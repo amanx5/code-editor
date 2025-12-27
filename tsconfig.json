@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2021", // 2021 for replaceAll method
+    "target": "ES2022", // 2021 for string.replaceAll(), 2022 for string.at()
     "module": "ESNext",
     "jsx": "react-jsx",
     "strict": true,
