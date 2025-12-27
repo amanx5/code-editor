@@ -1,20 +1,16 @@
-import { useState, useCallback } from 'react';
-import type { Code, isWrapEnabled, SetisWrapEnabled } from '../CodeBlock';
-import { WrapTextSvg } from './svg/WrapText';
+import { useState, useContext, useCallback } from 'react';
+import { CodeEditorContext } from '../CodeEditor';
+import type { Code, isWrapEnabled, SetisWrapEnabled } from '../CodeEditor';
 import { copyToClipboard } from '../utils/clipboard';
+import { WrapTextSvg } from './svg/WrapTextSvg';
 import { ClipboardSvg } from './svg/ClipboardSvg';
 
-type CodeActionButtonContainerProps = {
-	code: Code;
-	isWrapEnabled: isWrapEnabled;
-	setIsWrapEnabled: SetisWrapEnabled;
-};
+type CodeEditorToolbarProps = {};
 
-export function CodeActionButtonContainer({
-	code,
-	isWrapEnabled,
-	setIsWrapEnabled,
-}: CodeActionButtonContainerProps) {
+export function CodeEditorToolbar({}: CodeEditorToolbarProps) {
+	const { code, isWrapEnabled, setIsWrapEnabled } =
+		useContext(CodeEditorContext);
+
 	return (
 		<div className='flex h-full items-center gap-4'>
 			<WrapCodeAction
@@ -26,12 +22,9 @@ export function CodeActionButtonContainer({
 	);
 }
 
-export type CodeActionButtonProps =
-	React.ComponentProps<'button'>;
+export type CodeActionButtonProps = React.ComponentProps<'button'>;
 
-export function CodeActionButton({
-	...props
-}: CodeActionButtonProps) {
+export function CodeActionButton({ ...props }: CodeActionButtonProps) {
 	return (
 		<button
 			className={`rounded-md flex items-center justify-center hover:bg-surface-muted`}
@@ -60,7 +53,11 @@ function WrapCodeAction({
 			onClick={() => setIsWrapEnabled((isWrapEnabled) => !isWrapEnabled)}
 			title={readerText}
 		>
-			<WrapTextSvg {...codeActionSvgProps} disabled={!isWrapEnabled} disabledPathStyle='slashed' />
+			<WrapTextSvg
+				{...codeActionSvgProps}
+				disabled={!isWrapEnabled}
+				disabledPathStyle='slashed'
+			/>
 		</CodeActionButton>
 	);
 }
