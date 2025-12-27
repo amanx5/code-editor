@@ -3,14 +3,14 @@ import { useState } from 'react';
 export type Language = 'cmd' | 'js' | 'jsx' | 'ts' | 'tsx';
 
 type CodeBlockProps = {
-	title?: string;
+	fileName?: string;
 	lang: Language;
 	children: string;
 	highlightLines?: number[];
 };
 
 export function CodeBlock({
-	title,
+	fileName,
 	lang,
 	children,
 	highlightLines = [],
@@ -20,19 +20,19 @@ export function CodeBlock({
 
 	return (
 		<>
-			<div className='rounded-xl bg-code border border-slate-200 overflow-hidden'>
+			<div className='bg-surface-code border border-outline-subtle rounded-xl overflow-hidden'>
 				{/* header */}
-				<div className='p-3 flex justify-between border-b border-b-slate-200'>
-					<CodeMeta title={title} lang={lang} />
+				<div className='border-b border-b-outline-subtle p-3 flex justify-between'>
+					<CodeMeta fileName={fileName} lang={lang} />
 					<CopyCode code={children} />
 				</div>
 				{/* content */}
 
-				<div className='py-3 font-code overflow-auto'>
+				<div className='py-3 text-sm overflow-auto'>
 					{lines.map((line, index) => (
 						<LineBox
 							key={index}
-							lineNumber={index + 1}
+							lineNumber={index+1}
 							content={line}
 							showLineNum={showLineNum}
 							highlightLines={highlightLines}
@@ -44,7 +44,7 @@ export function CodeBlock({
 	);
 }
 
-function CodeMeta({ title, lang }: { title?: string; lang: Language }) {
+function CodeMeta({ fileName, lang }: { fileName?: string; lang: Language }) {
 	const LANGUAGE_TEXT: Record<Language, string> = {
 		cmd: 'Terminal',
 		js: 'JavaScript',
@@ -55,7 +55,7 @@ function CodeMeta({ title, lang }: { title?: string; lang: Language }) {
 
 	return (
 		<span className='text-gray-400'>
-			{title ? title + '.' + lang : LANGUAGE_TEXT[lang]}{' '}
+			{fileName ? fileName + '.' + lang : LANGUAGE_TEXT[lang]}{' '}
 		</span>
 	);
 }
@@ -64,7 +64,7 @@ function CopyCode({ code }: { code: string }) {
 	const [showCopyButton, setShowCopyButton] = useState(true);
 
 	return showCopyButton ? (
-		<button onClick={copy} title='Copy code'>
+		<button onClick={copy} title='Copy code' aria-label="Copy code">
 			<CopyIcon />
 		</button>
 	) : (
@@ -101,7 +101,6 @@ function LineBox({
 
 	return (
 		<div
-			key={lineNumber}
 			className={
 				'pl-3 flex flex-row space-x-5' + lineWrapperStyle(lineNumber)
 			}
@@ -140,7 +139,7 @@ function CopyIcon() {
 
 function CheckMarkIcon() {
 	return (
-		<span title='Code copied'>
+		<span title='Code copied' aria-label='Code Copied'>
 			<svg
 				className='text-gray-400'
 				xmlns='http://www.w3.org/2000/svg'
