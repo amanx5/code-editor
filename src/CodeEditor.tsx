@@ -1,3 +1,4 @@
+import '../dist/styles.css';
 import { createContext, useRef, useState } from 'react';
 import { convertToInternalCode } from './utils/virtualLinesUtil';
 import { CodeEditorHeader } from './components/CodeEditorHeader';

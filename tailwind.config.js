@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-	content: ['./src/**/*.{ts,tsx}'],
+	content: [
+		'./src/**/*.{ts,tsx}',
+		'./examples/**/*.{ts,tsx}'
+	],
 	theme: {
 		extend: {
 			fontFamily: {
@@ -30,6 +33,12 @@ export default {
 					subtle: '#e2e8f0',
 					dominant: 'black',
 				},
+			},
+			inset: {
+				belowHeader: '56px',
+			},
+			spacing: {
+				pageY: '48px',
 			},
 		},
 	},
