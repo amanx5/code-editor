@@ -1,0 +1,7 @@
+packages:
+  - "editor"
+  - "demo"
+
+# Allowlist of dependencies permitted to run install-time build scripts
+onlyBuiltDependencies:
+  - esbuild

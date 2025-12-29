@@ -35,7 +35,7 @@ export function CodeEditorExamples() {
 			</nav>
 
 			{/* Main content */}
-			<div className='flex-1 lg:order-1 py-pageY overflow-auto'>
+			<div className=' flex-1 lg:order-1 py-pageY overflow-auto'>
 				{EXAMPLES_META.map((example, index) => {
 					return (
 						<CodeEditorExamplesSection

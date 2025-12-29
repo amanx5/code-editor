@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import {
-	type Code,
-	type CodeLineNumber,
-	CodeEditor
-} from '../CodeEditor';
+import { type Code, type CodeLineNumber, CodeEditor } from 'code-editor';
 
 export function CodeEditorExamplesSectionOutput({
 	exampleCode,
@@ -15,11 +11,13 @@ export function CodeEditorExamplesSectionOutput({
 	const [code, setCode] = useState(exampleCode);
 
 	return (
-		<CodeEditor
-			code={code}
-			setCode= {setCode}
-			codeLang='cmd'
-			highlightLines={highlightLines}
-		/>
+		<>
+			<CodeEditor
+				code={code}
+				setCode= {setCode}
+				codeLang='cmd'
+				highlightLines={highlightLines}
+		 	/>
+		</>
 	);
 }

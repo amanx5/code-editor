@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Section } from '../components/Section';
+import { Section } from './Section';
 import { CodeEditorExamplesSectionOutput } from './CodeEditorExamplesSectionOutput';
 import type { CodeEditorTestExample } from './utils/codeEditorSampleExamples';
 
