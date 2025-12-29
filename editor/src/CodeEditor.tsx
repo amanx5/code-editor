@@ -1,5 +1,4 @@
-import { createContext, useRef, useState } from 'react';
-import { convertToInternalCode } from './utils/virtualLinesUtil';
+import { createContext, useState } from 'react';
 import { CodeEditorHeader } from './components/CodeEditorHeader';
 import { CodeEditorBody } from './components/CodeEditorBody';
 
@@ -29,7 +28,7 @@ export type CodeEditorProps = {
 
 /**
  * Code Editor component
- * 
+ *
  * Note: CSS for this component is not included by default. Refer README for CSS installation.
  */
 export function CodeEditor({
@@ -42,14 +41,12 @@ export function CodeEditor({
 	setCode,
 	setCodeError,
 }: CodeEditorProps) {
-	const codeInternalRef = useRef(convertToInternalCode(code));
 	const [isWrapEnabled, setIsWrapEnabled] = useState(true);
 
 	return (
 		<CodeEditorContext.Provider
 			value={{
 				code,
-				codeInternalRef,
 				codeLang,
 				fileName,
 				highlightLines,
@@ -80,7 +77,6 @@ export function CodeEditor({
 
 export type CodeEditorContext = {
 	code: Code;
-	codeInternalRef: React.RefObject<Code>;
 	codeLang: CodeLanguage;
 	fileName: string;
 	highlightLines: number[];
@@ -92,7 +88,6 @@ export type CodeEditorContext = {
 };
 export const CodeEditorContext = createContext<CodeEditorContext>({
 	code: '',
-	codeInternalRef: { current: '' },
 	codeLang: 'cmd',
 	fileName: '',
 	highlightLines: [],

@@ -19,7 +19,7 @@ export function getSampleLines(
 	maxWordCount: number = 10
 ) {
 	const line =
-		'Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia accusamus, reprehenderit, nobis itaque dolorem fugit ipsa vel minima natus enim quis nesciunt. Fugiat, sed? Iure ex quam suscipit est temporibus?';
+		'<div>SampleDiv</div> Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia accusamus, reprehenderit, nobis itaque dolorem fugit ipsa vel minima natus enim quis nesciunt. Fugiat, sed? Iure ex quam suscipit est temporibus?';
 
 	const words = line.split(' ');
 

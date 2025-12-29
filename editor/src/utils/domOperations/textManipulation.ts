@@ -121,7 +121,7 @@ export function deleteForward(): boolean {
 	const offset = range.startOffset;
 	const value = textNode.nodeValue!;
 
-	// 2️⃣ Caret at end or before \n of last line → nothing to delete
+	// 2️⃣ Caret at end or TRAILING_LINE → nothing to delete
 	if (offset + 1 >= value.length) {
 		return false;
 	}

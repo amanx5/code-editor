@@ -55,6 +55,7 @@ const EXAMPLES_META: CodeEditorTestExample[] = [
 		lineCount: 100,
 		lineSize: 'combo',
 		highlightLines: [1, 30, 100],
+		parentHeightCls: 'h-[200px]',
 	},
 ];
 

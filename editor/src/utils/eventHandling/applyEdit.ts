@@ -1,7 +1,5 @@
-import type { Code } from "../../CodeEditor";
-
 export type DomUpdater = () => boolean;
-export type StateUpdater = (code: Code) => void;
+export type StateUpdater = () => void;
 
 export function applyEdit(
 	event:
@@ -13,6 +11,6 @@ export function applyEdit(
 	event.preventDefault();
 
 	if (domUpdater()) {
-		stateUpdater(event.currentTarget.innerHTML);
+		stateUpdater();
 	}
 }

@@ -1,35 +1,25 @@
 import type { Code, CodeLine } from '../CodeEditor';
 
 /**
- * TRAILING_LINE is very critical to be inserted in the innerHTML of input element
- * It will solve the last-line quirk in browsers like chrome. ('\n' doesn't create 
- * a newline if there is no text after it.)
- * 
- * Note: Keep the <span> simple, no text content or height/width otherwise it become
- * part of selection area/navigation area within the pre element.
+ * V8 browsers doesn't render a newline if there is no text after it.
+ * TRAILING_LINE ensures there is always text ("\n") at the end of the code. So that
+ * if the user presses Enter(↵) at the end of the code, browser is forced to render
+ * a newline.
+ *
+ * TRAILING_LINE is deliberately kept as "\n" as browsers also usually ignore the
+ * last '\n' on arrow keys and text selection. So, this ensures that cursor
+ * doesn't move if the user presses → or ↓ key before the TRAILING_LINE.
  */
-export const TRAILING_LINE = '\n<span></span>';
+export const TRAILING_LINE = '\n';
 
-export function convertToVirtualLines(code: Code): CodeLine[] {
-	const lines = code.split('\n');
-
-	return lines;
+export function convertToVirtualLines(sourceCode: Code = ''): CodeLine[] {
+	return sourceCode.split('\n');
 }
 
-export function convertToInternalCode(externalCode: Code = ''): Code {
-	let code = externalCode;
-	if (!code.endsWith(TRAILING_LINE)) {
-		code = code + TRAILING_LINE;
-	}
-
-	return code;
+export function convertToEditorContent(sourceCode: Code = ''): Code {
+	return sourceCode + TRAILING_LINE;
 }
 
-export function convertToExternalCode(internalCode: Code = ''): Code {
-	let code = internalCode;
-	if (code.endsWith(TRAILING_LINE)) {
-		code = code.slice(0, -TRAILING_LINE.length);
-	}
-
-	return code;
+export function convertToSourceCode(editorCode: Code = ''): Code {
+	return editorCode.slice(0, -TRAILING_LINE.length);
 }

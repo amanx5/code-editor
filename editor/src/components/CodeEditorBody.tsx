@@ -1,16 +1,15 @@
 import { useContext, useEffect, useState } from 'react';
 import { CodeEditorContext } from '../CodeEditor';
 import { CodeEditorLineNumber } from './body/CodeEditorLineNumber';
-import { CodeEditorInput } from './body/CodeEditorInput';
+import { ContentEditor } from './body/ContentEditor';
 import { convertToVirtualLines } from '../utils/virtualLinesUtil';
 import { CodeEditorVirtualLine } from './body/CodeEditorVirtualLine';
 
 export function CodeEditorBody() {
-	const { code, codeInternalRef, isWrapEnabled } =
-		useContext(CodeEditorContext);
+	const { code, isWrapEnabled } = useContext(CodeEditorContext);
 
 	const [virtualLines, setVirtualLines] = useState(
-		convertToVirtualLines(codeInternalRef.current)
+		convertToVirtualLines(code)
 	);
 
 	const lineCls = `
@@ -21,9 +20,7 @@ export function CodeEditorBody() {
 	const linesWrapperCls = `${isWrapEnabled ? '' : 'min-w-max'}`;
 
 	useEffect(() => {
-		// can use codeInternalRef as it is already updated in CodeEditorInput effect (child effects run first).
-		const newVirtualLines = convertToVirtualLines(codeInternalRef.current);
-		setVirtualLines(newVirtualLines);
+		setVirtualLines(convertToVirtualLines(code));
 	}, [code]);
 
 	return (
@@ -44,7 +41,6 @@ export function CodeEditorBody() {
 							key={index}
 							className='bg-surface-code  select-none'
 							lineNumber={index + 1}
-							isTrailingLine={index + 1 === virtualLines.length}
 						/>
 					))}
 				</div>
@@ -74,13 +70,12 @@ export function CodeEditorBody() {
 							line={line}
 							lineCls={lineCls}
 							lineNumber={index + 1}
-							isTrailingLine={index + 1 == virtualLines.length}
 						/>
 					</div>
 				))}
 			</div>
 
-			{/* editable-lines-wrapper */}
+			{/* edit-surface-wrapper */}
 			<div
 				className={`
 					inline-block 
@@ -88,7 +83,7 @@ export function CodeEditorBody() {
 					z-10 ${linesWrapperCls}
 				`}
 			>
-				<CodeEditorInput lineCls={lineCls} />
+				<ContentEditor lineCls={lineCls} />
 			</div>
 		</div>
 	);

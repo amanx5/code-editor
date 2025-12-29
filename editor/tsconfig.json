@@ -7,7 +7,8 @@
     "moduleResolution": "bundler",
     "skipLibCheck": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "noUnusedLocals": true
   },
   "include": ["src"]
 }

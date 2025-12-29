@@ -3,8 +3,8 @@ import { CodeEditorContext, type CodeLine, type CodeLineNumber  } from '../../Co
 import { CodeEditorLineNumber } from '../body/CodeEditorLineNumber';
 
 export function CodeEditorVirtualLine(
-    {line, lineCls, lineNumber, isTrailingLine}: 
-    {line: CodeLine, lineCls: string, lineNumber: CodeLineNumber, isTrailingLine:boolean}
+    {line, lineCls, lineNumber}: 
+    {line: CodeLine, lineCls: string, lineNumber: CodeLineNumber}
 
 ) {
     const {isWrapEnabled, highlightLines, highlightLineCls} = useContext(CodeEditorContext)
@@ -19,7 +19,6 @@ export function CodeEditorVirtualLine(
 				<CodeEditorLineNumber
 					className='inline-block'
 					lineNumber={lineNumber}
-					isTrailingLine={isTrailingLine}
 				/>
 			)}
 			{/* virtual-line */}
@@ -30,7 +29,7 @@ export function CodeEditorVirtualLine(
                     ${lineCls}
                 `}
 			>
-				{isTrailingLine ? '' : line}
+				{line}
 			</pre>
 		</>
 	);
