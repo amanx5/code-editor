@@ -1,9 +1,8 @@
-/** @type {import('tailwindcss').Config} */
-export default {
-	content: [
-		'./src/**/*.{ts,tsx}',
-		'./examples/**/*.{ts,tsx}'
-	],
+/** 
+ * Tailwind preset for consumers that already have Tailwind CSS configured.
+ * @type {import('tailwindcss').Config} 
+ */
+module.exports = {
 	theme: {
 		extend: {
 			fontFamily: {
@@ -34,16 +33,7 @@ export default {
 					dominant: 'black',
 				},
 			},
-			inset: {
-				belowHeader: '56px',
-			},
-			spacing: {
-				pageY: '48px',
-			},
 		},
-	},
-	corePlugins: {
-		preflight: false, // ❗ disable global resets
 	},
 	plugins: [
 		function ({ addUtilities, theme }) {

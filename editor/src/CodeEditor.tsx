@@ -1,4 +1,3 @@
-import '../dist/styles.css';
 import { createContext, useRef, useState } from 'react';
 import { convertToInternalCode } from './utils/virtualLinesUtil';
 import { CodeEditorHeader } from './components/CodeEditorHeader';
@@ -28,6 +27,11 @@ export type CodeEditorProps = {
 	setCodeError?: React.Dispatch<React.SetStateAction<CodeError>>;
 };
 
+/**
+ * Code Editor component
+ * 
+ * Note: CSS for this component is not included by default. Refer README for CSS installation.
+ */
 export function CodeEditor({
 	className = '',
 	code,
