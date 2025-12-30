@@ -5,11 +5,11 @@ import {
 	convertToSourceCode,
 } from '../utils/virtualLinesUtil';
 
-export function useContentEditor(sourceCode: Code) {
-	const contentEditorRef = useRef<HTMLPreElement>(null);
+export function useEditor(sourceCode: Code) {
+	const editorRef = useRef<HTMLPreElement>(null);
 
 	useEffect(() => {
-		if (!contentEditorRef.current) return;
+		if (!editorRef.current) return;
 
 		const oldSourceCode = convertToSourceCode(getEditorContent());
 
@@ -20,20 +20,20 @@ export function useContentEditor(sourceCode: Code) {
 	}, [sourceCode]);
 
 	return {
-		contentEditorRef,
+		editorRef,
 		getEditorContent,
 		setEditorContent,
 	};
 
 	function getEditorContent() {
-		if (!contentEditorRef.current) return '';
+		if (!editorRef.current) return '';
 
-		return contentEditorRef.current.textContent;
+		return editorRef.current.textContent;
 	}
 
 	function setEditorContent(code: Code) {
-		if (!contentEditorRef.current) return;
+		if (!editorRef.current) return;
 
-		contentEditorRef.current.textContent = convertToEditorContent(code);
+		editorRef.current.textContent = convertToEditorContent(code);
 	}
 }

@@ -1,7 +1,7 @@
 import { cls } from '../../utils/cls';
 import type { CodeLineNumber } from '../../CodeEditor';
 
-export function CodeEditorLineNumber({
+export function LineNumber({
 	className,
 	lineNumber,
 }: {

@@ -1,12 +1,12 @@
 import { useContext, useMemo } from 'react';
 import { CodeEditorContext } from '../CodeEditor';
-import { CodeEditorLineNumber } from './body/CodeEditorLineNumber';
-import { ContentEditor } from './body/ContentEditor';
+import { LineNumber } from './body/LineNumber';
+import { Editor } from './body/Editor';
 import { convertToVirtualLines } from '../utils/virtualLinesUtil';
-import { CodeEditorVirtualLine } from './body/CodeEditorVirtualLine';
+import { VirtualLine } from './body/VirtualLine';
 import { cls } from '../utils/cls';
 
-export function CodeEditorBody() {
+export function Body() {
 	const { code, isWrapEnabled, highlightLines, highlightLineCls } =
 		useContext(CodeEditorContext);
 
@@ -25,7 +25,7 @@ export function CodeEditorBody() {
 			{!isWrapEnabled && (
 				<div aria-hidden className={`flex flex-col sticky left-0 z-20`}>
 					{virtualLines.map((_, index) => (
-						<CodeEditorLineNumber
+						<LineNumber
 							key={index}
 							className='bg-surface-code  select-none'
 							lineNumber={index + 1}
@@ -46,7 +46,7 @@ export function CodeEditorBody() {
 			>
 				{virtualLines.map((line, index) => (
 					<div key={index} className='inline-flex'>
-						<CodeEditorVirtualLine
+						<VirtualLine
 							line={line}
 							lineCls={lineCls}
 							lineNumber={index + 1}
@@ -60,7 +60,7 @@ export function CodeEditorBody() {
 
 			{/* edit-surface-wrapper */}
 			<div className='inline-block flex-1 z-10'>
-				<ContentEditor lineCls={lineCls} />
+				<Editor lineCls={lineCls} />
 			</div>
 		</div>
 	);

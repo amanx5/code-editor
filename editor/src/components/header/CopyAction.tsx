@@ -3,11 +3,11 @@ import { CodeEditorContext } from '../../CodeEditor';
 import { ClipboardSvg } from '../svg/ClipboardSvg';
 import { copyToClipboard } from '../../utils/clipboard';
 import {
-	CodeEditorActionButton,
-	CodeEditorActionButtonDefaultSvgProps,
-} from './CodeEditorActionButton';
+	ActionButton,
+	ActionButtonDefaultSvgProps,
+} from './ActionButton';
 
-export function CodeEditorCopyAction() {
+export function CopyAction() {
 	const { code } = useContext(CodeEditorContext);
 
 	const [isCopied, setIsCopied] = useState(false);
@@ -27,7 +27,7 @@ export function CodeEditorCopyAction() {
 
 	return (
 		<>
-			<CodeEditorActionButton
+			<ActionButton
 				aria-label={readerText}
 				disabled={isCopied}
 				onClick={copyCode}
@@ -36,9 +36,9 @@ export function CodeEditorCopyAction() {
 			>
 				<ClipboardSvg
 					checked={isCopied}
-					{...CodeEditorActionButtonDefaultSvgProps}
+					{...ActionButtonDefaultSvgProps}
 				/>
-			</CodeEditorActionButton>
+			</ActionButton>
 
 			<span role='status' aria-live='polite' className='sr-only'>
 				{!isCopied ? readerText : ''}

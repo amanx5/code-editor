@@ -1,24 +1,27 @@
 import { useContext } from 'react';
 import { CodeEditorContext } from '../../CodeEditor';
-import { WrapTextSvg } from "../svg/WrapTextSvg";
-import { CodeEditorActionButton, CodeEditorActionButtonDefaultSvgProps } from './CodeEditorActionButton';
+import { WrapTextSvg } from '../svg/WrapTextSvg';
+import {
+	ActionButton,
+	ActionButtonDefaultSvgProps,
+} from './ActionButton';
 
-export function CodeEditorWrapAction() {
+export function WrapAction() {
 	const { isWrapEnabled, setIsWrapEnabled } = useContext(CodeEditorContext);
 
 	const readerText = isWrapEnabled ? 'Disable Code Wrap' : 'Enable Code Wrap';
 
 	return (
-		<CodeEditorActionButton
+		<ActionButton
 			aria-label={readerText}
 			onClick={() => setIsWrapEnabled((isWrapEnabled) => !isWrapEnabled)}
 			title={readerText}
 		>
 			<WrapTextSvg
-				{...CodeEditorActionButtonDefaultSvgProps}
+				{...ActionButtonDefaultSvgProps}
 				disabled={!isWrapEnabled}
 				disabledPathStyle='slashed'
 			/>
-		</CodeEditorActionButton>
+		</ActionButton>
 	);
 }

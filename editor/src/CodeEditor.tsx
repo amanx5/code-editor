@@ -1,6 +1,6 @@
 import { createContext, useState } from 'react';
-import { CodeEditorHeader } from './components/CodeEditorHeader';
-import { CodeEditorBody } from './components/CodeEditorBody';
+import { Header } from './components/Header';
+import { Body } from './components/Body';
 import { cls } from './utils/cls';
 
 export type Code = string;
@@ -70,8 +70,8 @@ export function CodeEditor({
 					className
 				)}
 			>
-				<CodeEditorHeader />
-				<CodeEditorBody />
+				<Header />
+				<Body />
 			</div>
 		</CodeEditorContext.Provider>
 	);

@@ -4,13 +4,13 @@ import { validateCode } from '../../utils/codeLanguageUtil';
 import { convertToSourceCode } from '../../utils/virtualLinesUtil';
 import { onKeyDown } from '../../utils/eventHandling/keyboardEvent';
 import { onPaste } from '../../utils/eventHandling/clipboardEvent';
-import { useContentEditor } from '../../hooks/useContentEditor';
+import { useEditor } from '../../hooks/useEditor';
 import { cls } from '../../utils/cls';
 
-export function ContentEditor({ lineCls }: { lineCls: string }) {
+export function Editor({ lineCls }: { lineCls: string }) {
 	const { code, codeLang, isWrapEnabled, setCode, setCodeError } =
 		useContext(CodeEditorContext);
-	const { contentEditorRef, getEditorContent } = useContentEditor(code);
+	const { editorRef, getEditorContent } = useEditor(code);
 
 	const onEditorContentChange = useCallback(() => {
 		const sourceCode = convertToSourceCode(getEditorContent());
@@ -28,7 +28,7 @@ export function ContentEditor({ lineCls }: { lineCls: string }) {
 			contentEditable={!!setCode}
 			onKeyDown={(e) => onKeyDown(e, onEditorContentChange)}
 			onPaste={(e) => onPaste(e, onEditorContentChange)}
-			ref={contentEditorRef}
+			ref={editorRef}
 			spellCheck={false}
 		/>
 	);

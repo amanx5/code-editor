@@ -1,9 +1,9 @@
 import { type CodeLine, type CodeLineNumber } from '../../CodeEditor';
-import { CodeEditorLineNumber } from '../body/CodeEditorLineNumber';
+import { LineNumber } from './LineNumber';
 import { cls } from '../../utils/cls';
 import { memo } from 'react';
 
-type CodeEditorVirtualLineProps = {
+type VirtualLineProps = {
 	line: CodeLine;
 	lineCls: string;
 	lineNumber: CodeLineNumber;
@@ -11,7 +11,7 @@ type CodeEditorVirtualLineProps = {
 	doHighlight: boolean;
 	highlightLineCls: string;
 };
-export const CodeEditorVirtualLine = memo(
+export const VirtualLine = memo(
 	({
 		line,
 		lineCls,
@@ -19,7 +19,7 @@ export const CodeEditorVirtualLine = memo(
 		isWrapEnabled,
 		doHighlight,
 		highlightLineCls,
-	}: CodeEditorVirtualLineProps) => {
+	}: VirtualLineProps) => {
 		const togglehighlightLineCls = (n: CodeLineNumber) =>
 			doHighlight ? highlightLineCls : 'bg-surface-code';
 
@@ -27,7 +27,7 @@ export const CodeEditorVirtualLine = memo(
 			<>
 				{/* line-number: isWrapEnabled */}
 				{isWrapEnabled && (
-					<CodeEditorLineNumber
+					<LineNumber
 						className='inline-block'
 						lineNumber={lineNumber}
 					/>

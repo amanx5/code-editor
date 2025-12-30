@@ -1,6 +1,6 @@
 import { cls } from '../../utils/cls';
 
-export function CodeEditorActionButton(props: React.ComponentProps<'button'>) {
+export function ActionButton(props: React.ComponentProps<'button'>) {
 	return (
 		<button
 			className={cls(
@@ -12,7 +12,7 @@ export function CodeEditorActionButton(props: React.ComponentProps<'button'>) {
 	);
 }
 
-export const CodeEditorActionButtonDefaultSvgProps: React.SVGProps<SVGSVGElement> = {
+export const ActionButtonDefaultSvgProps: React.SVGProps<SVGSVGElement> = {
 	height: 16,
 	width: 16,
 };

@@ -52,7 +52,7 @@ const EXAMPLES_META: CodeEditorTestExample[] = [
 		highlightLines: [2, 6],
 	},
 	{
-		lineCount: 100,
+		lineCount: 1000,
 		lineSize: 'combo',
 		highlightLines: [1, 30, 100],
 		parentHeightCls: 'h-[200px]',
