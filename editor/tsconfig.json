@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
   },
   "include": ["src"]
 }

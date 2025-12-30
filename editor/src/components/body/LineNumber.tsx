@@ -1,4 +1,4 @@
-import { cls } from '../../utils/cls';
+import { cls } from '../../utils';
 import type { CodeLineNumber } from '../../CodeEditor';
 
 export function LineNumber({
@@ -8,7 +8,6 @@ export function LineNumber({
 	className?: string;
 	lineNumber: CodeLineNumber;
 }) {
-
 	return (
 		<span
 			className={cls(

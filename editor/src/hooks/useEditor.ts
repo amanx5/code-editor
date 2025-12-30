@@ -3,7 +3,7 @@ import { Code } from '../CodeEditor';
 import {
 	convertToEditorContent,
 	convertToSourceCode,
-} from '../utils/virtualLinesUtil';
+} from '../utils/code-editing/editor-internals/trailing-line';
 
 export function useEditor(sourceCode: Code) {
 	const editorRef = useRef<HTMLPreElement>(null);

@@ -1,38 +1,7 @@
-/**
- * Replica of native JSON.stringify, but this version fallbacks to casted string
- * instead of throwing error if the value is invalid.
- */
-export function encode(
-	value: unknown,
-	replacer?:
-		| ((this: any, key: string, value: any) => any)
-		| (string | number)[]
-		| null,
-	space?: string | number
-): string {
-	try {
-		return JSON.stringify(value, replacer as any, space);
-	} catch {
-		return String(value);
-	}
-}
-
-export function encodePretty(json: unknown) {
-	return encode(json, null, 2);
-}
-
 export type JsonDecodeResult = {
 	value?: object;
 	error?: JsonErrorMeta;
 };
-export type JsonErrorMeta = {
-	message: SyntaxError['message'];
-	type?: 'SyntaxError';
-	position?: number;
-	line?: number;
-	column?: number;
-};
-
 /**
  * Converts a JavaScript Object Notation (JSON) string into an object.
  * If provided `json` is valid, this method returns object containing decoded value
@@ -49,6 +18,13 @@ export function decode(json: string): JsonDecodeResult {
 	}
 }
 
+export type JsonErrorMeta = {
+	message: SyntaxError['message'];
+	type?: 'SyntaxError';
+	position?: number;
+	line?: number;
+	column?: number;
+};
 /**
  * Extracts error metadata from message property of `SyntaxError` thrown by JSON.parse.
  * This method is only reliable for V8 based browsers.
@@ -87,7 +63,13 @@ export function getJsonErrorMeta(err: unknown | SyntaxError): JsonErrorMeta {
 		};
 	} else {
 		return {
-			message: 'The provided string is not a valid JSON.',
+			message: 'Invalid JSON string.',
 		};
 	}
+}
+
+export function validateJson(json: string) {
+	const { error } = decode(json);
+
+	return error || null;
 }

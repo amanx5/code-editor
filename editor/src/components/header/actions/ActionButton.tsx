@@ -1,4 +1,4 @@
-import { cls } from '../../utils/cls';
+import { cls } from '../../../utils';
 
 export function ActionButton(props: React.ComponentProps<'button'>) {
 	return (

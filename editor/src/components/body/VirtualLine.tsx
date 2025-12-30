@@ -1,10 +1,11 @@
-import { type CodeLine, type CodeLineNumber } from '../../CodeEditor';
+import { type CodeLineNumber } from '../../CodeEditor';
 import { LineNumber } from './LineNumber';
-import { cls } from '../../utils/cls';
+import { cls } from '../../utils';
 import { memo } from 'react';
+import { type TokenizedLine } from '../../utils/code-languages';
 
 type VirtualLineProps = {
-	line: CodeLine;
+	line: TokenizedLine;
 	lineCls: string;
 	lineNumber: CodeLineNumber;
 	isWrapEnabled: boolean;
@@ -20,9 +21,7 @@ export const VirtualLine = memo(
 		doHighlight,
 		highlightLineCls,
 	}: VirtualLineProps) => {
-		const togglehighlightLineCls = (n: CodeLineNumber) =>
-			doHighlight ? highlightLineCls : 'bg-surface-code';
-
+		// render
 		return (
 			<>
 				{/* line-number: isWrapEnabled */}
@@ -35,9 +34,9 @@ export const VirtualLine = memo(
 				{/* virtual-line */}
 				<pre
 					className={cls(
+						lineCls,
 						!isWrapEnabled && 'pl-12 h-5',
-						togglehighlightLineCls(lineNumber),
-						lineCls
+						doHighlight ? highlightLineCls : 'bg-surface-code'
 					)}
 				>
 					{line}

@@ -2,7 +2,7 @@ import {
 	deleteBackward,
 	deleteForward,
 	insertTextAtCursor,
-} from '../domOperations/textManipulation';
+} from '../dom-mutators';
 import { applyEdit, type StateUpdater } from './applyEdit';
 
 export function isCharacterKey(e: React.KeyboardEvent) {

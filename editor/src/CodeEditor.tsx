@@ -1,9 +1,10 @@
 import { createContext, useState } from 'react';
-import { Header } from './components/Header';
-import { Body } from './components/Body';
-import { cls } from './utils/cls';
+import { Header, Body } from './components';
+import { cls } from './utils';
 
 export type Code = string;
+export type CodeLineNumber = number;
+export type CodeLanguage = 'cmd' | 'json' | 'js' | 'jsx' | 'ts' | 'tsx';
 export type CodeError = {
 	message: string;
 	type?: string;
@@ -11,9 +12,6 @@ export type CodeError = {
 	line?: number;
 	column?: number;
 } | null;
-export type CodeLine = string;
-export type CodeLineNumber = number;
-export type CodeLanguage = 'cmd' | 'json' | 'js' | 'jsx' | 'ts' | 'tsx';
 
 export type CodeEditorProps = {
 	className?: string;

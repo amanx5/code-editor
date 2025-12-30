@@ -1,4 +1,4 @@
-import { insertTextAtCursor } from '../domOperations/textManipulation';
+import { insertTextAtCursor } from '../dom-mutators';
 import { applyEdit, type StateUpdater } from './applyEdit';
 
 export function onPaste(

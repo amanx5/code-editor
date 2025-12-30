@@ -1,7 +1,6 @@
-import { cls } from '../utils/cls';
-import { CopyAction } from './header/CopyAction';
-import { Title } from './header/Title';
-import { WrapAction } from './header/WrapAction';
+import { cls } from '../../utils';
+import { CopyAction, WrapAction } from './actions';
+import { FileInfo } from './FileInfo';
 
 export function Header() {
 	return (
@@ -14,7 +13,7 @@ export function Header() {
 			)}
 		>
 			<div>
-				<Title />
+				<FileInfo />
 			</div>
 
 			<div className='flex h-full items-center gap-4'>

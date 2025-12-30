@@ -1,38 +1,26 @@
-import { decode, encodePretty } from './json';
-import type { Code, CodeError, CodeLanguage } from '../CodeEditor';
+import type { Code, CodeError, CodeLanguage } from '../../CodeEditor';
+import { validateJson } from './json/decode-json';
+import { beautifyJson } from './json/encode-json';
+
+export type TokenizedLine = string; // TODO
 
 type CodeLanguageUtil = {
 	name: string;
 	validate?: (code: Code) => CodeError;
 	beautify?: (code: Code) => Code;
+	tokenizer?: (code: Code) => TokenizedLine[];
 };
 export const CODE_LANGUAGES: Record<CodeLanguage, CodeLanguageUtil> = {
-	cmd: {
-		name: 'Terminal',
-	},
+	cmd: { name: 'Terminal' },
+	js: { name: 'JavaScript' },
+	jsx: { name: 'JavaScript XML' },
 	json: {
 		name: 'JSON',
-		validate: (code) => {
-			const { error } = decode(code);
-
-			if (error) {
-				const { message, position, line, column } = error;
-				return {
-					message,
-					position,
-					line,
-					column,
-				};
-			}
-
-			return null;
-		},
-		beautify: encodePretty,
+		validate: validateJson,
+		beautify: beautifyJson,
 	},
-	js: { name: 'JavaScript' },
 	ts: { name: 'TypeScript' },
 	tsx: { name: 'TypeScript XML' },
-	jsx: { name: 'JavaScript XML' },
 };
 
 export function validateCode(code: Code, codeLang: CodeLanguage): CodeError {
@@ -42,4 +30,3 @@ export function validateCode(code: Code, codeLang: CodeLanguage): CodeError {
 	}
 	return null;
 }
-

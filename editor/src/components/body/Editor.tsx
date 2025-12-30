@@ -1,11 +1,13 @@
 import { useContext, useCallback } from 'react';
 import { CodeEditorContext } from '../../CodeEditor';
-import { validateCode } from '../../utils/codeLanguageUtil';
-import { convertToSourceCode } from '../../utils/virtualLinesUtil';
-import { onKeyDown } from '../../utils/eventHandling/keyboardEvent';
-import { onPaste } from '../../utils/eventHandling/clipboardEvent';
+import {
+	cls,
+	onKeyDown,
+	onPaste,
+	validateCode,
+	convertToSourceCode,
+} from '../../utils';
 import { useEditor } from '../../hooks/useEditor';
-import { cls } from '../../utils/cls';
 
 export function Editor({ lineCls }: { lineCls: string }) {
 	const { code, codeLang, isWrapEnabled, setCode, setCodeError } =

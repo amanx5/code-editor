@@ -1,4 +1,4 @@
-import type { Code, CodeLine } from '../CodeEditor';
+import type { Code } from '../../../CodeEditor';
 
 /**
  * V8 browsers doesn't render a newline if there is no text after it.
@@ -11,10 +11,6 @@ import type { Code, CodeLine } from '../CodeEditor';
  * doesn't move if the user presses → or ↓ key before the TRAILING_LINE.
  */
 export const TRAILING_LINE = '\n';
-
-export function convertToVirtualLines(sourceCode: Code = ''): CodeLine[] {
-	return sourceCode.split('\n');
-}
 
 export function convertToEditorContent(sourceCode: Code = ''): Code {
 	return sourceCode + TRAILING_LINE;
