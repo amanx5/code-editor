@@ -1,6 +1,7 @@
 import { useContext, } from 'react';
 import { CodeEditorContext, type CodeLine, type CodeLineNumber  } from '../../CodeEditor';
 import { CodeEditorLineNumber } from '../body/CodeEditorLineNumber';
+import { cls } from '../../utils/cls';
 
 export function CodeEditorVirtualLine(
     {line, lineCls, lineNumber}: 
@@ -23,11 +24,11 @@ export function CodeEditorVirtualLine(
 			)}
 			{/* virtual-line */}
 			<pre
-				className={`
-                    ${isWrapEnabled ? '' : 'pl-12 h-5'}
-                    ${togglehighlightLineCls(lineNumber)}
-                    ${lineCls}
-                `}
+				className={cls(
+                    !isWrapEnabled && 'pl-12 h-5',
+                    togglehighlightLineCls(lineNumber),
+                    lineCls
+                )}
 			>
 				{line}
 			</pre>

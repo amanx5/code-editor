@@ -1,7 +1,12 @@
+import { cls } from '../../utils/cls';
+
 export function CodeEditorActionButton(props: React.ComponentProps<'button'>) {
 	return (
 		<button
-			className={`rounded-md flex items-center justify-center hover:bg-surface-muted`}
+			className={cls(
+				'flex items-center justify-center',
+				'rounded-md hover:bg-surface-muted'
+			)}
 			{...props}
 		/>
 	);

@@ -1,6 +1,7 @@
 import { createContext, useState } from 'react';
 import { CodeEditorHeader } from './components/CodeEditorHeader';
 import { CodeEditorBody } from './components/CodeEditorBody';
+import { cls } from './utils/cls';
 
 export type Code = string;
 export type CodeError = {
@@ -61,12 +62,13 @@ export function CodeEditor({
 				// flex-1: for forcing grow if consumer wraps CodeEditor in flex container
 				// don-t add min-h as it can be extra if there is only one line of code
 				// overflow-hidden: to make sure rounded borders are not overlapped by children
-				className={`
-					bg-surface-code
-					border border-outline-subtle rounded-xl
-					flex-1 flex flex-col
-					overflow-hidden ${className}
-				`}
+				className={cls(
+					'bg-surface-code',
+					'border border-outline-subtle rounded-xl',
+					'flex-1 flex flex-col',
+					'overflow-hidden',
+					className
+				)}
 			>
 				<CodeEditorHeader />
 				<CodeEditorBody />

@@ -5,6 +5,7 @@ import { convertToSourceCode } from '../../utils/virtualLinesUtil';
 import { onKeyDown } from '../../utils/eventHandling/keyboardEvent';
 import { onPaste } from '../../utils/eventHandling/clipboardEvent';
 import { useContentEditor } from '../../hooks/useContentEditor';
+import { cls } from '../../utils/cls';
 
 export function ContentEditor({ lineCls }: { lineCls: string }) {
 	const { code, codeLang, isWrapEnabled, setCode, setCodeError } =
@@ -19,11 +20,11 @@ export function ContentEditor({ lineCls }: { lineCls: string }) {
 
 	return (
 		<pre
-			className={`${lineCls}
-				${isWrapEnabled ? 'pl-12' : ''}
-				text-transparent/20 caret-black
-				focus:outline-none
-			`}
+			className={cls(
+				lineCls,
+				isWrapEnabled && 'pl-12',
+				'text-transparent/20 caret-black focus:outline-none'
+			)}
 			contentEditable={!!setCode}
 			onKeyDown={(e) => onKeyDown(e, onEditorContentChange)}
 			onPaste={(e) => onPaste(e, onEditorContentChange)}

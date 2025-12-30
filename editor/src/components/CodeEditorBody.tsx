@@ -4,6 +4,7 @@ import { CodeEditorLineNumber } from './body/CodeEditorLineNumber';
 import { ContentEditor } from './body/ContentEditor';
 import { convertToVirtualLines } from '../utils/virtualLinesUtil';
 import { CodeEditorVirtualLine } from './body/CodeEditorVirtualLine';
+import { cls } from '../utils/cls';
 
 export function CodeEditorBody() {
 	const { code, isWrapEnabled } = useContext(CodeEditorContext);
@@ -12,12 +13,13 @@ export function CodeEditorBody() {
 		convertToVirtualLines(code)
 	);
 
-	const lineCls = `
-		flex-1
-		leading-5 text-sm
-		${isWrapEnabled ? 'whitespace-pre-wrap wrap-anywhere' : 'min-w-full'}
-	`;
-	const linesWrapperCls = `${isWrapEnabled ? '' : 'min-w-max'}`;
+	const lineCls = cls(
+		'flex-1',
+		'leading-5 text-sm',
+		isWrapEnabled ? 'whitespace-pre-wrap wrap-anywhere' : 'min-w-full'
+	);
+
+	const linesWrapperCls = cls(!isWrapEnabled && 'min-w-max');
 
 	useEffect(() => {
 		setVirtualLines(convertToVirtualLines(code));
@@ -28,14 +30,7 @@ export function CodeEditorBody() {
 		<div className={`flex flex-1 py-3 overflow-auto relative`}>
 			{/* line-numbers: !isWrapEnabled */}
 			{!isWrapEnabled && (
-				<div
-					aria-hidden
-					className={`
-                        flex flex-col
-                        sticky left-0 
-                        z-20 
-                    `}
-				>
+				<div aria-hidden className={`flex flex-col sticky left-0 z-20`}>
 					{virtualLines.map((_, index) => (
 						<CodeEditorLineNumber
 							key={index}
@@ -49,22 +44,17 @@ export function CodeEditorBody() {
 			{/* syntax-highlight-layer */}
 			<div
 				aria-hidden
-				className={`
-					absolute
-					flex flex-col w-full
-					pointer-events-none
-					select-none
-					z-0
-					${isWrapEnabled ? '' : 'min-w-max'}
-				`}
+				className={cls(
+					'absolute flex flex-col',
+					'pointer-events-none select-none',
+					'w-full z-0',
+					!isWrapEnabled && 'min-w-max'
+				)}
 			>
 				{virtualLines.map((line, index) => (
 					<div
 						key={index}
-						className={`
-							inline-flex
-							${linesWrapperCls} 
-						`}
+						className={cls('inline-flex', linesWrapperCls)}
 					>
 						<CodeEditorVirtualLine
 							line={line}
@@ -76,13 +66,7 @@ export function CodeEditorBody() {
 			</div>
 
 			{/* edit-surface-wrapper */}
-			<div
-				className={`
-					inline-block 
-					flex-1
-					z-10 ${linesWrapperCls}
-				`}
-			>
+			<div className={cls('inline-block flex-1 z-10', linesWrapperCls)}>
 				<ContentEditor lineCls={lineCls} />
 			</div>
 		</div>

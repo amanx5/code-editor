@@ -1,3 +1,4 @@
+import { cls } from '../../utils/cls';
 import type { CodeLineNumber } from '../../CodeEditor';
 
 export function CodeEditorLineNumber({
@@ -10,11 +11,12 @@ export function CodeEditorLineNumber({
 
 	return (
 		<span
-			className={`
-                w-12 min-w-12 pr-4
-                text-sm text-right text-text-muted align-top
-                font-mono ${className}
-            `}
+			className={cls(
+				'w-12 min-w-12 pr-4',
+				'text-sm text-right text-text-muted align-top',
+				'font-mono',
+				className
+			)}
 		>
 			{lineNumber}
 		</span>
