@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useMemo } from 'react';
 import { CodeEditorContext } from '../CodeEditor';
 import { CodeEditorLineNumber } from './body/CodeEditorLineNumber';
 import { ContentEditor } from './body/ContentEditor';
@@ -7,23 +7,16 @@ import { CodeEditorVirtualLine } from './body/CodeEditorVirtualLine';
 import { cls } from '../utils/cls';
 
 export function CodeEditorBody() {
-	const { code, isWrapEnabled } = useContext(CodeEditorContext);
+	const { code, isWrapEnabled, highlightLines, highlightLineCls } =
+		useContext(CodeEditorContext);
 
-	const [virtualLines, setVirtualLines] = useState(
-		convertToVirtualLines(code)
-	);
+	const virtualLines = useMemo(() => convertToVirtualLines(code), [code]);
 
 	const lineCls = cls(
 		'flex-1',
 		'leading-5 text-sm',
 		isWrapEnabled ? 'whitespace-pre-wrap wrap-anywhere' : 'min-w-full'
 	);
-
-	const linesWrapperCls = cls(!isWrapEnabled && 'min-w-max');
-
-	useEffect(() => {
-		setVirtualLines(convertToVirtualLines(code));
-	}, [code]);
 
 	return (
 		/* scroller */
@@ -52,21 +45,21 @@ export function CodeEditorBody() {
 				)}
 			>
 				{virtualLines.map((line, index) => (
-					<div
-						key={index}
-						className={cls('inline-flex', linesWrapperCls)}
-					>
+					<div key={index} className='inline-flex'>
 						<CodeEditorVirtualLine
 							line={line}
 							lineCls={lineCls}
 							lineNumber={index + 1}
+							isWrapEnabled={isWrapEnabled}
+							doHighlight={highlightLines.includes(index + 1)}
+							highlightLineCls={highlightLineCls}
 						/>
 					</div>
 				))}
 			</div>
 
 			{/* edit-surface-wrapper */}
-			<div className={cls('inline-block flex-1 z-10', linesWrapperCls)}>
+			<div className='inline-block flex-1 z-10'>
 				<ContentEditor lineCls={lineCls} />
 			</div>
 		</div>
