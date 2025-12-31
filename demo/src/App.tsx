@@ -1,9 +1,9 @@
-import { CodeEditorExamples } from './components';
+import { ExamplesPage } from './pages/examples';
 
 export default function App() {
 	return (
 		<AppWrapper>
-			<CodeEditorExamples />
+			<ExamplesPage />
 		</AppWrapper>
 	);
 }
