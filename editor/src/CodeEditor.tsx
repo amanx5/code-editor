@@ -1,17 +1,9 @@
 import { createContext, useState } from 'react';
 import { Header, Body } from './components';
-import { cls } from './utils';
+import { cls, type CodeError, type CodeLanguage } from './utils';
 
 export type Code = string;
 export type CodeLineNumber = number;
-export type CodeLanguage = 'cmd' | 'json' | 'js' | 'jsx' | 'ts' | 'tsx';
-export type CodeError = {
-	message: string;
-	type?: string;
-	position?: number;
-	line?: number;
-	column?: number;
-} | null;
 
 export type CodeEditorProps = {
 	className?: string;
@@ -34,7 +26,7 @@ export function CodeEditor({
 	className = '',
 	code,
 	codeLang,
-	fileName = 'Code',
+	fileName = '',
 	highlightLines = [],
 	highlightLineCls = 'bg-surface-codeHighlight',
 	setCode,
