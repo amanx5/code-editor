@@ -1,4 +1,5 @@
 import { cls } from 'code-editor/utils';
+import { pxToNum, TW_CONFIG } from '../utils/styling';
 
 type SectionNavigatorProps = {
 	sections: Array<{
@@ -13,11 +14,14 @@ export function SectionNavigator({ sections }: SectionNavigatorProps) {
 				className={cls(
 					'bg-white border-b border-outline-subtle ',
 					'w-full top-belowHeader sticky ',
-					'lg:w-56 lg:min-w-56 lg:order-2 lg:self-stretch lg:border-b-0 lg:border-l '
+					'lg:w-56 lg:min-w-56 lg:order-2 lg:self-stretch lg:border-b-0 lg:border-l z-50'
 				)}
 			>
 				<div className='p-4 sticky top-belowHeader'>
-					<h3 className='font-semibold text-lg mb-4'>Examples</h3>
+					<h3 className='mb-4 text-xs text-text-muted '>
+						On This Page
+					</h3>
+
 					<ul className='flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible'>
 						{sections.map(({ id, title }) => (
 							<li key={id} className='shrink-0 lg:shrink'>
@@ -25,7 +29,7 @@ export function SectionNavigator({ sections }: SectionNavigatorProps) {
 									onClick={() => scrollToId(id)}
 									className={cls(
 										'block py-1 px-2',
-										'text-text-secondary hover:text-text-primary',
+										'text-xs text-text-muted hover:text-text-primary',
 										'transition-colors rounded hover:bg-surface-hover',
 										'whitespace-nowrap lg:whitespace-normal'
 									)}
@@ -45,7 +49,9 @@ function scrollToId(id: string) {
 	const el = document.getElementById(id);
 	if (!el) return;
 
-	const y = el.getBoundingClientRect().top + window.pageYOffset;
+	const offset =
+		pxToNum(TW_CONFIG.height.header) + pxToNum(TW_CONFIG.spacing.pageY);
+	const y = el.getBoundingClientRect().top + window.pageYOffset - offset;
 
 	window.scrollTo({
 		top: y,
