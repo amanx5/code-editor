@@ -1,4 +1,4 @@
-import type { Code } from '../../../CodeEditor';
+import type { Code } from '../../../../../CodeEditor';
 
 /**
  * V8 browsers doesn't render a newline if there is no text after it.

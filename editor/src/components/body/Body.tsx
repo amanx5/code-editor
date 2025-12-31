@@ -1,14 +1,16 @@
 import { useContext, useMemo } from 'react';
 import { CodeEditorContext } from '../../CodeEditor';
-import { LineNumber, Editor, VirtualLine} from '../../components';
-import { cls } from '../../utils';
+import { LineNumber, Editor, VirtualLine } from '../../components';
+import { cls, tokenizeCode } from '../../utils';
 
 export function Body() {
-	const { code, isWrapEnabled, highlightLines, highlightLineCls } =
+	const { code, codeLang, isWrapEnabled, highlightLines, highlightLineCls } =
 		useContext(CodeEditorContext);
 
-	// TODO: use tokenizer 
-	const virtualLines = useMemo(() => code.split('\n'), [code]);
+	const virtualLines = useMemo(
+		() => tokenizeCode(code, codeLang),
+		[code, codeLang]
+	);
 
 	const lineCls = cls(
 		'flex-1',

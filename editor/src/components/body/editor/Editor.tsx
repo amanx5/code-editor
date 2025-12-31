@@ -1,13 +1,10 @@
 import { useContext, useCallback } from 'react';
-import { CodeEditorContext } from '../../CodeEditor';
-import {
-	cls,
-	onKeyDown,
-	onPaste,
-	validateCode,
-	convertToSourceCode,
-} from '../../utils';
-import { useEditor } from '../../hooks/useEditor';
+import { CodeEditorContext } from '../../../CodeEditor';
+import { getEventHandlers, convertToSourceCode } from './utils';
+import { useEditor } from './hooks/useEditor';
+import { cls, validateCode } from '../../../utils';
+
+export type EditorElement = HTMLPreElement;
 
 export function Editor({ lineCls }: { lineCls: string }) {
 	const { code, codeLang, isWrapEnabled, setCode, setCodeError } =
@@ -28,10 +25,9 @@ export function Editor({ lineCls }: { lineCls: string }) {
 				'text-transparent/20 caret-black focus:outline-none'
 			)}
 			contentEditable={!!setCode}
-			onKeyDown={(e) => onKeyDown(e, onEditorContentChange)}
-			onPaste={(e) => onPaste(e, onEditorContentChange)}
 			ref={editorRef}
 			spellCheck={false}
+			{...getEventHandlers(onEditorContentChange)}
 		/>
 	);
 }

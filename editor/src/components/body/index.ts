@@ -1,4 +1,4 @@
 export * from './Body';
-export * from './Editor';
+export * from './editor/Editor';
 export * from './LineNumber';
 export * from './VirtualLine';

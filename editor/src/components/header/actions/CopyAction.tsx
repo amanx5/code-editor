@@ -1,7 +1,7 @@
 import { useContext, useState, useCallback } from 'react';
 import { CodeEditorContext } from '../../../CodeEditor';
 import { ClipboardSvg } from '../../svg/ClipboardSvg';
-import { copyToClipboard } from '../../../utils/code-editing/editor-internals/clipboard';
+import { copyToClipboard } from '../../body/editor/utils/internals/clipboard';
 import { ActionButton, ActionButtonDefaultSvgProps } from './ActionButton';
 
 export function CopyAction() {
