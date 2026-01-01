@@ -14,8 +14,8 @@ export function ExampleSection({
 	title,
 	exampleProps,
 }: ExampleSectionProps) {
-	const [showProps, setShowProps] = useState(true);
-	const [showOutput, setShowOutput] = useState(false);
+	const [showProps, setShowProps] = useState(false);
+	const [showOutput, setShowOutput] = useState(true);
 	const exampleSectionOptions = [
 		{
 			label: 'Show Props',

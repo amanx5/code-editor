@@ -1,7 +1,7 @@
-/** 
+/**
  * Tailwind config for the demo app
- * @type {import('tailwindcss').Config} 
-*/
+ * @type {import('tailwindcss').Config}
+ */
 module.exports = {
 	presets: [
 		require('code-editor/tailwind-preset'), // preset for code-editor
@@ -13,28 +13,12 @@ module.exports = {
 	],
 	theme: {
 		extend: {
-			fontFamily: {
-				// override the default mono font family that tailwind applies on code, kbd, samp, pre
-				mono: [
-					'Source Code Pro',
-					'Fira Code',
-					'Menlo',
-					'Monaco',
-					'Consolas',
-					'Liberation Mono',
-					'Courier New',
-					'monospace',
-				],
-			},
-
 			colors: {
 				text: {
 					muted: '#475569',
 					primary: 'blueviolet',
 				},
 				surface: {
-					code: '#fbfbfb',
-					codeHighlight: '#fffbe6',
 					muted: '#f6f7f9',
 				},
 				outline: {
@@ -58,11 +42,6 @@ module.exports = {
 	},
 	plugins: [
 		function ({ addUtilities, theme }) {
-			const px = (n) => ({
-				paddingLeft: theme(`spacing.${n}`),
-				paddingRight: theme(`spacing.${n}`),
-			});
-
 			addUtilities({
 				'.w-controlled': {
 					width: '100%',
@@ -74,10 +53,14 @@ module.exports = {
 					'@screen lg': px(10),
 					'@screen 2xl': px(0),
 				},
-				'.wrap-anywhere': {
-					'overflow-wrap': 'anywhere',
-				},
 			});
+
+			function px(n) {
+				return {
+					paddingLeft: theme(`spacing.${n}`),
+					paddingRight: theme(`spacing.${n}`),
+				};
+			}
 		},
 	],
 };
