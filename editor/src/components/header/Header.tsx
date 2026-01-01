@@ -6,7 +6,7 @@ export function Header() {
 	return (
 		<div
 			className={cls(
-				'border-b border-b-outline-subtle',
+				'bg-ce-bg-header border-b border-b-ce-border-subtle',
 				'flex justify-between',
 				'h-12 max-h-12',
 				'p-3'

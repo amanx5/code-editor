@@ -6,8 +6,8 @@ import { cls, validateCode } from '../../../utils';
 
 export type EditorElement = HTMLPreElement;
 
-export function Editor({ lineCls }: { lineCls: string }) {
-	const { code, codeLang, isWrapEnabled, setCode, setCodeError } =
+export function Editor() {
+	const { code, isWrapEnabled, codeLang, setCode, setCodeError } =
 		useContext(CodeEditorContext);
 	const { editorRef, getEditorContent } = useEditor(code);
 
@@ -20,9 +20,11 @@ export function Editor({ lineCls }: { lineCls: string }) {
 	return (
 		<pre
 			className={cls(
-				lineCls,
-				isWrapEnabled && 'pl-12',
-				'text-transparent/20 caret-black focus:outline-none'
+				'ce-content inline-block',
+				'flex-1 min-h-full',
+				'text-transparent/20 caret-black focus:outline-none',
+				isWrapEnabled && 'whitespace-pre-wrap wrap-anywhere',
+				'z-10'
 			)}
 			contentEditable={!!setCode}
 			ref={editorRef}

@@ -28,7 +28,7 @@ export function CodeEditor({
 	codeLang,
 	fileName = '',
 	highlightLines = [],
-	highlightLineCls = 'bg-surface-codeHighlight',
+	highlightLineCls = 'bg-ce-bg-highlight',
 	setCode,
 	setCodeError,
 }: CodeEditorProps) {
@@ -53,8 +53,8 @@ export function CodeEditor({
 				// don-t add min-h as it can be extra if there is only one line of code
 				// overflow-hidden: to make sure rounded borders are not overlapped by children
 				className={cls(
-					'bg-surface-code',
-					'border border-outline-subtle rounded-xl',
+					'bg-ce-bg-root',
+					'border border-ce-border-subtle rounded-lg',
 					'flex-1 flex flex-col',
 					'overflow-hidden',
 					className

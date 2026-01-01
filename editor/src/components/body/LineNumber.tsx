@@ -2,19 +2,20 @@ import { cls } from '../../utils';
 import type { CodeLineNumber } from '../../CodeEditor';
 
 export function LineNumber({
-	className,
+	isWrapEnabled,
 	lineNumber,
 }: {
-	className?: string;
+	isWrapEnabled?: boolean;
 	lineNumber: CodeLineNumber;
 }) {
 	return (
 		<span
 			className={cls(
+				'ce-content',
+				'align-top',
 				'w-12 min-w-12 pr-4',
-				'text-sm text-right text-text-muted align-top',
-				'font-mono',
-				className
+				'text-right text-text-muted select-none',
+				!isWrapEnabled && 'bg-ce-bg-root' // to hide any content behind the line-numbers when scrolled
 			)}
 		>
 			{lineNumber}
