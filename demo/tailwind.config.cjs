@@ -1,10 +1,12 @@
+const {preset} = require('code-editor/tailwind-config');
+
 /**
  * Tailwind config for the demo app
  * @type {import('tailwindcss').Config}
  */
 module.exports = {
 	presets: [
-		require('code-editor/tailwind-preset'), // preset for code-editor
+		preset, // preset for code-editor
 	],
 	content: [
 		'./index.html',

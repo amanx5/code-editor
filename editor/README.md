@@ -21,9 +21,11 @@ Use this option if your application already uses Tailwind CSS.
 
 ```js
 // tailwind.config.cjs
+const {preset} = require('code-editor/tailwind-config');
+
 module.exports = {
   presets: [
-    require('code-editor/tailwind-preset'),
+    preset
   ],
   content: [
     './src/**/*.{js,ts,jsx,tsx}',
