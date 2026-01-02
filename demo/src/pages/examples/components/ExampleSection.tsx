@@ -31,7 +31,7 @@ export function ExampleSection({
 
 	return (
 		<Section id={id} title={title}>
-			<div className='min-h-96 border border-outline-subtle flex flex-col p-4 mb-10 gap-4'>
+			<div className='border border-outline-subtle flex flex-col p-4 mb-10 gap-4'>
 				{/* checkboxes to toggle visibility */}
 				<div className='flex justify-end gap-2'>
 					{exampleSectionOptions.map(({ label, enabled, toggle }) => (

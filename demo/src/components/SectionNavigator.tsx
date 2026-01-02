@@ -18,17 +18,17 @@ export function SectionNavigator({ sections }: SectionNavigatorProps) {
 				)}
 			>
 				<div className='p-4 sticky top-belowHeader'>
-					<h3 className='mb-4 text-xs text-text-muted '>
+					<h3 className='mb-2 text-xs text-text-muted '>
 						On This Page
 					</h3>
 
-					<ul className='flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible'>
+					<ul className='flex flex-row lg:flex-col gap-4 overflow-x-auto lg:overflow-x-visible lg:gap-1'>
 						{sections.map(({ id, title }) => (
 							<li key={id} className='shrink-0 lg:shrink'>
 								<button
 									onClick={() => scrollToId(id)}
 									className={cls(
-										'block py-1 px-2',
+										'block py-1',
 										'text-xs text-text-muted hover:text-text-primary',
 										'transition-colors rounded hover:bg-surface-hover',
 										'whitespace-nowrap lg:whitespace-normal'

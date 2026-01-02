@@ -11,7 +11,6 @@ export type CodeEditorProps = {
 	codeError?: CodeError;
 	codeLang: CodeLanguage;
 	fileName?: string;
-	highlightLineCls?: string;
 	highlightLines?: CodeLineNumber[];
 	setCode?: React.Dispatch<React.SetStateAction<Code>>;
 	setCodeError?: React.Dispatch<React.SetStateAction<CodeError>>;
@@ -25,10 +24,10 @@ export type CodeEditorProps = {
 export function CodeEditor({
 	className = '',
 	code,
+	codeError = null,
 	codeLang,
 	fileName = '',
 	highlightLines = [],
-	highlightLineCls = 'bg-ce-bg-highlight',
 	setCode,
 	setCodeError,
 }: CodeEditorProps) {
@@ -38,10 +37,10 @@ export function CodeEditor({
 		<CodeEditorContext.Provider
 			value={{
 				code,
+				codeError,
 				codeLang,
 				fileName,
 				highlightLines,
-				highlightLineCls,
 				isWrapEnabled,
 				setCode,
 				setCodeError,
@@ -69,10 +68,10 @@ export function CodeEditor({
 
 export type CodeEditorContext = {
 	code: Code;
+	codeError: CodeError;
 	codeLang: CodeLanguage;
 	fileName: string;
 	highlightLines: number[];
-	highlightLineCls: string;
 	isWrapEnabled: boolean;
 	setCode?: React.Dispatch<React.SetStateAction<Code>>;
 	setCodeError?: React.Dispatch<React.SetStateAction<CodeError>>;
@@ -80,10 +79,10 @@ export type CodeEditorContext = {
 };
 export const CodeEditorContext = createContext<CodeEditorContext>({
 	code: '',
+	codeError: null,
 	codeLang: 'cmd',
 	fileName: '',
 	highlightLines: [],
-	highlightLineCls: '',
 	isWrapEnabled: true,
 	setCode: () => undefined,
 	setCodeError: () => undefined,

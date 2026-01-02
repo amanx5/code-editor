@@ -9,7 +9,7 @@ import { cls, tokenizeCode } from '../../utils';
  * TODO: Scroll the body when the user enters on last line or type in the end of a line
  */
 export function Body() {
-	const { code, codeLang, isWrapEnabled, highlightLines, highlightLineCls } =
+	const { code, codeError, codeLang, isWrapEnabled, highlightLines } =
 		useContext(CodeEditorContext);
 
 	const virtualLines = useMemo(
@@ -36,9 +36,9 @@ export function Body() {
 						key={index}
 						line={line}
 						lineNumber={index + 1}
+						isHighlighted={highlightLines.includes(index + 1)}
+						isInvalid={codeError?.line === index + 1}
 						isWrapEnabled={isWrapEnabled}
-						doHighlight={highlightLines.includes(index + 1)}
-						highlightLineCls={highlightLineCls}
 					/>
 				))}
 			</div>

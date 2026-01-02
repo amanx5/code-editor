@@ -15,7 +15,9 @@ function AppWrapper({ children }: { children: React.ReactNode }) {
 			{/* app-header */}
 			<header className='bg-white border-b border-b-outline-subtle h-header w-full flex justify-center sticky top-0 z-[9999]'>
 				<div className='h-full w-controlled px-controlled'>
-					Code Editor
+					<div className='h-full flex items-center'>
+						<a className='font-bold text-2xl' href='/'>Code Editor</a>
+					</div>
 				</div>
 			</header>
 

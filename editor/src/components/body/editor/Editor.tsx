@@ -21,9 +21,9 @@ export function Editor() {
 		<pre
 			className={cls(
 				'ce-content inline-block',
-				'flex-1 min-h-full',
+				'flex-1 h-max',
 				'text-transparent/20 caret-black focus:outline-none',
-				isWrapEnabled && 'whitespace-pre-wrap wrap-anywhere',
+				isWrapEnabled && 'ce-content-wrap',
 				'z-10'
 			)}
 			contentEditable={!!setCode}

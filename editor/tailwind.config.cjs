@@ -12,6 +12,7 @@ const preset = {
 				},
 				'ce-bg': {
 					root: '#FFFFFF',
+					error: '#fee2e2',
 					header: '#f6f8fa',
 					highlight: '#fffbdd',
 					muted: '#f6f7f9',
@@ -32,8 +33,9 @@ const preset = {
 					lineHeight: theme('lineHeight.6'),
 					minHeight: theme('lineHeight.6'),
 				},
-				'.wrap-anywhere': {
-					'overflow-wrap': 'anywhere',
+				'.ce-content-wrap': {
+					'whiteSpace': 'pre-wrap',
+					'overflowWrap': 'anywhere',
 				},
 			});
 		},
