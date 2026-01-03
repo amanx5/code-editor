@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
 	Root,
 	Body,
@@ -47,9 +47,17 @@ export function CodeEditor({
 		isPlainObject(toolbar) ? !!toolbar.showWrapTool : false
 	);
 
+	
+	const lastCommitRef = useRef(document.content);
+
 	// effect to sync internalContent when external document.content changes
 	useEffect(() => {
-		setInternalContent(document.content);
+		// don't compare document.content with internal content as on rapid/continous user inputs
+		// internal content will update continously while external content won't be able to sync with it 
+		// so values will differ and will cause infinite nested updates 
+		if (document.content !== lastCommitRef.current) {
+			setInternalContent(document.content);
+		}
 	}, [document.content]);
 
 	// effect to update internalError and call external onChange callback when internalContent changes
@@ -59,6 +67,8 @@ export function CodeEditor({
 			document.language
 		);
 		setInternalError(internalErrorUpdated);
+
+		lastCommitRef.current = internalContent;
 		onChange?.(internalContent, internalErrorUpdated);
 	}, [internalContent, document.language]);
 

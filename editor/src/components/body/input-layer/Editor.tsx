@@ -25,8 +25,8 @@ export function Editor({
 	const { editorRef, getEditorContent } = useEditor(internalContent);
 
 	const domChangeCallback = useCallback(() => {
-		const sourceCode = convertToInternalContent(getEditorContent());
-		setInternalContent(sourceCode);
+		const internalContentUpdated = convertToInternalContent(getEditorContent());
+		setInternalContent(internalContentUpdated);
 	}, [getEditorContent, setInternalContent]);
 
 	return (
