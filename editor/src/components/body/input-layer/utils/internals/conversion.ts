@@ -1,4 +1,4 @@
-import type { Code } from '../../../../../CodeEditor';
+import type { Content } from "../../../../../contexts";
 
 /**
  * V8 browsers doesn't render a newline if there is no text after it.
@@ -12,10 +12,10 @@ import type { Code } from '../../../../../CodeEditor';
  */
 export const TRAILING_LINE = '\n';
 
-export function convertToEditorContent(sourceCode: Code = ''): Code {
-	return sourceCode + TRAILING_LINE;
+export function convertToEditorContent(internalContent: Content = ''): Content {
+	return internalContent + TRAILING_LINE;
 }
 
-export function convertToSourceCode(editorCode: Code = ''): Code {
-	return editorCode.slice(0, -TRAILING_LINE.length);
+export function convertToInternalContent(editorContent: Content = ''): Content {
+	return editorContent.slice(0, -TRAILING_LINE.length);
 }

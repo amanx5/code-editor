@@ -3,12 +3,12 @@ import { convertToEditorContent } from '../utils/internals';
 import type { EditorElement } from '../Editor';
 import type { Content } from '../../../../contexts';
 
-export function useEditor(sourceCode: Content) {
+export function useEditor(internalContent: Content) {
 	const editorRef = useRef<EditorElement>(null);
 
 	useEffect(() => {
-		setEditorContent(sourceCode);
-	}, [sourceCode]);
+		setEditorContent(internalContent);
+	}, [internalContent]);
 
 	return {
 		editorRef,
@@ -22,14 +22,14 @@ export function useEditor(sourceCode: Content) {
 		return editorRef.current.textContent;
 	}
 
-	function setEditorContent(sourceCode: Content) {
+	function setEditorContent(internalContent: Content) {
 		if (!editorRef.current) return;
 
 		const currentEditorContent = getEditorContent();
-		const convertedSourceCode = convertToEditorContent(sourceCode);
+		const convertedEditorContent = convertToEditorContent(internalContent);
 
-		if (currentEditorContent !== convertedSourceCode) {
-			editorRef.current.textContent = convertedSourceCode;
+		if (currentEditorContent !== convertedEditorContent) {
+			editorRef.current.textContent = convertedEditorContent;
 			console.info('CodeEditor: Updated code in the editor.');
 		}
 	}

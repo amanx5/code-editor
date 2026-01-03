@@ -5,7 +5,7 @@ import { ToolDefaultSvgProps, ToolWrapper } from './ToolWrapper';
 import {  RootContext } from '../../../contexts';
 
 export function ContentCopyTool() {
-	const { content } = useContext(RootContext);
+	const { internalContent } = useContext(RootContext);
 
 
 	const [isCopied, setIsCopied] = useState(false);
@@ -13,7 +13,7 @@ export function ContentCopyTool() {
 	const hoverText = isCopied ? 'Code copied' : 'Copy code';
 
 	const copyCode = useCallback(async () => {
-		await copyToClipboard(content);
+		await copyToClipboard(internalContent);
 		setIsCopied(true);
 
 		const timeout = setTimeout(() => {
@@ -21,7 +21,7 @@ export function ContentCopyTool() {
 		}, 2000);
 
 		return () => clearTimeout(timeout);
-	}, [content, isCopied]);
+	}, [internalContent, isCopied]);
 
 	return (
 		<>

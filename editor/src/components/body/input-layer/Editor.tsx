@@ -1,29 +1,33 @@
 import { useContext, useCallback } from 'react';
-import { getEventHandlers, convertToSourceCode } from './utils';
+import { getEventHandlers, convertToInternalContent } from './utils';
 import { useEditor } from './hooks/useEditor';
 import { cls } from '../../../utils';
-import { EditorOptionsContext, RootContext, type Content } from '../../../contexts';
+import {
+	EditorOptionsContext,
+	RootContext,
+	type Content,
+} from '../../../contexts';
 
 export type EditorElement = HTMLPreElement;
 
 export function Editor({
 	hideLineNumbers,
-	content,
-	setContent,
+	internalContent,
+	setInternalContent,
 }: {
 	hideLineNumbers: boolean;
-	content: Content;
-	setContent: React.Dispatch<React.SetStateAction<Content>>;
+	internalContent: Content;
+	setInternalContent: React.Dispatch<React.SetStateAction<Content>>;
 }) {
 	const { isWrapEnabled } = useContext(RootContext);
 	const editorOptions = useContext(EditorOptionsContext);
 
-	const { editorRef, getEditorContent } = useEditor(content);
+	const { editorRef, getEditorContent } = useEditor(internalContent);
 
 	const domChangeCallback = useCallback(() => {
-		const sourceCode = convertToSourceCode(getEditorContent());
-		setContent(sourceCode);
-	}, [setContent, getEditorContent]);
+		const sourceCode = convertToInternalContent(getEditorContent());
+		setInternalContent(sourceCode);
+	}, [getEditorContent, setInternalContent]);
 
 	return (
 		<pre

@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Root, Body, Toolbar, type ToolbarOptions, ToolbarOptionsDefault } from './components';
+import {
+	Root,
+	Body,
+	Toolbar,
+	type ToolbarOptions,
+	ToolbarOptionsDefault,
+} from './components';
 import {
 	type Content,
 	type EditorDocument,
@@ -10,7 +16,6 @@ import {
 	RootContext,
 } from './contexts';
 import { isPlainObject, validateCode, type CodeError } from './utils/';
-
 
 export type CodeEditorProps = {
 	document: EditorDocument;
@@ -30,35 +35,45 @@ export function CodeEditor({
 	toolbar = ToolbarOptionsDefault,
 	onChange,
 }: CodeEditorProps) {
+	// TODO: use ref instead of state, currently virtual lines are dependent on this state,
+	// better approach is to mutate syntax layer automatically on content change and add a cursor layer
+	// instead of double content layers
+	const [internalContent, setInternalContent] = useState<Content>(
+		document.content
+	);
+	const [internalError, setInternalError] = useState<CodeError>(null);
+
 	const [isWrapEnabled, setIsWrapEnabled] = useState(
 		isPlainObject(toolbar) ? !!toolbar.showWrapTool : false
 	);
 
-	// TODO: use ref instead of state, currently virtual lines are dependent on this state, 
-	// better approach is to mutate syntax layer automatically on content change and add a cursor layer
-	// instead of double content layers
-	const [content, setContent] = useState<Content>(document.content);
-	const [error, setError] = useState<CodeError>(null);
+	// effect to sync internalContent when external document.content changes
+	useEffect(() => {
+		setInternalContent(document.content);
+	}, [document.content]);
 
-	useEffect(()=>{
-		const error = validateCode(content, document.language)
-		setError(error);
-		onChange?.(content, error);
-	}, [content, document.language])
+	// effect to update internalError and call external onChange callback when internalContent changes
+	useEffect(() => {
+		const internalErrorUpdated = validateCode(
+			internalContent,
+			document.language
+		);
+		setInternalError(internalErrorUpdated);
+		onChange?.(internalContent, internalErrorUpdated);
+	}, [internalContent, document.language]);
+
+	const rootContextValue = {
+		internalContent,
+		internalError,
+		isWrapEnabled,
+		setIsWrapEnabled,
+		setInternalContent,
+	};
 
 	return (
 		<EditorDocumentContext.Provider value={document}>
 			<EditorOptionsContext.Provider value={editor}>
-				<RootContext.Provider
-					value={{ 
-						isWrapEnabled, 
-						setIsWrapEnabled, 
-						content,
-						setContent,
-						error,
-						setError,
-					}}
-				>
+				<RootContext.Provider value={rootContextValue}>
 					<Root>
 						<Toolbar options={toolbar} />
 						<Body />
