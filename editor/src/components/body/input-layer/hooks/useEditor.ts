@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { Code } from '../../../../CodeEditor';
 import { convertToEditorContent } from '../utils/internals';
 import type { EditorElement } from '../Editor';
+import type { Content } from '../../../../contexts';
 
-export function useEditor(sourceCode: Code) {
+export function useEditor(sourceCode: Content) {
 	const editorRef = useRef<EditorElement>(null);
 
 	useEffect(() => {
@@ -22,7 +22,7 @@ export function useEditor(sourceCode: Code) {
 		return editorRef.current.textContent;
 	}
 
-	function setEditorContent(sourceCode: Code) {
+	function setEditorContent(sourceCode: Content) {
 		if (!editorRef.current) return;
 
 		const currentEditorContent = getEditorContent();
@@ -34,3 +34,5 @@ export function useEditor(sourceCode: Code) {
 		}
 	}
 }
+
+

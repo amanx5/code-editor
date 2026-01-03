@@ -1,19 +1,22 @@
-import { createContext, useState } from 'react';
-import { Header, Body } from './components';
-import { cls, type CodeError, type CodeLanguage } from './utils';
+import { useEffect, useState } from 'react';
+import { Root, Body, Toolbar, type ToolbarOptions, ToolbarOptionsDefault } from './components';
+import {
+	type Content,
+	type EditorDocument,
+	type EditorOptions,
+	EditorDocumentContext,
+	EditorOptionsContext,
+	EditorOptionsDefault,
+	RootContext,
+} from './contexts';
+import { isPlainObject, validateCode, type CodeError } from './utils/';
 
-export type Code = string;
-export type CodeLineNumber = number;
 
 export type CodeEditorProps = {
-	className?: string;
-	code: Code;
-	codeError?: CodeError;
-	codeLang: CodeLanguage;
-	fileName?: string;
-	highlightLines?: CodeLineNumber[];
-	setCode?: React.Dispatch<React.SetStateAction<Code>>;
-	setCodeError?: React.Dispatch<React.SetStateAction<CodeError>>;
+	document: EditorDocument;
+	editor?: EditorOptions;
+	toolbar?: ToolbarOptions;
+	onChange?: (content: Content, error: CodeError) => void;
 };
 
 /**
@@ -22,69 +25,46 @@ export type CodeEditorProps = {
  * Note: CSS for this component is not included by default. Refer README for CSS installation.
  */
 export function CodeEditor({
-	className = '',
-	code,
-	codeError = null,
-	codeLang,
-	fileName = '',
-	highlightLines = [],
-	setCode,
-	setCodeError,
+	document,
+	editor = EditorOptionsDefault,
+	toolbar = ToolbarOptionsDefault,
+	onChange,
 }: CodeEditorProps) {
-	const [isWrapEnabled, setIsWrapEnabled] = useState(true);
+	const [isWrapEnabled, setIsWrapEnabled] = useState(
+		isPlainObject(toolbar) ? !!toolbar.showWrapTool : false
+	);
+
+	// TODO: use ref instead of state, currently virtual lines are dependent on this state, 
+	// better approach is to mutate syntax layer automatically on content change and add a cursor layer
+	// instead of double content layers
+	const [content, setContent] = useState<Content>(document.content);
+	const [error, setError] = useState<CodeError>(null);
+
+	useEffect(()=>{
+		const error = validateCode(content, document.language)
+		setError(error);
+		onChange?.(content, error);
+	}, [content, document.language])
 
 	return (
-		<CodeEditorContext.Provider
-			value={{
-				code,
-				codeError,
-				codeLang,
-				fileName,
-				highlightLines,
-				isWrapEnabled,
-				setCode,
-				setCodeError,
-				setIsWrapEnabled,
-			}}
-		>
-			<div
-				// flex-1: for forcing grow if consumer wraps CodeEditor in flex container
-				// don-t add min-h as it can be extra if there is only one line of code
-				// overflow-hidden: to make sure rounded borders are not overlapped by children
-				className={cls(
-					'bg-ce-bg-root',
-					'border border-ce-border-subtle rounded-lg',
-					'flex-1 flex flex-col',
-					'overflow-hidden',
-					className
-				)}
-			>
-				<Header />
-				<Body />
-			</div>
-		</CodeEditorContext.Provider>
+		<EditorDocumentContext.Provider value={document}>
+			<EditorOptionsContext.Provider value={editor}>
+				<RootContext.Provider
+					value={{ 
+						isWrapEnabled, 
+						setIsWrapEnabled, 
+						content,
+						setContent,
+						error,
+						setError,
+					}}
+				>
+					<Root>
+						<Toolbar options={toolbar} />
+						<Body />
+					</Root>
+				</RootContext.Provider>
+			</EditorOptionsContext.Provider>
+		</EditorDocumentContext.Provider>
 	);
 }
-
-export type CodeEditorContext = {
-	code: Code;
-	codeError: CodeError;
-	codeLang: CodeLanguage;
-	fileName: string;
-	highlightLines: number[];
-	isWrapEnabled: boolean;
-	setCode?: React.Dispatch<React.SetStateAction<Code>>;
-	setCodeError?: React.Dispatch<React.SetStateAction<CodeError>>;
-	setIsWrapEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-};
-export const CodeEditorContext = createContext<CodeEditorContext>({
-	code: '',
-	codeError: null,
-	codeLang: 'cmd',
-	fileName: '',
-	highlightLines: [],
-	isWrapEnabled: true,
-	setCode: () => undefined,
-	setCodeError: () => undefined,
-	setIsWrapEnabled: () => undefined,
-});

@@ -1,5 +1,5 @@
 import { cls } from '../../utils';
-import type { CodeLineNumber } from '../../CodeEditor';
+import type { CodeLineNumber } from '../../contexts';
 
 export function LineNumber({
 	isWrapEnabled,

@@ -1,6 +1,6 @@
 import { cls } from '../../../utils';
 
-export function ActionButton(props: React.ComponentProps<'button'>) {
+export function ToolWrapper(props: React.ComponentProps<'button'>) {
 	return (
 		<button
 			className={cls(
@@ -12,7 +12,7 @@ export function ActionButton(props: React.ComponentProps<'button'>) {
 	);
 }
 
-export const ActionButtonDefaultSvgProps: React.SVGProps<SVGSVGElement> = {
+export const ToolDefaultSvgProps: React.SVGProps<SVGSVGElement> = {
 	height: 16,
 	width: 16,
 };

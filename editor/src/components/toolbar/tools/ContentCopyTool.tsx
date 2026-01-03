@@ -1,18 +1,19 @@
 import { useContext, useState, useCallback } from 'react';
-import { CodeEditorContext } from '../../../CodeEditor';
 import { ClipboardSvg } from '../../svg/ClipboardSvg';
-import { copyToClipboard } from '../../body/editor/utils/internals/clipboard';
-import { ActionButton, ActionButtonDefaultSvgProps } from './ActionButton';
+import { copyToClipboard } from '../../body/input-layer/utils/internals/clipboard';
+import { ToolDefaultSvgProps, ToolWrapper } from './ToolWrapper';
+import {  RootContext } from '../../../contexts';
 
-export function CopyAction() {
-	const { code } = useContext(CodeEditorContext);
+export function ContentCopyTool() {
+	const { content } = useContext(RootContext);
+
 
 	const [isCopied, setIsCopied] = useState(false);
 	const readerText = 'Copy code to clipboard';
 	const hoverText = isCopied ? 'Code copied' : 'Copy code';
 
 	const copyCode = useCallback(async () => {
-		await copyToClipboard(code);
+		await copyToClipboard(content);
 		setIsCopied(true);
 
 		const timeout = setTimeout(() => {
@@ -20,11 +21,11 @@ export function CopyAction() {
 		}, 2000);
 
 		return () => clearTimeout(timeout);
-	}, [code, isCopied]);
+	}, [content, isCopied]);
 
 	return (
 		<>
-			<ActionButton
+			<ToolWrapper
 				aria-label={readerText}
 				disabled={isCopied}
 				onClick={copyCode}
@@ -33,9 +34,9 @@ export function CopyAction() {
 			>
 				<ClipboardSvg
 					checked={isCopied}
-					{...ActionButtonDefaultSvgProps}
+					{...ToolDefaultSvgProps}
 				/>
-			</ActionButton>
+			</ToolWrapper>
 
 			<span role='status' aria-live='polite' className='sr-only'>
 				{!isCopied ? readerText : ''}

@@ -13,9 +13,9 @@ const preset = {
 				'ce-bg': {
 					root: '#FFFFFF',
 					error: '#fee2e2',
-					header: '#f6f8fa',
 					highlight: '#fffbdd',
 					muted: '#f6f7f9',
+					toolbar: '#f6f8fa',
 				},
 				'ce-border': {
 					subtle: '#e2e8f0',
@@ -37,6 +37,9 @@ const preset = {
 					'whiteSpace': 'pre-wrap',
 					'overflowWrap': 'anywhere',
 				},
+				'.ce-content-pd': {
+					'paddingLeft': theme('padding.6'),
+				}
 			});
 		},
 	],
