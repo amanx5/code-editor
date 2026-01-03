@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { cls } from 'code-editor/utils';
 import { Section } from '../../../components/Section';
-import { ExampleOutput } from './ExampleOutput';
 import type { ExampleProps } from '../utils/example-props';
+import { ExampleData } from './ExampleData';
+import { ExampleOutput } from './ExampleOutput';
 
 type ExampleSectionProps = {
 	id: string;
@@ -32,7 +33,7 @@ export function ExampleSection({
 	return (
 		<Section id={id} title={title}>
 			<div className='border border-outline-subtle flex flex-col p-4 mb-10 gap-4'>
-				{/* checkboxes to toggle visibility */}
+				{/* header */}
 				<div className='flex justify-end gap-2'>
 					{exampleSectionOptions.map(({ label, enabled, toggle }) => (
 						<button
@@ -52,51 +53,12 @@ export function ExampleSection({
 					))}
 				</div>
 
-				{/* example data */}
-				{showProps && (
-					<div
-						className={cls(
-							'bg-surface-muted border border-outline-subtle rounded-md',
-							'flex flex-col gap-1 p-4'
-						)}
-					>
-						{Object.entries(exampleProps).map(
-							([key, value], index) => (
-								<div key={index} className='flex gap-2'>
-									<pre className='font-semibold'>{key}:</pre>
+				{/* data */}
+				{showProps && <ExampleData exampleProps={exampleProps} />}
 
-									<pre className='overflow-auto max-h-20 font-semibold text-text-primary'>
-										{formatValue(value)}
-									</pre>
-								</div>
-							)
-						)}
-					</div>
-				)}
-
-				{/* editor */}
-				{showOutput && (
-					<div className={`flex h-64`}>
-						<ExampleOutput exampleProps={exampleProps} />
-					</div>
-				)}
+				{/* output */}
+				{showOutput && <ExampleOutput exampleProps={exampleProps} />}
 			</div>
 		</Section>
 	);
-}
-
-function formatValue(value: unknown): string {
-	return Array.isArray(value)
-		? '[ ' + value.join(', ') + ' ]'
-		: isBoolean(value)
-		? toBoolIcon(value)
-		: String(value);
-}
-
-export function isBoolean(arg: unknown): arg is boolean {
-	return typeof arg === 'boolean';
-}
-
-export function toBoolIcon(bool: boolean): string {
-	return bool == true ? '✓' : '✗';
 }

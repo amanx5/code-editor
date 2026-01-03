@@ -1,4 +1,4 @@
-import { range, shuffle } from "../../../utils/array";
+import { range, shuffle } from "code-editor/utils";
 
 export function getExampleLines(
 	count: number,

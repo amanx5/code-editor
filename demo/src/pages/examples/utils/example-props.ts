@@ -6,22 +6,63 @@ export type ExampleProps = CodeEditorProps;
 
 export const EXAMPLES_PROPS: ExampleProps[] = [
 	{
-		code: exampleJson,
-		codeLang: 'json',
+		document: {
+			content: exampleJson,
+			language: 'json',
+		},
 	},
 	{
-		code: getExampleLines(1, 0, 6),
-		codeLang: 'txt',
-		highlightLines: [1],
+		document: {
+			content: getExampleLines(1, 0, 5),
+			language: 'txt',
+		},
+		editor: {
+			highlightLines: [1],
+		},
 	},
 	{
-		code: getExampleLines(10, 0, 40),
-		codeLang: 'txt',
-		highlightLines: [1, 3],
+		document: {
+			content: getExampleLines(2, 0, 10),
+			language: 'txt',
+		},
+		editor: {
+			highlightLines: [1, 3],
+			hideLineNumbers: true
+		},
 	},
 	{
-		code: getExampleLines(1000, 0, 40),
-		codeLang: 'txt',
-		highlightLines: [1, 3],
+		document: {
+			content: getExampleLines(10, 0, 40),
+			language: 'txt',
+		},
+		editor: {
+			highlightLines: [1, 3],
+		},
+	},
+	{
+		document: {
+			content: getExampleLines(1000, 0, 40),
+			language: 'txt',
+		},
+		editor: {
+			highlightLines: [1, 3],
+		},
 	},
 ];
+
+
+export function formatPropValue(value: unknown): string {
+	return Array.isArray(value)
+		? '[ ' + value.join(', ') + ' ]'
+		: isBoolean(value)
+		? toBoolIcon(value)
+		: String(value);
+}
+
+export function isBoolean(arg: unknown): arg is boolean {
+	return typeof arg === 'boolean';
+}
+
+export function toBoolIcon(bool: boolean): string {
+	return bool == true ? '✓' : '✗';
+}
