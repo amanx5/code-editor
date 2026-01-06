@@ -5,12 +5,14 @@ import {
 } from '../dom-mutators';
 import type {
 	EditorEventObject,
-	ShouldCommitState,
+	ShouldCallChangeCallback,
 } from './get-event-handlers';
 
 export function onKeyDown(
-	event: EditorEventObject['onKeyDown']
-): ShouldCommitState {
+	event: EditorEventObject['onKeyDown'],
+	getCurrentContent: () => string,
+	setEditorMarkup: (content: string) => void
+): ShouldCallChangeCallback {
 	const key = event.key;
 
 	switch (key) {

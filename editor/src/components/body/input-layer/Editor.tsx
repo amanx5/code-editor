@@ -1,48 +1,41 @@
 import { useContext, useCallback } from 'react';
-import { getEventHandlers, convertToInternalContent } from './utils';
-import { useEditor } from './hooks/useEditor';
-import { cls } from '../../../utils';
+import { getEventHandlers } from './utils';
+import { cls, validateContent } from '../../../utils';
 import {
+	EditorDocumentContext,
 	EditorOptionsContext,
 	RootContext,
-	type Content,
 } from '../../../contexts';
+import { useEditorRenderer } from './hooks';
 
 export type EditorElement = HTMLPreElement;
 
-export function Editor({
-	hideLineNumbers,
-	internalContent,
-	setInternalContent,
-}: {
-	hideLineNumbers: boolean;
-	internalContent: Content;
-	setInternalContent: React.Dispatch<React.SetStateAction<Content>>;
-}) {
-	const { isWrapEnabled } = useContext(RootContext);
+export function Editor({}: {}) {
+	const document = useContext(EditorDocumentContext);
 	const editorOptions = useContext(EditorOptionsContext);
+	const { onChange } = useContext(RootContext);
+	const { editorRef, getCurrentContent, setEditorMarkup } = useEditorRenderer(document);
 
-	const { editorRef, getEditorContent } = useEditor(internalContent);
+	const changeCallback = useCallback(() => {
+		const currentContent = getCurrentContent();
+		const updatedError = validateContent(currentContent, document.language);
 
-	const domChangeCallback = useCallback(() => {
-		const internalContentUpdated = convertToInternalContent(getEditorContent());
-		setInternalContent(internalContentUpdated);
-	}, [getEditorContent, setInternalContent]);
+		onChange?.(currentContent, updatedError);
+	}, [getCurrentContent]);
 
 	return (
 		<pre
 			className={cls(
 				'ce-content inline-block',
 				'flex-1 h-max',
-				'text-transparent/20 caret-black focus:outline-none',
-				hideLineNumbers && 'ce-content-pd',
-				isWrapEnabled && 'ce-content-wrap',
+				'focus:outline-none',
+				editorOptions.hideLineNumbers && 'ce-content-pd',
 				'z-10'
 			)}
 			contentEditable={!editorOptions.disabled}
 			ref={editorRef}
 			spellCheck={false}
-			{...getEventHandlers(domChangeCallback)}
+			{...getEventHandlers(changeCallback, getCurrentContent, setEditorMarkup)}
 		/>
 	);
 }

@@ -1,10 +1,9 @@
 import { createContext } from "react";
-import type { CodeLanguage } from "../utils";
+import type { Content, Language } from "../utils";
 
-export type Content = string;
 export type EditorDocument = {
 	content: Content;
-	language: CodeLanguage;
+	language: Language;
 	name?: string;
 };
 export const EditorDocumentContext = createContext<EditorDocument>({
