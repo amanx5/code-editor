@@ -1,1 +1,1 @@
-export * from './useEditorRenderer';
+export * from './useMarkupRenderer';

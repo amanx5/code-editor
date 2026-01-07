@@ -1,5 +1,5 @@
 import { cls } from '../../utils';
-import { Editor } from './input-layer';
+import { MarkupEditor } from './input-layer';
 
 /**
  * Code Editor Body Component
@@ -11,7 +11,7 @@ export function Body() {
 	return (
 		/* scroller */
 		<div className={cls('flex flex-1 py-2 overflow-auto relative')}>
-			<Editor
+			<MarkupEditor
 			/>
 		</div>
 	);

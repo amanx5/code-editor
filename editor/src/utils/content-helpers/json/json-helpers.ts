@@ -1,9 +1,9 @@
-import type { ContentHelpers } from "..";
-import { validateJson } from "./decode-json";
-import { renderJson } from "./render-json";
+import type { LanguageUtil } from '..';
+import { validateJson } from './decode-json';
+import { generateMarkupJson } from './generate-markup-json';
 
-export const JSON_HELPERS: ContentHelpers['json'] = {
+export const JSON_HELPERS: LanguageUtil = {
 	languageName: 'JSON',
-	validator: validateJson,
-	renderer: renderJson,
+	contentValidator: validateJson,
+	markupGenerator: generateMarkupJson,
 };

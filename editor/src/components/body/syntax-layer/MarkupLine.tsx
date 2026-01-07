@@ -1,23 +1,23 @@
-import { cls, type TokenizedLine } from '../../../utils';
+import { cls, type EditorMarkup } from '../../../utils';
 import { memo } from 'react';
 import { LineNumber } from '../LineNumber';
 
-type VirtualLineProps = {
+type MarkupLineProps = {
 	hideLineNumbers: boolean;
-	line: TokenizedLine;
+	lineContent: EditorMarkup;
 	lineNumber: number;
 	isHighlighted: boolean;
 	isInvalid: boolean;
 	isWrapEnabled: boolean;
 };
-export const VirtualLine = memo(function VirtualLine({
+export const MarkupLine = memo(function MarkupLine({
 	hideLineNumbers,
-	line,
+	lineContent,
 	lineNumber,
 	isHighlighted,
 	isInvalid,
 	isWrapEnabled,
-}: VirtualLineProps) {
+}: MarkupLineProps) {
 	// render
 	return (
 		<div className='inline-flex'>
@@ -41,7 +41,7 @@ export const VirtualLine = memo(function VirtualLine({
 					isWrapEnabled && 'ce-content-wrap'
 				)}
 			>
-				{line}
+				{lineContent}
 			</pre>
 		</div>
 	);

@@ -1,7 +1,8 @@
-import type { ContentHelpers } from "..";
+import type { LanguageUtil } from '..';
+import { generateMarkupTxt } from './generate-markup-txt';
 
-export const TXT_HELPERS: ContentHelpers['txt'] = {
+export const TXT_HELPERS: LanguageUtil = {
 	languageName: 'Text',
-	validator: () => null,
-	renderer: (content) => content,
+	contentValidator: () => null,
+	markupGenerator: generateMarkupTxt,
 };

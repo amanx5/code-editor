@@ -1,3 +1,4 @@
+import type { RendererObject } from '../../hooks';
 import {
 	deleteBackward,
 	deleteForward,
@@ -9,11 +10,11 @@ import type {
 } from './get-event-handlers';
 
 export function onKeyDown(
-	event: EditorEventObject['onKeyDown'],
-	getCurrentContent: () => string,
-	setEditorMarkup: (content: string) => void
+	eventObject: EditorEventObject['onKeyDown'],
+	rendererObject: RendererObject
 ): ShouldCallChangeCallback {
-	const key = event.key;
+	const key = eventObject.key;
+	// const { editorDataRef, renderDocument } = editingObject;
 
 	switch (key) {
 		case 'Control': {
@@ -31,14 +32,14 @@ export function onKeyDown(
 			return deleteForward();
 		}
 		case 'Enter': {
-			return insertTextAtCursor('\n');
+			return insertTextAtCursor('\n', rendererObject);
 		}
 		case 'Tab': {
-			return insertTextAtCursor('\t');
+			return insertTextAtCursor('\t', rendererObject);
 		}
 		default: {
-			if (isCharacterKey(event)) {
-				return insertTextAtCursor(key);
+			if (isCharacterKey(eventObject)) {
+				return insertTextAtCursor(key, rendererObject);
 			}
 
 			return false;

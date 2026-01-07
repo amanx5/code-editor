@@ -1,3 +1,6 @@
+import type { RendererObject } from '../../hooks';
+import type { EditingObject } from '../event-handlers';
+
 export function getActiveTextNode() {
 	const selection = window.getSelection();
 	if (!selection || selection.rangeCount === 0) return null;
@@ -15,23 +18,34 @@ export function getActiveTextNode() {
 	};
 }
 
-export function insertTextAtCursor(text: string): boolean {
+export function insertTextAtCursor(
+	text: string,
+	rendererObject: RendererObject
+): boolean {
 	const ctx = getActiveTextNode();
 	if (!ctx) return false;
 
 	const { selection, range, textNode } = ctx;
+	const { 
+		getRenderedDocument, renderDocument } =
+		rendererObject;
 
 	let insertOffset: number;
+
+	const existingRenderedDocument = getRenderedDocument()!;
 
 	// 1️⃣ If selection exists → replace it
 	if (!selection.isCollapsed) {
 		const start = range.startOffset;
 		const end = range.endOffset;
 
-		textNode.nodeValue =
-			textNode.nodeValue!.slice(0, start) +
-			text +
-			textNode.nodeValue!.slice(end);
+		renderDocument({
+			...existingRenderedDocument,
+			content:
+				existingRenderedDocument.content.slice(0, start) +
+				text +
+				existingRenderedDocument.content.slice(end),
+		});
 
 		insertOffset = start + text.length;
 	}
@@ -39,10 +53,13 @@ export function insertTextAtCursor(text: string): boolean {
 	else {
 		const offset = range.startOffset;
 
-		textNode.nodeValue =
-			textNode.nodeValue!.slice(0, offset) +
-			text +
-			textNode.nodeValue!.slice(offset);
+		renderDocument({
+			...existingRenderedDocument,
+			content:
+				existingRenderedDocument.content.slice(0, offset) +
+				text +
+				existingRenderedDocument.content.slice(offset),
+		});
 
 		insertOffset = offset + text.length;
 	}
