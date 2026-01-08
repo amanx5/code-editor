@@ -1,26 +1,32 @@
 import { useState } from 'react';
 import {
-	Root,
-	Body,
-	Toolbar,
+	type EditorOptions,
 	type ToolbarOptions,
+	Body,
+	CursorLayer,
+	MarkupLayer,
+	Root,
+	Toolbar,
 	ToolbarOptionsDefault,
+	EditorOptionsDefault,
 } from './components';
 import {
 	type EditorDocument,
-	type EditorOptions,
 	EditorDocumentContext,
-	EditorOptionsContext,
-	EditorOptionsDefault,
-	RootContext,
+	EditorStatesContext,
 } from './contexts';
-import { isPlainObject, type Content, type EditorError } from './utils/';
+
+import { isPlainObject, type EditorError } from './utils';
+import { ToolbarStatesContext } from './contexts/ToolbarStatesContext';
+import { useCursorApi } from './hooks/useCursorApi';
+import { useMarkupApi, type Listeners } from './hooks';
+
 
 export type CodeEditorProps = {
 	document: EditorDocument;
-	editor?: EditorOptions;
-	toolbar?: ToolbarOptions;
-	onChange?: (content: Content, error: EditorError) => void;
+	editorOptions?: EditorOptions;
+	listeners?: Listeners;
+	toolbarOptions?: ToolbarOptions;
 };
 
 /**
@@ -30,34 +36,56 @@ export type CodeEditorProps = {
  */
 export function CodeEditor({
 	document,
-	editor = EditorOptionsDefault,
-	toolbar = ToolbarOptionsDefault,
-	onChange,
+	editorOptions = EditorOptionsDefault,
+	listeners,
+	toolbarOptions = ToolbarOptionsDefault,
 }: CodeEditorProps) {
 	const [error, setError] = useState<EditorError>(null);
-
 	const [isWrapEnabled, setIsWrapEnabled] = useState(
-		isPlainObject(toolbar) ? !!toolbar.showWrapTool : false
+		isPlainObject(toolbarOptions) ? !!toolbarOptions.showWrapTool : false
+	);
+	const [isFormatEnabled, setIsFormatEnabled] = useState(
+		isPlainObject(toolbarOptions) ? !!toolbarOptions.showFormatTool : false
 	);
 
-	const rootContextValue = {
-		error,
+	const toolbarStates = {
 		isWrapEnabled,
+		isFormatEnabled,
 		setIsWrapEnabled,
-		setError,
-		onChange,
+		setIsFormatEnabled,
 	};
+	const editorStates = {
+		error,
+		setError,
+	};
+
+	const markupOptions = {
+		...editorOptions,
+		isWrapEnabled,
+		isFormatEnabled,
+	};
+
+	const cursorApi = useCursorApi();
+
+	const markupApi = useMarkupApi(document, markupOptions, listeners);
 
 	return (
 		<EditorDocumentContext.Provider value={document}>
-			<EditorOptionsContext.Provider value={editor}>
-				<RootContext.Provider value={rootContextValue}>
+			<EditorStatesContext.Provider value={editorStates}>
+				<ToolbarStatesContext.Provider value={toolbarStates}>
 					<Root>
-						<Toolbar options={toolbar} />
-						<Body />
+						<Toolbar options={toolbarOptions} />
+						<Body>
+							<MarkupLayer
+								cursorApi={cursorApi}
+								markupApi={markupApi}
+								editorOptions={editorOptions}
+							/>
+							<CursorLayer cursorApi={cursorApi} />
+						</Body>
 					</Root>
-				</RootContext.Provider>
-			</EditorOptionsContext.Provider>
+				</ToolbarStatesContext.Provider>
+			</EditorStatesContext.Provider>
 		</EditorDocumentContext.Provider>
 	);
 }

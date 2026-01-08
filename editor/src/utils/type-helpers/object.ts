@@ -11,7 +11,11 @@ export function isPlainObject(arg: unknown): arg is PlainObject {
 	return false;
 }
 
-export function isEqualObjects(object1: PlainObject, object2: PlainObject) {
+export function isEqualObjects(object1: unknown, object2: unknown) {
+	if (!isPlainObject(object1) || !isPlainObject(object2)) {
+		return false;
+	}
+
 	if (Object.keys(object1).length !== Object.keys(object2).length) {
 		return false;
 	}

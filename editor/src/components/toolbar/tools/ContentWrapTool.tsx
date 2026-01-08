@@ -1,10 +1,10 @@
 import { useContext } from 'react';
 import { WrapTextSvg } from '../../svg/WrapTextSvg';
 import { ToolDefaultSvgProps, ToolWrapper } from './ToolWrapper';
-import { RootContext } from '../../../contexts';
+import { ToolbarStatesContext } from '../../../contexts/ToolbarStatesContext';
 
 export function ContentWrapTool() {
-	const { isWrapEnabled, setIsWrapEnabled } = useContext(RootContext);
+	const { isWrapEnabled, setIsWrapEnabled } = useContext(ToolbarStatesContext);
 
 	const readerText = isWrapEnabled ? 'Disable Code Wrap' : 'Enable Code Wrap';
 

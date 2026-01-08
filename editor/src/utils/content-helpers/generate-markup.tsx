@@ -1,26 +1,24 @@
-import type { CodeLineNumber, EditorDocument } from '../../contexts';
+import type { CodeLineNumber, EditorOptions } from '../../components';
+import type { EditorDocument } from '../../contexts';
+import type { ToolbarStateValues } from '../../contexts/ToolbarStatesContext';
 import { cls } from '../styling';
 import { LANGUAGE_UTIL, type Content } from './language-util';
 import type { EditorError } from './validate-content';
 
 export type EditorMarkup = string;
 
-export type MarkupGeneratorOptions = {
-	beautify?: boolean;
-	highlightLines?: CodeLineNumber[];
-	wrapContent: boolean;
-};
+export type MarkupOptions = EditorOptions & ToolbarStateValues;
 
 export type MarkupGenerator = (
 	content: Content,
 	error: EditorError,
-	options?: MarkupGeneratorOptions
+	markupOptions?: MarkupOptions
 ) => EditorMarkup;
 
 export function generateMarkup(
 	document: EditorDocument,
 	error: EditorError,
-	options?: MarkupGeneratorOptions
+	markupOptions?: MarkupOptions
 ): EditorMarkup {
 	const { content, language } = document;
 
@@ -32,16 +30,16 @@ export function generateMarkup(
 		);
 	}
 
-	return MarkupGenerator(content, error, options);
+	return MarkupGenerator(content, error, markupOptions);
 }
 
 export function getMarkupLine(
 	lineContent: Content,
 	lineNumber: CodeLineNumber,
 	error: EditorError,
-	options?: MarkupGeneratorOptions
+	options?: MarkupOptions
 ) {
-	const { highlightLines, wrapContent } = options || {};
+	const { highlightLines, isWrapEnabled } = options || {};
 	const isInvalid = error?.line === lineNumber;
 	const isHighlighted = highlightLines?.includes(lineNumber);
 
@@ -49,7 +47,7 @@ export function getMarkupLine(
 		'inline-flex ce-content flex-1',
 		isHighlighted && 'bg-ce-bg-highlight',
 		isInvalid && 'bg-ce-bg-error',
-		wrapContent && 'ce-content-wrap'
+		isWrapEnabled && 'ce-content-wrap'
 	);
 
 	return `<pre class='${classes}' data-line-num='${lineNumber}'>${lineContent}</pre>`;

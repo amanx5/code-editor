@@ -1,5 +1,5 @@
 import { cls } from '../../utils';
-import { ContentCopyTool, ContentWrapTool } from './tools';
+import { ContentCopyTool, ContentFormatTool, ContentWrapTool } from './tools';
 import { memo } from 'react';
 import { Title } from './Title';
 
@@ -7,25 +7,26 @@ export type ToolbarOptions = {
 	hideToolbar?: boolean;
 	showWrapTool?: boolean;
 	showCopyTool?: boolean;
+	showFormatTool?: boolean;
 };
 
 export const ToolbarOptionsDefault = {
 	hideToolbar: false,
 	showWrapTool: true,
 	showCopyTool: true,
+	showFormatTool: false,
 };
 
 export type ToolbarProps = {
 	options: ToolbarOptions;
 };
 
-export const Toolbar = memo(function Toolbar(
-	{ options }: ToolbarProps
-) {
+export const Toolbar = memo(function Toolbar({ options }: ToolbarProps) {
 	const {
 		hideToolbar = ToolbarOptionsDefault.hideToolbar,
 		showWrapTool = ToolbarOptionsDefault.showWrapTool,
 		showCopyTool = ToolbarOptionsDefault.showCopyTool,
+		showFormatTool = ToolbarOptionsDefault.showFormatTool,
 	} = options;
 
 	if (hideToolbar) return null;
@@ -44,6 +45,7 @@ export const Toolbar = memo(function Toolbar(
 			<div className='flex h-full items-center gap-4'>
 				{showWrapTool && <ContentWrapTool />}
 				{showCopyTool && <ContentCopyTool />}
+				{showFormatTool && <ContentFormatTool />}
 			</div>
 		</div>
 	);

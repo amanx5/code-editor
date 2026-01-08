@@ -1,19 +1,18 @@
 import { useContext, useState, useCallback } from 'react';
 import { ClipboardSvg } from '../../svg/ClipboardSvg';
-import { copyToClipboard } from '../../body/input-layer/utils/internals/clipboard';
 import { ToolDefaultSvgProps, ToolWrapper } from './ToolWrapper';
-import {  RootContext } from '../../../contexts';
+import { EditorDocumentContext } from '../../../contexts';
 
 export function ContentCopyTool() {
-	const { internalContent } = useContext(RootContext);
-
+	// TODO: use the content from editordataref
+	const { content } = useContext(EditorDocumentContext);
 
 	const [isCopied, setIsCopied] = useState(false);
 	const readerText = 'Copy code to clipboard';
 	const hoverText = isCopied ? 'Code copied' : 'Copy code';
 
 	const copyCode = useCallback(async () => {
-		await copyToClipboard(internalContent);
+		await copyToClipboard(content);
 		setIsCopied(true);
 
 		const timeout = setTimeout(() => {
@@ -21,7 +20,7 @@ export function ContentCopyTool() {
 		}, 2000);
 
 		return () => clearTimeout(timeout);
-	}, [internalContent, isCopied]);
+	}, [content, isCopied]);
 
 	return (
 		<>
@@ -32,10 +31,7 @@ export function ContentCopyTool() {
 				title={hoverText}
 				type='button'
 			>
-				<ClipboardSvg
-					checked={isCopied}
-					{...ToolDefaultSvgProps}
-				/>
+				<ClipboardSvg checked={isCopied} {...ToolDefaultSvgProps} />
 			</ToolWrapper>
 
 			<span role='status' aria-live='polite' className='sr-only'>
@@ -43,4 +39,33 @@ export function ContentCopyTool() {
 			</span>
 		</>
 	);
+}
+
+
+export async function copyToClipboard(text: string) {
+	if (navigator.clipboard?.writeText) {
+		await navigator.clipboard.writeText(text);
+	} else {
+		writeTextFallback(text);
+	}
+}
+
+/**
+ * Fallbsck for `clipboard.writeText`.
+ * 
+ * This is added because native `clipboard.writeText` requires a secure context like https://example.com or http://localhost
+ * It is not available in http://example.com  or http://192.168.x.x.
+ * 
+ * WARNING: It's functionality is not thoroughly tested
+ */
+export function writeTextFallback(text: string) {
+	const ta = document.createElement('textarea');
+	ta.value = text;
+	ta.style.position = 'fixed';
+	ta.style.opacity = '0';
+	document.body.appendChild(ta);
+	ta.focus();
+	ta.select();
+	document.execCommand('copy');
+	document.body.removeChild(ta);
 }
