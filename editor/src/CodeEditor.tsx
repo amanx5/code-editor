@@ -16,11 +16,15 @@ import {
 	EditorStatesContext,
 } from './contexts';
 
-import { isPlainObject, type EditorError } from './utils';
+import { isPlainObject, type Content, type EditorError } from './utils';
 import { ToolbarStatesContext } from './contexts/ToolbarStatesContext';
 import { useCursorApi } from './hooks/useCursorApi';
-import { useMarkupApi, type Listeners } from './hooks';
+import { useMarkupApi } from './hooks';
 
+export type Listeners = {
+	onChange?: (content: Content) => void;
+	onError?: (error: EditorError) => void;
+};
 
 export type CodeEditorProps = {
 	document: EditorDocument;

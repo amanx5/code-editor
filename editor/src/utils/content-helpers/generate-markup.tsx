@@ -2,57 +2,46 @@ import type { CodeLineNumber, EditorOptions } from '../../components';
 import type { EditorDocument } from '../../contexts';
 import type { ToolbarStateValues } from '../../contexts/ToolbarStatesContext';
 import { cls } from '../styling';
-import { LANGUAGE_UTIL, type Content } from './language-util';
+import { tokeniseContent, type TokenisedLine } from './tokenise-content';
 import type { EditorError } from './validate-content';
 
-export type EditorMarkup = string;
+export type LineMeta = {
+	cls: string;
+	number: CodeLineNumber;
+	value: TokenisedLine;
+};
+
+export type EditorMarkup = Array<LineMeta>;
 
 export type MarkupOptions = EditorOptions & ToolbarStateValues;
-
-export type MarkupGenerator = (
-	content: Content,
-	error: EditorError,
-	markupOptions?: MarkupOptions
-) => EditorMarkup;
 
 export function generateMarkup(
 	document: EditorDocument,
 	error: EditorError,
 	markupOptions?: MarkupOptions
 ): EditorMarkup {
-	const { content, language } = document;
+	const tokenisedLines = tokeniseContent(document);
 
-	const MarkupGenerator = LANGUAGE_UTIL[language]?.markupGenerator;
+	const markup = tokenisedLines.map((lineTokens, index) => {
+		const lineNumber = index + 1;
 
-	if (!MarkupGenerator) {
-		throw new Error(
-			`No 'MarkupGenerator' found for language '${language}'`
+		const { highlightLines, isWrapEnabled } = markupOptions || {};
+		const isInvalid = error?.line === lineNumber;
+		const isHighlighted = highlightLines?.includes(lineNumber);
+
+		const lineCls = cls(
+			'ce-content flex-1 inline-flex',
+			isHighlighted && 'bg-ce-bg-highlight',
+			isInvalid && 'bg-ce-bg-error',
+			isWrapEnabled && 'ce-content-wrap'
 		);
-	}
 
-	return MarkupGenerator(content, error, markupOptions);
-}
+		return {
+			cls: lineCls,
+			number: lineNumber,
+			value: lineTokens,
+		};
+	});
 
-export function getMarkupLine(
-	lineContent: Content,
-	lineNumber: CodeLineNumber,
-	error: EditorError,
-	options?: MarkupOptions
-) {
-	const { highlightLines, isWrapEnabled } = options || {};
-	const isInvalid = error?.line === lineNumber;
-	const isHighlighted = highlightLines?.includes(lineNumber);
-
-	const classes = cls(
-		'inline-flex ce-content flex-1',
-		isHighlighted && 'bg-ce-bg-highlight',
-		isInvalid && 'bg-ce-bg-error',
-		isWrapEnabled && 'ce-content-wrap'
-	);
-
-	return `<pre class='${classes}' data-line-num='${lineNumber}'>${lineContent}</pre>`;
-}
-
-export function mkp(...args: Array<string | false | null | undefined>) {
-	return args.filter(Boolean).join('');
+	return markup;
 }

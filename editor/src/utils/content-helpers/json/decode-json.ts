@@ -68,8 +68,4 @@ export function getJsonErrorMeta(err: unknown | SyntaxError): JsonErrorMeta {
 	}
 }
 
-export function validateJson(json: string) {
-	const { error } = decode(json);
 
-	return error || null;
-}

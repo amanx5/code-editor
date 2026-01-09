@@ -3,6 +3,9 @@ import { cls } from '../../../utils';
 
 export type CursorElement = HTMLDivElement;
 
+// TODO 
+// 1. Hide cursor when not in focus, not typing
+// 2. Keep cursor stable while typing
 export function CursorLayer({
 	cursorApi,
 }: {
@@ -15,11 +18,12 @@ export function CursorLayer({
 		<div aria-hidden className='absolute'>
 			<div
 				className={cls(
-					'bg-black ce-content',
-					'h-full w-[1px]',
-					'relative',
-					`left-${x}px`,
-					`top-${y}px`,
+					'animate-ce-caret',
+					`absolute left-${x}px top-${y}px`,
+					'border-l-[1.2px] border-black',
+					'ce-content',
+					'pointer-events-none',
+					'z-10'
 				)}
 				ref={cursorRef}
 			></div>

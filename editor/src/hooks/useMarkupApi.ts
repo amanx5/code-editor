@@ -3,6 +3,7 @@ import {
 	type Content,
 	type EditorError,
 	type EditorMarkup,
+	type LineMeta,
 	type MarkupOptions,
 	generateMarkup,
 	isEqualObjects,
@@ -10,18 +11,14 @@ import {
 } from '../utils';
 import type { EditorDocument } from '../contexts';
 import type { MarkupElement } from '../components';
-
-
-export type Listeners = {
-	onChange?: (content: Content) => void
-	onError?: (error: EditorError) => void
-}
+import type { Listeners } from '../CodeEditor';
+import type { TokenMeta } from '../utils/content-helpers/tokenise-content';
 
 export type MarkupData = {
 	document: EditorDocument;
 	error: EditorError;
 	markup: EditorMarkup;
-} | null;
+};
 
 export type MarkupApi = {
 	markupDataRef: React.RefObject<MarkupData | null>;
@@ -42,6 +39,8 @@ export function useMarkupApi(
 	const documentChangeCallback = useCallback(() => {
 		renderDocument(document);
 	}, [document]);
+
+	useEffect(documentChangeCallback, [document]);
 
 	const renderDocument = useCallback(
 		(newDocument: EditorDocument) => {
@@ -66,16 +65,11 @@ export function useMarkupApi(
 					markup: newMarkup,
 				};
 
-				markupElementRef.current.innerHTML = newMarkup;
-				console.info('CodeEditor: Document is updated.');
+				renderMarkup(newMarkup, markupElementRef.current);
 			}
-
-
 		},
 		[markupElementRef, markupDataRef, markupOptions]
 	);
-
-	useEffect(documentChangeCallback, [document]);
 
 	return {
 		markupDataRef,
@@ -96,14 +90,34 @@ export function useMarkupApi(
 					content: newContent,
 				});
 
-				listeners?.onChange?.(
-					markupDataRef.current.document.content,
-				);
-				listeners?.onError?.(
-					markupDataRef.current.error
-				);
+				listeners?.onChange?.(markupDataRef.current.document.content);
+				listeners?.onError?.(markupDataRef.current.error);
 			},
 			[markupDataRef, listeners, renderDocument]
 		),
 	};
+}
+
+// TODO: Perform a minimal diff of changed lines and only add new token markup instead of re-rendering complete markup
+export function renderMarkup(
+	markup: EditorMarkup,
+	markupElement: MarkupElement
+) {
+	const linesMarkup = markup
+		.map((lineMeta) => convertLineMetaToMarkup(lineMeta))
+		.join('');
+
+	markupElement.innerHTML = linesMarkup;
+}
+
+export function convertLineMetaToMarkup(lineMeta: LineMeta): string {
+	const { cls, number, value } = lineMeta;
+
+	const tokensMarkup = value.map(convertTokenMetaToMarkup).join('');
+
+	return `<pre class='${cls}' data-line-num='${number}'>${tokensMarkup}</pre>`;
+}
+
+export function convertTokenMetaToMarkup(token: TokenMeta): string {
+	return `<span class='${token.cls}'>${token.value}</span>`;
 }

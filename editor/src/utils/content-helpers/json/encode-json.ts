@@ -1,3 +1,4 @@
+
 /**
  * Replica of native JSON.stringify, but this version fallbacks to casted string
  * instead of throwing error if the value is invalid.
@@ -20,4 +21,3 @@ export function encode(
 export function beautifyJson(json: unknown) {
 	return encode(json, null, 2);
 }
-

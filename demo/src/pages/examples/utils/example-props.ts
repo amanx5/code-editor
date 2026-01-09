@@ -16,7 +16,7 @@ export const EXAMPLES_PROPS: ExampleProps[] = [
 			content: getExampleLines(1, 0, 5),
 			language: 'txt',
 		},
-		editor: {
+		editorOptions: {
 			highlightLines: [1],
 		},
 	},
@@ -25,7 +25,7 @@ export const EXAMPLES_PROPS: ExampleProps[] = [
 			content: getExampleLines(2, 0, 10),
 			language: 'txt',
 		},
-		editor: {
+		editorOptions: {
 			highlightLines: [1, 3],
 			hideLineNumbers: true
 		},
@@ -35,7 +35,7 @@ export const EXAMPLES_PROPS: ExampleProps[] = [
 			content: getExampleLines(10, 0, 40),
 			language: 'txt',
 		},
-		editor: {
+		editorOptions: {
 			highlightLines: [1, 3],
 		},
 	},
@@ -44,7 +44,7 @@ export const EXAMPLES_PROPS: ExampleProps[] = [
 			content: getExampleLines(1000, 0, 40),
 			language: 'txt',
 		},
-		editor: {
+		editorOptions: {
 			highlightLines: [1, 3],
 		},
 	},

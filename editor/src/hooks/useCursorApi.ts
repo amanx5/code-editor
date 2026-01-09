@@ -15,6 +15,7 @@ export function useCursorApi(): CursorApi {
 	});
 
 	const getCursorPosition = () => cursorPositionRef.current;
+	
 	const setCursorPosition = (x: number, y: number) => {
 		if (!cursorRef.current) {
 			return;
