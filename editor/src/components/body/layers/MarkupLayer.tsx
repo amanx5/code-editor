@@ -30,7 +30,6 @@ export function MarkupLayer({
 	const {
 		disabled = EditorOptionsDefault.disabled,
 		// highlightLines = EditorOptionsDefault.highlightLines,
-		hideLineNumbers = EditorOptionsDefault.hideLineNumbers,
 	} = editorOptions;
 
 	const eventHandlers =
@@ -43,14 +42,12 @@ export function MarkupLayer({
 	return (
 		<pre
 			className={cls(
-				'ce-content',
 				'cursor-text',
-				'flex-1 inline-flex flex-col h-max',
+				'flex-1 inline-flex flex-col min-h-full h-max',
 				'focus:outline-none',
-				hideLineNumbers && 'ce-content-pd',
 				'z-10'
 			)}
-			ref={markupApi.markupElementRef}
+			ref={markupApi.markupRef}
 			spellCheck={false}
 			{...eventHandlers}
 		/>

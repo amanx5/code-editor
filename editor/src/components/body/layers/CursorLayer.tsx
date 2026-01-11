@@ -3,25 +3,20 @@ import { cls } from '../../../utils';
 
 export type CursorElement = HTMLDivElement;
 
-// TODO 
-// 1. Hide cursor when not in focus, not typing
+// TODO
+// 1. Hide cursor when not in focus
 // 2. Keep cursor stable while typing
-export function CursorLayer({
-	cursorApi,
-}: {
-	cursorApi: CursorApi;
-}) {
-	const { cursorRef, getCursorPosition } = cursorApi;
-	const { x, y } = getCursorPosition();
+export function CursorLayer({ cursorApi }: { cursorApi: CursorApi }) {
+	const { cursorRef } = cursorApi;
 
 	return (
 		<div aria-hidden className='absolute'>
 			<div
 				className={cls(
-					'animate-ce-caret',
-					`absolute left-${x}px top-${y}px`,
+					'absolute',
 					'border-l-[1.2px] border-black',
 					'ce-content',
+					'hidden',
 					'pointer-events-none',
 					'z-10'
 				)}

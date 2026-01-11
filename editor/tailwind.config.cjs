@@ -70,6 +70,7 @@ const preset = {
 
 /**
  * Tailwind config for generating the standalone css file for non tailwind users
+ * and for intellisense in this project
  * @type {import('tailwindcss').Config}
  */
 module.exports = {

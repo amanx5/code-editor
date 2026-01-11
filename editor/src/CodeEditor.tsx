@@ -69,9 +69,9 @@ export function CodeEditor({
 		isFormatEnabled,
 	};
 
-	const cursorApi = useCursorApi();
-
 	const markupApi = useMarkupApi(document, markupOptions, listeners);
+
+	const cursorApi = useCursorApi(markupApi);
 
 	return (
 		<EditorDocumentContext.Provider value={document}>

@@ -3,16 +3,19 @@ import {
 	type Content,
 	type EditorError,
 	type EditorMarkup,
-	type LineMeta,
 	type MarkupOptions,
 	generateMarkup,
+	getCharWidth,
 	isEqualObjects,
 	validateContent,
 } from '../utils';
 import type { EditorDocument } from '../contexts';
-import type { MarkupElement } from '../components';
+import type { CodeLineNumber, MarkupElement } from '../components';
 import type { Listeners } from '../CodeEditor';
-import type { TokenMeta } from '../utils/content-helpers/tokenise-content';
+
+export const MARKUP_LINE_ATTRIBUTES = {
+	lineNumber: 'data-line-num',
+};
 
 export type MarkupData = {
 	document: EditorDocument;
@@ -20,9 +23,23 @@ export type MarkupData = {
 	markup: EditorMarkup;
 };
 
+export type MarkupMetrics = {
+	line: {
+		paddingLeft: number;
+		columnWidth: number;
+	};
+};
+
+export type MarkupLineElement = HTMLPreElement;
+
 export type MarkupApi = {
 	markupDataRef: React.RefObject<MarkupData | null>;
-	markupElementRef: React.RefObject<MarkupElement | null>;
+	markupRef: React.RefObject<MarkupElement | null>;
+
+	getMarkupEl: () => MarkupElement | null;
+	getMarkupLineEl: (lineNumber?: CodeLineNumber) => MarkupLineElement | null;
+	getMarkupMetrics: () => MarkupMetrics | null;
+
 	updateDocumentContent: (
 		arg: Content | ((prev: Content) => Content)
 	) => void;
@@ -33,18 +50,20 @@ export function useMarkupApi(
 	markupOptions: MarkupOptions,
 	listeners?: Listeners
 ): MarkupApi {
+	const markupRef = useRef<MarkupElement>(null);
 	const markupDataRef = useRef<MarkupData>(null);
-	const markupElementRef = useRef<MarkupElement>(null);
+	const markupMetricsRef = useRef<MarkupMetrics>(null);
 
 	const documentChangeCallback = useCallback(() => {
 		renderDocument(document);
 	}, [document]);
 
+	useEffect(setMarkupMetrics, []);
 	useEffect(documentChangeCallback, [document]);
 
 	const renderDocument = useCallback(
 		(newDocument: EditorDocument) => {
-			if (!markupElementRef.current) return;
+			if (!markupRef.current) return;
 
 			const isDocumentChanged = !isEqualObjects(
 				markupDataRef.current?.document,
@@ -56,6 +75,7 @@ export function useMarkupApi(
 				const newMarkup = generateMarkup(
 					newDocument,
 					newError,
+					markupRef.current,
 					markupOptions
 				);
 
@@ -64,17 +84,19 @@ export function useMarkupApi(
 					error: newError,
 					markup: newMarkup,
 				};
-
-				renderMarkup(newMarkup, markupElementRef.current);
 			}
 		},
-		[markupElementRef, markupDataRef, markupOptions]
+		[markupOptions]
 	);
 
 	return {
 		markupDataRef,
 
-		markupElementRef,
+		markupRef,
+
+		getMarkupEl,
+		getMarkupLineEl,
+		getMarkupMetrics,
 
 		updateDocumentContent: useCallback(
 			(arg) => {
@@ -93,31 +115,45 @@ export function useMarkupApi(
 				listeners?.onChange?.(markupDataRef.current.document.content);
 				listeners?.onError?.(markupDataRef.current.error);
 			},
-			[markupDataRef, listeners, renderDocument]
+			[listeners, renderDocument]
 		),
 	};
-}
 
-// TODO: Perform a minimal diff of changed lines and only add new token markup instead of re-rendering complete markup
-export function renderMarkup(
-	markup: EditorMarkup,
-	markupElement: MarkupElement
-) {
-	const linesMarkup = markup
-		.map((lineMeta) => convertLineMetaToMarkup(lineMeta))
-		.join('');
+	function getMarkupEl() {
+		return markupRef.current ?? null;
+	}
 
-	markupElement.innerHTML = linesMarkup;
-}
+	function getMarkupLineEl(lineNumber?: CodeLineNumber) {
+		if (!markupRef.current) return null;
 
-export function convertLineMetaToMarkup(lineMeta: LineMeta): string {
-	const { cls, number, value } = lineMeta;
+		const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
+		const selector =
+			lineNumber == null
+				? `[${lineNumAttr}]`
+				: `[${lineNumAttr}='${lineNumber}']`;
 
-	const tokensMarkup = value.map(convertTokenMetaToMarkup).join('');
+		return markupRef.current.querySelector(selector) as MarkupLineElement;
+	}
 
-	return `<pre class='${cls}' data-line-num='${number}'>${tokensMarkup}</pre>`;
-}
+	function getMarkupMetrics() {
+		return markupMetricsRef.current ?? null;
+	}
 
-export function convertTokenMetaToMarkup(token: TokenMeta): string {
-	return `<span class='${token.cls}'>${token.value}</span>`;
+	function setMarkupMetrics() {
+		const lineEl = getMarkupLineEl();
+
+		if (!lineEl) return;
+
+		const lineColumnWidth = getCharWidth(lineEl);
+		const linePaddingLeft = parseFloat(
+			getComputedStyle(lineEl).paddingLeft
+		);
+
+		markupMetricsRef.current = {
+			line: {
+				columnWidth: lineColumnWidth,
+				paddingLeft: linePaddingLeft,
+			},
+		};
+	}
 }
