@@ -17,10 +17,11 @@ export const MARKUP_LINE_ATTRIBUTES = {
 	lineNumber: 'data-line-num',
 };
 
-export type MarkupData = {
+export type MarkupCommit = {
 	document: EditorDocument;
 	error: EditorError;
 	markup: EditorMarkup;
+	markupOptions: MarkupOptions;
 };
 
 export type MarkupMetrics = {
@@ -33,8 +34,8 @@ export type MarkupMetrics = {
 export type MarkupLineElement = HTMLPreElement;
 
 export type MarkupApi = {
-	markupDataRef: React.RefObject<MarkupData | null>;
 	markupRef: React.RefObject<MarkupElement | null>;
+	markupCommitRef: React.RefObject<MarkupCommit | null>;
 
 	getMarkupEl: () => MarkupElement | null;
 	getMarkupLineEl: (lineNumber?: CodeLineNumber) => MarkupLineElement | null;
@@ -51,26 +52,26 @@ export function useMarkupApi(
 	listeners?: Listeners
 ): MarkupApi {
 	const markupRef = useRef<MarkupElement>(null);
-	const markupDataRef = useRef<MarkupData>(null);
+	const markupCommitRef = useRef<MarkupCommit>(null);
 	const markupMetricsRef = useRef<MarkupMetrics>(null);
 
-	const documentChangeCallback = useCallback(() => {
-		renderDocument(document);
-	}, [document]);
-
-	useEffect(setMarkupMetrics, []);
-	useEffect(documentChangeCallback, [document]);
-
 	const renderDocument = useCallback(
-		(newDocument: EditorDocument) => {
+		(newDocument?: EditorDocument) => {
+			newDocument = newDocument ?? document;
+
 			if (!markupRef.current) return;
 
 			const isDocumentChanged = !isEqualObjects(
-				markupDataRef.current?.document,
+				markupCommitRef.current?.document,
 				newDocument
 			);
 
-			if (isDocumentChanged) {
+			const isOptionsChanged = !isEqualObjects(
+				markupCommitRef.current?.markupOptions,
+				markupOptions
+			);
+
+			if (isDocumentChanged || isOptionsChanged) {
 				const newError = validateContent(newDocument);
 				const newMarkup = generateMarkup(
 					newDocument,
@@ -79,20 +80,24 @@ export function useMarkupApi(
 					markupOptions
 				);
 
-				markupDataRef.current = {
+				markupCommitRef.current = {
 					document: newDocument,
 					error: newError,
 					markup: newMarkup,
+					markupOptions,
 				};
+
+				setMarkupMetrics();
 			}
 		},
-		[markupOptions]
+		[document, markupOptions]
 	);
 
-	return {
-		markupDataRef,
+	useEffect(renderDocument, [document, markupOptions]);
 
+	return {
 		markupRef,
+		markupCommitRef,
 
 		getMarkupEl,
 		getMarkupLineEl,
@@ -100,20 +105,20 @@ export function useMarkupApi(
 
 		updateDocumentContent: useCallback(
 			(arg) => {
-				if (!markupDataRef.current) return;
+				if (!markupCommitRef.current) return;
 
 				const newContent =
 					typeof arg === 'function'
-						? arg(markupDataRef.current.document.content)
+						? arg(markupCommitRef.current.document.content)
 						: arg;
 
 				renderDocument({
-					...markupDataRef.current.document,
+					...markupCommitRef.current.document,
 					content: newContent,
 				});
 
-				listeners?.onChange?.(markupDataRef.current.document.content);
-				listeners?.onError?.(markupDataRef.current.error);
+				listeners?.onChange?.(markupCommitRef.current.document.content);
+				listeners?.onError?.(markupCommitRef.current.error);
 			},
 			[listeners, renderDocument]
 		),
@@ -140,6 +145,8 @@ export function useMarkupApi(
 	}
 
 	function setMarkupMetrics() {
+		if (markupMetricsRef.current) return;
+
 		const lineEl = getMarkupLineEl();
 
 		if (!lineEl) return;

@@ -1,15 +1,16 @@
 import { useContext } from 'react';
 import { WrapTextSvg } from '../../svg/WrapTextSvg';
-import { ToolDefaultSvgProps, ToolWrapper } from './ToolWrapper';
+import { ToolDefaultSvgProps, ToolButton } from './ToolButton';
 import { ToolbarStatesContext } from '../../../contexts/ToolbarStatesContext';
 
 export function ContentWrapTool() {
-	const { isWrapEnabled, setIsWrapEnabled } = useContext(ToolbarStatesContext);
+	const { isWrapEnabled, setIsWrapEnabled } =
+		useContext(ToolbarStatesContext);
 
 	const readerText = isWrapEnabled ? 'Disable Code Wrap' : 'Enable Code Wrap';
 
 	return (
-		<ToolWrapper
+		<ToolButton
 			aria-label={readerText}
 			onClick={() => setIsWrapEnabled((isWrapEnabled) => !isWrapEnabled)}
 			title={readerText}
@@ -19,6 +20,6 @@ export function ContentWrapTool() {
 				disabledPathStyle='slashed'
 				{...ToolDefaultSvgProps}
 			/>
-		</ToolWrapper>
+		</ToolButton>
 	);
 }

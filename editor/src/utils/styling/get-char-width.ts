@@ -1,31 +1,29 @@
 let measureCanvas: HTMLCanvasElement | null = null;
 
-export function getCharWidth(preEl: HTMLElement, ch = 'M'): number {
-	const style = getComputedStyle(preEl);
+export function getCharWidth(el: HTMLElement, char = 'M'): number {
+	measureCanvas = measureCanvas ?? document.createElement('canvas');
 
-	const font = [
-		style.fontStyle,
-		style.fontVariant,
-		style.fontWeight,
-		style.fontSize,
-		style.fontFamily,
-	].join(' ');
+	const style = getComputedStyle(el);
+	const context = measureCanvas.getContext('2d');
 
-	if (!measureCanvas) {
-		measureCanvas = document.createElement('canvas');
+	if (context) {
+		context.font = [
+			style.fontStyle,
+			style.fontVariant,
+			style.fontWeight,
+			style.fontSize,
+			style.fontFamily,
+		].join(' ');
+
+		let width = context.measureText(char).width;
+		const letterSpacing = parseFloat(style.letterSpacing);
+
+		if (!Number.isNaN(letterSpacing)) {
+			width += letterSpacing;
+		}
+
+		return width;
+	} else {
+		return parseFloat(style.fontSize) * 0.6;
 	}
-
-	const ctx = measureCanvas.getContext('2d');
-	if (!ctx) return parseFloat(style.fontSize) * 0.6;
-
-	ctx.font = font;
-
-	let width = ctx.measureText(ch).width;
-
-	const letterSpacing = parseFloat(style.letterSpacing);
-	if (!Number.isNaN(letterSpacing)) {
-		width += letterSpacing;
-	}
-
-	return width;
 }

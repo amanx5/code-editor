@@ -41,6 +41,7 @@ export function MarkupLayer({
 
 	return (
 		<pre
+			aria-multiline
 			className={cls(
 				'cursor-text',
 				'flex-1 inline-flex flex-col min-h-full h-max',
@@ -48,7 +49,9 @@ export function MarkupLayer({
 				'z-10'
 			)}
 			ref={markupApi.markupRef}
+			role='textbox'
 			spellCheck={false}
+			tabIndex={0}
 			{...eventHandlers}
 		/>
 	);

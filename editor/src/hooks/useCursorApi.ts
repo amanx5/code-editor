@@ -28,15 +28,11 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 
 	return {
 		cursorRef,
-		setVisible,
 		getPosition,
 		setPosition,
 		setPositionOnClick,
+		setVisible,
 	};
-
-	function setVisible(isVisible: boolean) {
-		cursorRef.current?.classList.toggle('hidden', !isVisible);
-	}
 
 	function getPosition() {
 		return (
@@ -55,6 +51,8 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 		if (cursorPosition.lineNumber > 0) {
 			syncCoordinates();
 			setVisible(true);
+		} else {
+			setVisible(false);
 		}
 	}
 
@@ -109,28 +107,42 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 		}
 	}
 
-	function syncCoordinates() {
-		const markupMetrics = markupApi.getMarkupMetrics();
-		const cursorPosition = getPosition();
+	function setVisible(isVisible: boolean) {
+		cursorRef.current?.classList.toggle('hidden', !isVisible);
+	}
 
-		if (!cursorPosition || !markupMetrics) return;
+	function syncCoordinates() {
+		const markupMetrics1 = markupApi.getMarkupMetrics();
+		const cursorPosition1 = getPosition();
+
+		if (!cursorPosition1 || !markupMetrics1) return;
 
 		const cursorEl = cursorRef.current;
 		const markupEl = markupRef.current;
-		const lineEl = getMarkupLineEl(cursorPosition.lineNumber);
+		const lineEl = getMarkupLineEl(cursorPosition1.lineNumber);
 
 		if (!cursorEl || !lineEl || !markupEl) return;
 
-		const left =
+		const newX =
 			lineEl.offsetLeft +
-			markupMetrics.line.paddingLeft +
-			cursorPosition.lineColumn * markupMetrics.line.columnWidth;
+			markupMetrics1.line.paddingLeft +
+			cursorPosition1.lineColumn * markupMetrics1.line.columnWidth;
 
-		const top =
+		const newY =
 			lineEl.getBoundingClientRect().top -
 			markupEl.getBoundingClientRect().top;
 
-		cursorEl.style.left = `${left}px`;
-		cursorEl.style.top = `${top}px`;
+		cursorEl.style.transform = `translate(${newX}px, ${newY}px)`;
+
+		ensureVisible(cursorEl);
 	}
+
+}
+
+export function ensureVisible(el: HTMLElement) {
+	el.scrollIntoView({
+		behavior: 'instant',
+		block: 'nearest',
+		inline: 'nearest',
+	});
 }

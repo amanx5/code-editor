@@ -1,6 +1,6 @@
 import { useContext, useState, useCallback } from 'react';
 import { ClipboardSvg } from '../../svg/ClipboardSvg';
-import { ToolDefaultSvgProps, ToolWrapper } from './ToolWrapper';
+import { ToolDefaultSvgProps, ToolButton } from './ToolButton';
 import { EditorDocumentContext } from '../../../contexts';
 
 export function ContentCopyTool() {
@@ -24,7 +24,7 @@ export function ContentCopyTool() {
 
 	return (
 		<>
-			<ToolWrapper
+			<ToolButton
 				aria-label={readerText}
 				disabled={isCopied}
 				onClick={copyCode}
@@ -32,7 +32,7 @@ export function ContentCopyTool() {
 				type='button'
 			>
 				<ClipboardSvg checked={isCopied} {...ToolDefaultSvgProps} />
-			</ToolWrapper>
+			</ToolButton>
 
 			<span role='status' aria-live='polite' className='sr-only'>
 				{!isCopied ? readerText : ''}
@@ -40,7 +40,6 @@ export function ContentCopyTool() {
 		</>
 	);
 }
-
 
 export async function copyToClipboard(text: string) {
 	if (navigator.clipboard?.writeText) {
@@ -52,10 +51,10 @@ export async function copyToClipboard(text: string) {
 
 /**
  * Fallbsck for `clipboard.writeText`.
- * 
+ *
  * This is added because native `clipboard.writeText` requires a secure context like https://example.com or http://localhost
  * It is not available in http://example.com  or http://192.168.x.x.
- * 
+ *
  * WARNING: It's functionality is not thoroughly tested
  */
 export function writeTextFallback(text: string) {

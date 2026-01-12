@@ -1,21 +1,21 @@
 import type { Content } from '../language-util';
-import type { LineTokens } from '../tokenise-content';
+import type { TokenisedLine } from '../tokenise-content';
 
-export function contentTokeniserTxt(content: Content): LineTokens[] {
+export function contentTokeniserTxt(content: Content): TokenisedLine[] {
 	const plainLines = content.split('\n');
 
-	let LineTokenss: LineTokens[] = [];
+	let tokenisedLines: TokenisedLine[] = [];
 
 	for (const line of plainLines) {
-		const LineTokens: LineTokens = [
+		const tokenisedLine: TokenisedLine = [
 			{
 				cls: '',
 				value: line,
 			},
 		];
 
-		LineTokenss.push(LineTokens);
+		tokenisedLines.push(tokenisedLine);
 	}
 
-	return LineTokenss;
+	return tokenisedLines;
 }

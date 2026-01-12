@@ -1,6 +1,6 @@
 import { cls } from '../../../utils';
 
-export function ToolWrapper(props: React.ComponentProps<'button'>) {
+export function ToolButton(props: React.ComponentProps<'button'>) {
 	return (
 		<button
 			className={cls(

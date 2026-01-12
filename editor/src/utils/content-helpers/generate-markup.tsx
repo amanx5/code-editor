@@ -41,7 +41,9 @@ export function generateMarkup(
 		const isHighlighted = highlightLines?.includes(lineNumber);
 
 		const lineCls = cls(
-			'ce-content max-h-max flex-1 inline-flex',
+			'ce-content',
+			'flex-1 inline-flex',
+			'max-h-max', // disabled stetching to parent's height
 			hideLineNumbers && 'ce-content-pd',
 			isHighlighted && 'bg-ce-bg-highlight',
 			isInvalid && 'bg-ce-bg-error',
