@@ -38,7 +38,9 @@ export type MarkupApi = {
 	markupCommitRef: React.RefObject<MarkupCommit | null>;
 
 	getMarkupEl: () => MarkupElement | null;
-	getMarkupLineEl: (lineNumber?: CodeLineNumber) => MarkupLineElement | null;
+	getMarkupLineEl: (
+		position?: CodeLineNumber | 'first' | 'last'
+	) => MarkupLineElement | null;
 	getMarkupMetrics: () => MarkupMetrics | null;
 
 	updateDocumentContent: (
@@ -95,6 +97,28 @@ export function useMarkupApi(
 
 	useEffect(renderDocument, [document, markupOptions]);
 
+	const getMarkupLineEl: MarkupApi['getMarkupLineEl'] = (
+		position = 'first'
+	) => {
+		if (!markupRef.current) return null;
+
+		const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
+		const selector =
+			position === 'first'
+				? `[${lineNumAttr}='1']`
+				: position === 'last'
+				? `[${lineNumAttr}]:last-child`
+				: `[${lineNumAttr}='${position}']`;
+
+		const lineEl = markupRef.current.querySelector(selector);
+
+		if (lineEl) {
+			return lineEl as MarkupLineElement;
+		}
+
+		return null;
+	};
+
 	return {
 		markupRef,
 		markupCommitRef,
@@ -126,18 +150,6 @@ export function useMarkupApi(
 
 	function getMarkupEl() {
 		return markupRef.current ?? null;
-	}
-
-	function getMarkupLineEl(lineNumber?: CodeLineNumber) {
-		if (!markupRef.current) return null;
-
-		const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
-		const selector =
-			lineNumber == null
-				? `[${lineNumAttr}]`
-				: `[${lineNumAttr}='${lineNumber}']`;
-
-		return markupRef.current.querySelector(selector) as MarkupLineElement;
 	}
 
 	function getMarkupMetrics() {

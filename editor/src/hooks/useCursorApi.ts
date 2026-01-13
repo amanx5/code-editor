@@ -5,7 +5,7 @@ import {
 	type MarkupApi,
 	type MarkupLineElement,
 } from './useMarkupApi';
-import { type EditorEventObject } from '../utils';
+import type { ApiMap, EditorEventObject } from '../utils';
 
 export type CursorPosition = {
 	lineColumn: number;
@@ -17,7 +17,6 @@ export type CursorApi = {
 	setVisible: (isVisible: boolean) => void;
 	getPosition: () => CursorPosition;
 	setPosition: (cursorPosition: CursorPosition) => void;
-	setPositionOnClick: (e: EditorEventObject['onClick']) => void;
 };
 
 export function useCursorApi(markupApi: MarkupApi): CursorApi {
@@ -30,7 +29,6 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 		cursorRef,
 		getPosition,
 		setPosition,
-		setPositionOnClick,
 		setVisible,
 	};
 
@@ -51,57 +49,6 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 		if (cursorPosition.lineNumber > 0) {
 			syncCoordinates();
 			setVisible(true);
-		} else {
-			setVisible(false);
-		}
-	}
-
-	function setPositionOnClick(e: EditorEventObject['onClick']) {
-		const markupMetrics = markupApi.getMarkupMetrics();
-		if (!markupMetrics) return;
-
-		const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
-		const clickedEl = e.target as HTMLElement;
-
-		let lineColumn, lineNumber;
-		const closestLineEl = clickedEl.closest(
-			`[${lineNumAttr}]`
-		) as MarkupLineElement;
-
-		const lastLineEl = clickedEl.querySelector(
-			`[${lineNumAttr}]:last-child`
-		) as MarkupLineElement;
-
-		if (closestLineEl) {
-			// calculate difference between click x coordinate and left coordinate of markup line relative to viewport.
-			// this is to account for the fact that the click event is relative to the viewport and not the element.
-			// don't use offsetLeft here as it is relative to the offset parent.
-			const clickXDiff =
-				e.clientX -
-				closestLineEl.getBoundingClientRect().left -
-				markupMetrics.line.paddingLeft;
-
-			const clickedColumn = Math.round(
-				clickXDiff / markupMetrics.line.columnWidth
-			);
-
-			const totalColumns = closestLineEl.textContent.length;
-
-			lineColumn = Math.max(0, Math.min(clickedColumn, totalColumns));
-			lineNumber = Number(closestLineEl.getAttribute(lineNumAttr));
-
-			setPosition({
-				lineColumn,
-				lineNumber,
-			});
-		} else if (lastLineEl) {
-			lineColumn = lastLineEl.textContent.length;
-			lineNumber = Number(lastLineEl.getAttribute(lineNumAttr));
-
-			setPosition({
-				lineColumn,
-				lineNumber,
-			});
 		} else {
 			setVisible(false);
 		}
@@ -136,7 +83,6 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 
 		ensureVisible(cursorEl);
 	}
-
 }
 
 export function ensureVisible(el: HTMLElement) {
@@ -145,4 +91,56 @@ export function ensureVisible(el: HTMLElement) {
 		block: 'nearest',
 		inline: 'nearest',
 	});
+}
+
+export function setCursorPositionOnEvent(
+	e: EditorEventObject<'onPointerUp'> | EditorEventObject<'onPointerMove'>,
+	apiMap: ApiMap
+) {
+	const { cursorApi, markupApi } = apiMap;
+
+	const markupMetrics = markupApi.getMarkupMetrics();
+	if (!markupMetrics) return;
+
+	const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
+	const targetEl = e.target as HTMLElement;
+
+	let lineColumn, lineNumber;
+
+	const closestLineEl = targetEl.closest(
+		`[${lineNumAttr}]`
+	) as MarkupLineElement;
+
+	const lastLineEl = markupApi.getMarkupLineEl('last');
+
+	if (closestLineEl) {
+		const pointerHorizontalDiff =
+			e.clientX -
+			markupMetrics.line.paddingLeft -
+			closestLineEl.getBoundingClientRect().left;
+
+		const targetColumn = Math.round(
+			pointerHorizontalDiff / markupMetrics.line.columnWidth
+		);
+
+		const totalColumns = closestLineEl.textContent.length;
+
+		lineColumn = Math.max(0, Math.min(targetColumn, totalColumns));
+		lineNumber = Number(closestLineEl.getAttribute(lineNumAttr));
+
+		cursorApi.setPosition({
+			lineColumn,
+			lineNumber,
+		});
+	} else if (lastLineEl) {
+		lineColumn = lastLineEl.textContent.length;
+		lineNumber = Number(lastLineEl.getAttribute(lineNumAttr));
+
+		cursorApi.setPosition({
+			lineColumn,
+			lineNumber,
+		});
+	} else {
+		cursorApi.setVisible(false);
+	}
 }

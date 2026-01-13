@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { MarkupApi } from '../../../hooks';
 import type { CursorApi } from '../../../hooks/useCursorApi';
 import { cls, getEventHandlers } from '../../../utils';
@@ -16,7 +17,7 @@ export const EditorOptionsDefault: EditorOptions = {
 	hideLineNumbers: false,
 };
 
-export type MarkupElement = HTMLPreElement;
+export type MarkupElement = HTMLDivElement;
 
 export function MarkupLayer({
 	cursorApi,
@@ -32,20 +33,24 @@ export function MarkupLayer({
 		// highlightLines = EditorOptionsDefault.highlightLines,
 	} = editorOptions;
 
-	const eventHandlers =
-		!disabled &&
-		getEventHandlers({
-			cursorApi,
-			markupApi,
-		});
+	const eventHandlers = useMemo(
+		() =>
+			!disabled &&
+			getEventHandlers({
+				cursorApi,
+				markupApi,
+			}),
+		[cursorApi, markupApi]
+	);
 
 	return (
-		<pre
+		<div
 			aria-multiline
 			className={cls(
 				'cursor-text',
 				'flex-1 inline-flex flex-col min-h-full h-max',
 				'focus:outline-none',
+				'selection:bg-blue-100',
 				'z-10'
 			)}
 			ref={markupApi.markupRef}

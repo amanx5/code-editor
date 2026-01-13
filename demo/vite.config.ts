@@ -7,6 +7,7 @@ export default defineConfig({
 		exclude: ['code-editor'],
 	},
 	server: {
+		host: true,
 		port: 5174,
 	},
 	plugins: [

@@ -3,46 +3,61 @@ import type { CursorApi, MarkupApi } from '../../hooks';
 import { handleBlur, handleFocus } from './focus';
 import { handleKeyDown } from './keyboard';
 import { handlePaste } from './clipboard';
-import { handleClick } from './mouse';
+import {
+	handlePointerDown,
+	handlePointerMove,
+	handlePointerUp,
+} from './pointer';
 
 export type ApiMap = {
 	cursorApi: CursorApi;
 	markupApi: MarkupApi;
 };
 
-export interface EditorEventObject<E = MarkupElement> {
-	// onDragEnter: React.DragEvent<MarkupElement>;
-	// onDragOver: React.DragEvent<MarkupElement>;
-	// onDragLeave: React.DragEvent<MarkupElement>;
-	// onDrop: React.DragEvent<MarkupElement>;
-	onBlur: React.FocusEvent<E>;
-	onClick: React.MouseEvent<E>;
-	onFocus: React.FocusEvent<E>;
-	onKeyDown: React.KeyboardEvent<E>;
-	onPaste: React.ClipboardEvent<E>;
-};
+export type EditorEventName = keyof EditorEventHandlerInvoker;
 
-export type EditorEventName = keyof EditorEventObject;
+export type EditorEventObject<N extends EditorEventName> = Parameters<
+	NonNullable<EditorEventHandlerInvoker[N]>
+>[0];
 
-export type EditorEventHandler<T extends EditorEventName> = (
-	e: EditorEventObject[T],
+export type EditorEventHandler<N extends EditorEventName> = (
+	e: EditorEventObject<N>,
 	apiMap: ApiMap
 ) => void;
 
-export type EditorEventHandlerInvoker<T extends EditorEventName> = (
-	e: EditorEventObject[T]
-) => ReturnType<EditorEventHandler<T>>;
+export type EditorEventHandlerInvoker = Pick<
+	React.DOMAttributes<MarkupElement>,
+	// Clipboard Events
+	| 'onPaste'
 
-export type EditorEventHandlers = {
-	[eventName in EditorEventName]: EditorEventHandlerInvoker<eventName>;
-};
+	// Focus Events
+	| 'onFocus'
+	| 'onBlur'
 
-export function getEventHandlers(apiMap: ApiMap): EditorEventHandlers {
+	// Keyboard Events
+	| 'onKeyDown'
+
+	// Pointer Events
+	| 'onPointerDown'
+	| 'onPointerMove'
+	| 'onPointerUp'
+>;
+
+export function getEventHandlers(apiMap: ApiMap): EditorEventHandlerInvoker {
 	return {
-		onBlur: (e) => handleBlur(e, apiMap),
-		onClick: (e) => handleClick(e, apiMap),
-		onFocus: (e) => handleFocus(e, apiMap),
-		onKeyDown: (e) => handleKeyDown(e, apiMap),
+		// Clipboard Events
 		onPaste: (e) => handlePaste(e, apiMap),
+
+		// Focus Events
+		onFocus: (e) => handleFocus(e, apiMap),
+		onBlur: (e) => handleBlur(e, apiMap),
+
+		// Keyboard Events
+		onKeyDown: (e) => handleKeyDown(e, apiMap),
+
+		// Pointer Events
+		onPointerDown: (e) => handlePointerDown(e, apiMap),
+		onPointerMove: (e) => handlePointerMove(e, apiMap),
+		onPointerUp: (e) => handlePointerUp(e, apiMap),
 	};
 }
