@@ -16,20 +16,26 @@ export function ExampleOutput({
 			<div className='flex h-64'>
 				<CodeEditor
 					{...exampleProps}
-					onChange={(content, error) => {
-						setContent(content);
-						setError(error);
+					listeners={{
+						onChange: (content) => {
+							setContent(content);
+						},
+						onError: (error) => {
+							setError(error);
+						},
 					}}
 				/>
 			</div>
-			<div className='bg-yellow-50 flex flex-col gap-2 border rounded-lg p-3'>
+			<div className='bg-blue-50 flex flex-col gap-2 border rounded-lg p-3'>
 				<div className='flex gap-2'>
-					<span>Content:</span>
+					<span className='font-semibold'>Content:</span>
 					<pre className='max-h-20 overflow-auto'>{content}</pre>
 				</div>
 				<div className='flex gap-2'>
-					<span>Error:</span>
-					<pre className='max-h-10 overflow-auto'>{error?.message}</pre>
+					<span className='font-semibold'>Error:</span>
+					<pre className='max-h-10 overflow-auto'>
+						{JSON.stringify(error)}
+					</pre>
 				</div>
 			</div>
 		</>

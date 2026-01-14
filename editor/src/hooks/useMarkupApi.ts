@@ -2,33 +2,36 @@ import { useCallback, useEffect, useRef } from 'react';
 import {
 	type Content,
 	type EditorError,
-	type EditorMarkup,
-	type MarkupOptions,
-	generateMarkup,
-	getCharWidth,
 	isEqualObjects,
+	isPlainObject,
 	validateContent,
 } from '../utils';
-import type { EditorDocument } from '../contexts';
-import type { CodeLineNumber, MarkupElement } from '../components';
+import type { EditorDocument, ToolbarStateValues } from '../contexts';
+import type {
+	CodeLineNumber,
+	MarkupElement,
+	MarkupOptions,
+} from '../components';
 import type { Listeners } from '../CodeEditor';
+import {
+	updateMarkupMetrics,
+	type MarkupMetrics,
+	type EditorMarkupMeta,
+	generateMarkupMeta,
+	renderMarkup,
+} from '../hooks';
 
 export const MARKUP_LINE_ATTRIBUTES = {
 	lineNumber: 'data-line-num',
 };
 
+export type RenderOptions = MarkupOptions & ToolbarStateValues;
+
 export type MarkupCommit = {
 	document: EditorDocument;
 	error: EditorError;
-	markup: EditorMarkup;
-	markupOptions: MarkupOptions;
-};
-
-export type MarkupMetrics = {
-	line: {
-		paddingLeft: number;
-		columnWidth: number;
-	};
+	markupMeta: EditorMarkupMeta;
+	renderOptions: RenderOptions;
 };
 
 export type MarkupLineElement = HTMLPreElement;
@@ -36,12 +39,14 @@ export type MarkupLineElement = HTMLPreElement;
 export type MarkupApi = {
 	markupRef: React.RefObject<MarkupElement | null>;
 	markupCommitRef: React.RefObject<MarkupCommit | null>;
+	markupMetricsRef: React.RefObject<MarkupMetrics | null>;
 
-	getMarkupEl: () => MarkupElement | null;
-	getMarkupLineEl: (
-		position?: CodeLineNumber | 'first' | 'last'
+	getEl: () => MarkupElement | null;
+	getLineEl: (
+		position?: CodeLineNumber | 'first' | 'last' | { near: HTMLElement },
+		referenceEl?: HTMLElement
 	) => MarkupLineElement | null;
-	getMarkupMetrics: () => MarkupMetrics | null;
+	getMetrics: () => MarkupMetrics | null;
 
 	updateDocumentContent: (
 		arg: Content | ((prev: Content) => Content)
@@ -50,7 +55,7 @@ export type MarkupApi = {
 
 export function useMarkupApi(
 	document: EditorDocument,
-	markupOptions: MarkupOptions,
+	renderOptions: RenderOptions,
 	listeners?: Listeners
 ): MarkupApi {
 	const markupRef = useRef<MarkupElement>(null);
@@ -58,74 +63,89 @@ export function useMarkupApi(
 	const markupMetricsRef = useRef<MarkupMetrics>(null);
 
 	const renderDocument = useCallback(
-		(newDocument?: EditorDocument) => {
+		(newDocument?: EditorDocument, newRenderOptions?: RenderOptions) => {
 			newDocument = newDocument ?? document;
+			newRenderOptions = newRenderOptions ?? renderOptions;
 
 			if (!markupRef.current) return;
 
+			const isFirstRender = markupCommitRef.current === null;
 			const isDocumentChanged = !isEqualObjects(
 				markupCommitRef.current?.document,
 				newDocument
 			);
 
 			const isOptionsChanged = !isEqualObjects(
-				markupCommitRef.current?.markupOptions,
-				markupOptions
+				markupCommitRef.current?.renderOptions,
+				newRenderOptions
 			);
 
-			if (isDocumentChanged || isOptionsChanged) {
+			if (isFirstRender || isDocumentChanged || isOptionsChanged) {
 				const newError = validateContent(newDocument);
-				const newMarkup = generateMarkup(
-					newDocument,
-					newError,
-					markupRef.current,
-					markupOptions
-				);
+				const newMarkupMeta = generateMarkupMeta(newDocument, newError);
+
+				renderMarkup(markupApi, newMarkupMeta, newRenderOptions);
 
 				markupCommitRef.current = {
 					document: newDocument,
 					error: newError,
-					markup: newMarkup,
-					markupOptions,
+					markupMeta: newMarkupMeta,
+					renderOptions: newRenderOptions,
 				};
 
-				setMarkupMetrics();
+				// fire onChange only in the subsequent renders
+				if (!isFirstRender) {
+					listeners?.onChange?.(newDocument.content);
+				}
+				// fire onError always
+				listeners?.onError?.(newError);
+
+				// TODO: Don't cache metrics, we need to re-calculate metrics everytime cursor changes.
+				// Assuming that content change doesn't have impact on metrics is wrong, since
+				// not all glyphs acquire same column width
+				if (isOptionsChanged) {
+					updateMarkupMetrics(markupApi);
+				}
 			}
 		},
-		[document, markupOptions]
+		[document, renderOptions]
 	);
 
-	useEffect(renderDocument, [document, markupOptions]);
+	useEffect(renderDocument, [document, renderOptions]);
 
-	const getMarkupLineEl: MarkupApi['getMarkupLineEl'] = (
-		position = 'first'
-	) => {
-		if (!markupRef.current) return null;
-
-		const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
-		const selector =
-			position === 'first'
-				? `[${lineNumAttr}='1']`
-				: position === 'last'
-				? `[${lineNumAttr}]:last-child`
-				: `[${lineNumAttr}='${position}']`;
-
-		const lineEl = markupRef.current.querySelector(selector);
-
-		if (lineEl) {
-			return lineEl as MarkupLineElement;
-		}
-
-		return null;
-	};
-
-	return {
+	const markupApi: MarkupApi = {
 		markupRef,
 		markupCommitRef,
+		markupMetricsRef,
 
-		getMarkupEl,
-		getMarkupLineEl,
-		getMarkupMetrics,
+		getEl: () => markupRef.current ?? null,
+		getLineEl: (position = 'first') => {
+			if (!markupRef.current) return null;
+
+			const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
+			let lineEl;
+
+			if (isPlainObject(position) && 'near' in position) {
+				lineEl = position.near.closest(`[${lineNumAttr}]`);
+			} else {
+				const selector =
+					position === 'first'
+						? `[${lineNumAttr}='1']`
+						: position === 'last'
+						? `[${lineNumAttr}]:last-child`
+						: `[${lineNumAttr}='${position}']`;
+
+				lineEl = markupRef.current.querySelector(selector);
+			}
+
+			if (lineEl) {
+				return lineEl as MarkupLineElement;
+			}
+
+			return null;
+		},
+
+		getMetrics: () => markupMetricsRef.current ?? null,
 
 		updateDocumentContent: useCallback(
 			(arg) => {
@@ -140,39 +160,10 @@ export function useMarkupApi(
 					...markupCommitRef.current.document,
 					content: newContent,
 				});
-
-				listeners?.onChange?.(markupCommitRef.current.document.content);
-				listeners?.onError?.(markupCommitRef.current.error);
 			},
-			[listeners, renderDocument]
+			[renderDocument]
 		),
 	};
 
-	function getMarkupEl() {
-		return markupRef.current ?? null;
-	}
-
-	function getMarkupMetrics() {
-		return markupMetricsRef.current ?? null;
-	}
-
-	function setMarkupMetrics() {
-		if (markupMetricsRef.current) return;
-
-		const lineEl = getMarkupLineEl();
-
-		if (!lineEl) return;
-
-		const lineColumnWidth = getCharWidth(lineEl);
-		const linePaddingLeft = parseFloat(
-			getComputedStyle(lineEl).paddingLeft
-		);
-
-		markupMetricsRef.current = {
-			line: {
-				columnWidth: lineColumnWidth,
-				paddingLeft: linePaddingLeft,
-			},
-		};
-	}
+	return markupApi;
 }

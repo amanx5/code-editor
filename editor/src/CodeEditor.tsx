@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-	type EditorOptions,
+	type MarkupOptions,
 	type ToolbarOptions,
 	Body,
 	CursorLayer,
@@ -8,7 +8,7 @@ import {
 	Root,
 	Toolbar,
 	ToolbarOptionsDefault,
-	EditorOptionsDefault,
+	MarkupOptionsDefault,
 } from './components';
 import {
 	type EditorDocument,
@@ -16,10 +16,13 @@ import {
 	EditorStatesContext,
 } from './contexts';
 
-import { isPlainObject, type Content, type EditorError } from './utils';
-import { ToolbarStatesContext } from './contexts/ToolbarStatesContext';
+import { type Content, type EditorError } from './utils';
+import {
+	ToolbarStatesContext,
+	ToolbarStatesDefault,
+} from './contexts/ToolbarStatesContext';
 import { useCursorApi } from './hooks/useCursorApi';
-import { useMarkupApi } from './hooks';
+import { useMarkupApi, type RenderOptions } from './hooks';
 
 export type Listeners = {
 	onChange?: (content: Content) => void;
@@ -28,8 +31,8 @@ export type Listeners = {
 
 export type CodeEditorProps = {
 	document: EditorDocument;
-	editorOptions?: EditorOptions;
 	listeners?: Listeners;
+	markupOptions?: MarkupOptions;
 	toolbarOptions?: ToolbarOptions;
 };
 
@@ -40,16 +43,16 @@ export type CodeEditorProps = {
  */
 export function CodeEditor({
 	document,
-	editorOptions = EditorOptionsDefault,
 	listeners,
+	markupOptions = MarkupOptionsDefault,
 	toolbarOptions = ToolbarOptionsDefault,
 }: CodeEditorProps) {
 	const [error, setError] = useState<EditorError>(null);
 	const [isWrapEnabled, setIsWrapEnabled] = useState(
-		isPlainObject(toolbarOptions) ? !!toolbarOptions.showWrapTool : false
+		ToolbarStatesDefault.isWrapEnabled
 	);
 	const [isFormatEnabled, setIsFormatEnabled] = useState(
-		isPlainObject(toolbarOptions) ? !!toolbarOptions.showFormatTool : false
+		ToolbarStatesDefault.isFormatEnabled
 	);
 
 	const toolbarStates = {
@@ -63,13 +66,13 @@ export function CodeEditor({
 		setError,
 	};
 
-	const markupOptions = {
-		...editorOptions,
+	const renderOptions: RenderOptions = {
+		...markupOptions,
 		isWrapEnabled,
 		isFormatEnabled,
 	};
 
-	const markupApi = useMarkupApi(document, markupOptions, listeners);
+	const markupApi = useMarkupApi(document, renderOptions, listeners);
 
 	const cursorApi = useCursorApi(markupApi);
 
@@ -83,7 +86,6 @@ export function CodeEditor({
 							<MarkupLayer
 								cursorApi={cursorApi}
 								markupApi={markupApi}
-								editorOptions={editorOptions}
 							/>
 							<CursorLayer cursorApi={cursorApi} />
 						</Body>

@@ -5,13 +5,13 @@ import { cls, getEventHandlers } from '../../../utils';
 
 export type CodeLineNumber = number;
 
-export type EditorOptions = {
+export type MarkupOptions = {
 	disabled?: boolean;
 	highlightLines?: CodeLineNumber[];
 	hideLineNumbers?: boolean;
 };
 
-export const EditorOptionsDefault: EditorOptions = {
+export const MarkupOptionsDefault: MarkupOptions = {
 	disabled: false,
 	highlightLines: [],
 	hideLineNumbers: false,
@@ -22,20 +22,12 @@ export type MarkupElement = HTMLDivElement;
 export function MarkupLayer({
 	cursorApi,
 	markupApi,
-	editorOptions,
 }: {
 	cursorApi: CursorApi;
 	markupApi: MarkupApi;
-	editorOptions: EditorOptions;
 }) {
-	const {
-		disabled = EditorOptionsDefault.disabled,
-		// highlightLines = EditorOptionsDefault.highlightLines,
-	} = editorOptions;
-
 	const eventHandlers = useMemo(
 		() =>
-			!disabled &&
 			getEventHandlers({
 				cursorApi,
 				markupApi,
