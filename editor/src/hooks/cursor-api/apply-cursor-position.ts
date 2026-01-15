@@ -7,15 +7,13 @@ export function applyCursorPosition(
 	cursorApi: CursorApi,
 	markupApi: MarkupApi
 ) {
-	if (cursorPosition.lineNumber === 0) return;
-
 	const markupMetrics = markupApi.getMetrics();
 
 	if (!markupMetrics) return;
 
-	const cursorEl = cursorApi.getEl();
-	const markupEl = markupApi.getEl();
-	const lineEl = markupApi.getLineEl(cursorPosition.lineNumber);
+	const cursorEl = cursorApi.getElement();
+	const markupEl = markupApi.getElement();
+	const lineEl = markupApi.getLineElement(cursorPosition.lineNumber);
 
 	if (!cursorEl || !lineEl || !markupEl) return;
 
@@ -41,14 +39,5 @@ export function applyCursorPosition(
 
 	cursorEl.style.transform = `translate(${newX}px, ${newY}px)`;
 
-	ensureInView(cursorEl);
 	cursorApi.setVisible(true);
-}
-
-function ensureInView(el: HTMLElement) {
-	el.scrollIntoView({
-		behavior: 'instant',
-		block: 'nearest',
-		inline: 'nearest',
-	});
 }

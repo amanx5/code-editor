@@ -10,33 +10,48 @@ export type CursorPosition = {
 };
 
 export type CursorApi = {
-	cursorRef: React.RefObject<CursorElement | null>;
-	getEl: () => CursorElement | null;
+	getElement: () => CursorElement | null;
+
+	getElementRef: () => React.RefObject<CursorElement | null>;
+
 	getPosition: () => CursorPosition | null;
+
 	setPosition: (cursorPosition: CursorPosition) => void;
+
 	setVisible: (isVisible: boolean) => void;
 };
 
 export function useCursorApi(markupApi: MarkupApi): CursorApi {
-	const cursorRef = useRef<CursorElement>(null);
+	const cursorElementRef = useRef<CursorElement>(null);
 	const cursorPositionRef = useRef<CursorPosition>(null);
 
 	const cursorApi: CursorApi = {
-		cursorRef,
-		getEl: () => cursorRef.current ?? null,
+		getElement: () => cursorElementRef.current ?? null,
+
+		getElementRef: () => cursorElementRef,
 
 		getPosition: () => cursorPositionRef.current,
 
 		setPosition: (cursorPosition: CursorPosition) => {
-			if (!cursorRef.current) return;
-
 			cursorPositionRef.current = cursorPosition;
 
 			applyCursorPosition(cursorPosition, cursorApi, markupApi);
 		},
 
 		setVisible: (isVisible: boolean) => {
-			cursorRef.current?.classList.toggle('hidden', !isVisible);
+			const cursorEl = cursorApi.getElement();
+
+			if (!cursorEl) return;
+
+			cursorEl.classList.toggle('hidden', !isVisible);
+
+			if (isVisible) {
+				cursorEl.scrollIntoView({
+					behavior: 'instant',
+					block: 'nearest',
+					inline: 'nearest',
+				});
+			}
 		},
 	};
 
@@ -57,8 +72,8 @@ export function setCursorPositionOnEvent(
 
 	let lineColumn, lineNumber;
 
-	const closestLineEl = markupApi.getLineEl({ near: targetEl });
-	const lastLineEl = markupApi.getLineEl('last');
+	const closestLineEl = markupApi.getLineElement({ near: targetEl });
+	const lastLineEl = markupApi.getLineElement('last');
 
 	if (closestLineEl) {
 		const pointerHorizontalDiff: number =

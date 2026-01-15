@@ -12,7 +12,7 @@ import type {
 	MarkupElement,
 	MarkupOptions,
 } from '../components';
-import type { Listeners } from '../CodeEditor';
+import type { EditorListeners } from '../CodeEditor';
 import {
 	updateMarkupMetrics,
 	type MarkupMetrics,
@@ -37,16 +37,18 @@ export type MarkupCommit = {
 export type MarkupLineElement = HTMLPreElement;
 
 export type MarkupApi = {
-	markupRef: React.RefObject<MarkupElement | null>;
-	markupCommitRef: React.RefObject<MarkupCommit | null>;
-	markupMetricsRef: React.RefObject<MarkupMetrics | null>;
+	getElement: () => MarkupElement | null;
+	
+	getElementRef: () => React.RefObject<MarkupElement | null>;
 
-	getEl: () => MarkupElement | null;
-	getLineEl: (
+	getLineElement: (
 		position?: CodeLineNumber | 'first' | 'last' | { near: HTMLElement },
 		referenceEl?: HTMLElement
 	) => MarkupLineElement | null;
+
 	getMetrics: () => MarkupMetrics | null;
+
+	setMetrics: (metrics: MarkupMetrics) => void;
 
 	updateDocumentContent: (
 		arg: Content | ((prev: Content) => Content)
@@ -56,9 +58,9 @@ export type MarkupApi = {
 export function useMarkupApi(
 	document: EditorDocument,
 	renderOptions: RenderOptions,
-	listeners?: Listeners
+	listeners?: EditorListeners
 ): MarkupApi {
-	const markupRef = useRef<MarkupElement>(null);
+	const markupElementRef = useRef<MarkupElement>(null);
 	const markupCommitRef = useRef<MarkupCommit>(null);
 	const markupMetricsRef = useRef<MarkupMetrics>(null);
 
@@ -66,8 +68,6 @@ export function useMarkupApi(
 		(newDocument?: EditorDocument, newRenderOptions?: RenderOptions) => {
 			newDocument = newDocument ?? document;
 			newRenderOptions = newRenderOptions ?? renderOptions;
-
-			if (!markupRef.current) return;
 
 			const isFirstRender = markupCommitRef.current === null;
 			const isDocumentChanged = !isEqualObjects(
@@ -114,13 +114,12 @@ export function useMarkupApi(
 	useEffect(renderDocument, [document, renderOptions]);
 
 	const markupApi: MarkupApi = {
-		markupRef,
-		markupCommitRef,
-		markupMetricsRef,
+		getElement: () => markupElementRef.current ?? null,
+		getElementRef: () => markupElementRef,
 
-		getEl: () => markupRef.current ?? null,
-		getLineEl: (position = 'first') => {
-			if (!markupRef.current) return null;
+		getLineElement: (position = 'first') => {
+			const markupEl = markupApi.getElement();
+			if (!markupEl) return null;
 
 			const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
 			let lineEl;
@@ -135,7 +134,7 @@ export function useMarkupApi(
 						? `[${lineNumAttr}]:last-child`
 						: `[${lineNumAttr}='${position}']`;
 
-				lineEl = markupRef.current.querySelector(selector);
+				lineEl = markupEl.querySelector(selector);
 			}
 
 			if (lineEl) {
@@ -146,6 +145,10 @@ export function useMarkupApi(
 		},
 
 		getMetrics: () => markupMetricsRef.current ?? null,
+
+		setMetrics: (metrics: MarkupMetrics) => {
+			markupMetricsRef.current = metrics;
+		},
 
 		updateDocumentContent: useCallback(
 			(arg) => {

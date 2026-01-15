@@ -10,28 +10,22 @@ import {
 	ToolbarOptionsDefault,
 	MarkupOptionsDefault,
 } from './components';
-import {
-	type EditorDocument,
-	EditorDocumentContext,
-	EditorStatesContext,
-} from './contexts';
-
+import { type EditorDocument, EditorDocumentContext } from './contexts';
 import { type Content, type EditorError } from './utils';
 import {
 	ToolbarStatesContext,
 	ToolbarStatesDefault,
 } from './contexts/ToolbarStatesContext';
-import { useCursorApi } from './hooks/useCursorApi';
-import { useMarkupApi, type RenderOptions } from './hooks';
+import { useCursorApi, useMarkupApi, type RenderOptions } from './hooks';
 
-export type Listeners = {
+export type EditorListeners = {
 	onChange?: (content: Content) => void;
 	onError?: (error: EditorError) => void;
 };
 
 export type CodeEditorProps = {
 	document: EditorDocument;
-	listeners?: Listeners;
+	listeners?: EditorListeners;
 	markupOptions?: MarkupOptions;
 	toolbarOptions?: ToolbarOptions;
 };
@@ -47,7 +41,6 @@ export function CodeEditor({
 	markupOptions = MarkupOptionsDefault,
 	toolbarOptions = ToolbarOptionsDefault,
 }: CodeEditorProps) {
-	const [error, setError] = useState<EditorError>(null);
 	const [isWrapEnabled, setIsWrapEnabled] = useState(
 		ToolbarStatesDefault.isWrapEnabled
 	);
@@ -60,10 +53,6 @@ export function CodeEditor({
 		isFormatEnabled,
 		setIsWrapEnabled,
 		setIsFormatEnabled,
-	};
-	const editorStates = {
-		error,
-		setError,
 	};
 
 	const renderOptions: RenderOptions = {
@@ -78,20 +67,18 @@ export function CodeEditor({
 
 	return (
 		<EditorDocumentContext.Provider value={document}>
-			<EditorStatesContext.Provider value={editorStates}>
-				<ToolbarStatesContext.Provider value={toolbarStates}>
-					<Root>
-						<Toolbar options={toolbarOptions} />
-						<Body>
-							<MarkupLayer
-								cursorApi={cursorApi}
-								markupApi={markupApi}
-							/>
-							<CursorLayer cursorApi={cursorApi} />
-						</Body>
-					</Root>
-				</ToolbarStatesContext.Provider>
-			</EditorStatesContext.Provider>
+			<ToolbarStatesContext.Provider value={toolbarStates}>
+				<Root>
+					<Toolbar options={toolbarOptions} />
+					<Body>
+						<MarkupLayer
+							cursorApi={cursorApi}
+							markupApi={markupApi}
+						/>
+						<CursorLayer cursorApi={cursorApi} />
+					</Body>
+				</Root>
+			</ToolbarStatesContext.Provider>
 		</EditorDocumentContext.Provider>
 	);
 }

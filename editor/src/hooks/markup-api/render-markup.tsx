@@ -17,7 +17,7 @@ export function renderMarkup(
 	markupMeta: EditorMarkupMeta,
 	newRenderOptions?: RenderOptions
 ) {
-	const markupEl = markupApi.getEl();
+	const markupEl = markupApi.getElement();
 
 	if (!markupEl) return;
 

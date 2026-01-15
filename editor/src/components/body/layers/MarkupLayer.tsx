@@ -45,7 +45,7 @@ export function MarkupLayer({
 				'selection:bg-blue-100',
 				'z-10'
 			)}
-			ref={markupApi.markupRef}
+			ref={markupApi.getElementRef()}
 			role='textbox'
 			spellCheck={false}
 			tabIndex={0}

@@ -14,13 +14,13 @@ export type MarkupMetrics = {
 };
 
 export function updateMarkupMetrics(markupApi: MarkupApi) {
-	const lineEl = markupApi.getLineEl();
+	const lineEl = markupApi.getLineElement();
 	if (!lineEl) return;
 
 	const lineStyle = getComputedStyle(lineEl);
 
 	// set metrics based on current font
-	markupApi.markupMetricsRef.current = calculateMetrics(lineStyle);
+	markupApi.setMetrics(calculateMetrics(lineStyle));
 
 	// optimisation
 	if (lastCheckedFont === lineStyle.font) return;
@@ -33,14 +33,14 @@ export function updateMarkupMetrics(markupApi: MarkupApi) {
 	// NOTE: FontFaceSet.load itself doesn't load any font, it just returns a promise that
 	// resolves when all the fonts provided in parameters are loaded
 	window.document.fonts.load(lineStyle.font).then(() => {
-		// lineEl from closure might be stale (if the markup has been re-rendered)
-		const lineEl2 = markupApi.getLineEl();
+		// get lineEl again as lineEl from closure might be stale (if the markup has been re-rendered)
+		const lineEl2 = markupApi.getLineElement();
 		if (!lineEl2) return;
 
 		const lineStyle2 = getComputedStyle(lineEl2);
 
 		// set metrics based on loaded font
-		markupApi.markupMetricsRef.current = calculateMetrics(lineStyle2);
+		markupApi.setMetrics(calculateMetrics(lineStyle2));
 	});
 }
 
