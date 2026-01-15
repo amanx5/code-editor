@@ -29,15 +29,14 @@ export const Toolbar = memo(function Toolbar({ options }: ToolbarProps) {
 	return (
 		<div
 			className={cls(
-				'bg-ce-bg-toolbar border-b border-b-ce-border-subtle',
-				'flex items-center justify-between',
-				'h-12 max-h-12',
-				'px-6'
+				'border-b border-b-cePanel',
+				'flex items-stretch justify-between',
+				'h-9 max-h-9',
 			)}
 		>
 			<Title />
 
-			<div className='flex h-full items-center gap-4'>
+			<div className='flex h-full items-stretch'>
 				{showWrapTool && <ContentWrapTool />}
 				{showCopyTool && <ContentCopyTool />}
 				{showFormatTool && <ContentFormatTool />}

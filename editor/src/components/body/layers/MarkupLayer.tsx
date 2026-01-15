@@ -34,6 +34,7 @@ export function MarkupLayer() {
 		<div
 			aria-multiline
 			className={cls(
+				'bg-ceMarkupLayer',
 				'cursor-text',
 				'flex-1 inline-flex flex-col min-h-full h-max',
 				'focus:outline-none',

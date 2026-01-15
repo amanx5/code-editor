@@ -5,7 +5,7 @@ import { cls } from '../../../utils';
 export type CursorElement = HTMLDivElement;
 
 // TODO
-// - Keep cursor stable while typing
+// - Add Blink effect (make sure to pause blink when typing)
 export function CursorLayer() {
 	const { cursorApi } = useContext(EditorApiContext);
 	
@@ -14,8 +14,8 @@ export function CursorLayer() {
 			<div
 				className={cls(
 					'absolute',
+					'ceContent',
 					'border-l-[1.2px] border-black',
-					'ce-content',
 					'hidden',
 					'pointer-events-none',
 					'z-10'

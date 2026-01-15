@@ -5,37 +5,24 @@
 const preset = {
 	safelist: [
 		{
-			pattern: /ce-token-[\w-]+/,
+			pattern: /ceMarkupToken-[\w-]+/,
 		},
 	],
 	theme: {
 		extend: {
 			animation: {
-				'ce-caret': 'ce-caret 1.5s steps(1, end) infinite',
+				ceCaret: 'ceCaret 1.5s steps(1, end) infinite',
 			},
+
 			keyframes: {
-				'ce-caret': {
+				ceCaret: {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0' },
 				},
 			},
-			colors: {
-				'ce-text': {
-					muted: '#475569',
-					primary: 'blueviolet',
-				},
-				'ce-bg': {
-					root: '#FFFFFF',
-					error: '#fee2e2',
-					highlight: '#fffbdd',
-					muted: '#f6f7f9',
-					toolbar: '#f6f8fa',
-				},
-				'ce-border': {
-					subtle: '#e2e8f0',
-					dominant: 'black',
-				},
-				'ce-token': {
+			
+			textColor: {
+				ceMarkupToken: {
 					string: '#A31515', // deep brick red
 					number: '#098658', // strong green
 					boolean: '#0550AE', // rich blue
@@ -44,24 +31,47 @@ const preset = {
 					whitespace: '#9CA3AF', // soft gray (optional)
 					unknown: '#B91C1C', // error red
 				},
+				ceStatusBarItem: {
+					normal: '#3b3b3b',
+					hover: '#000000',
+				},
+				ceToolbarItem: {
+					normal: '#3b3b3b',
+					hover: '#000000',
+				},
+			},
+
+			backgroundColor: {
+				ceRoot: '#f8f8f8',
+				ceMarkupLayer: 'white',
+				ceMarkupLine: {
+					error: '#fee2e2',
+					highlight: '#fffbdd',
+				},
+				ceStatusBarItem: {
+					hover: '#1f1f1f12',
+				},
+				ceToolbarItem: {
+					hover: '#1f1f1f12',
+				},
+			},
+
+			borderColor: {
+				cePanel: '#e5e5e5',
 			},
 		},
 	},
 	plugins: [
 		function ({ addUtilities, theme }) {
 			addUtilities({
-				'.ce-content': {
+				'.ceContent': {
 					fontFamily: `Source Code Pro,Consolas,Menlo,DejaVu Sans Mono,monospace`,
 					fontSize: theme('fontSize.sm'),
 					lineHeight: theme('lineHeight.6'),
 					minHeight: theme('lineHeight.6'),
 				},
-				'.ce-content-wrap': {
-					whiteSpace: 'pre-wrap',
+				'.wrap-anywhere': {
 					overflowWrap: 'anywhere',
-				},
-				'.ce-content-pd': {
-					paddingLeft: theme('padding.6'),
 				},
 			});
 		},

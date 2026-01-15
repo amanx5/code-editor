@@ -5,13 +5,13 @@ const JSON_TOKEN_REGEX =
 	/(\s+|"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|\btrue\b|\bfalse\b|\bnull\b|[{}\[\]:,])/g;
 
 const TOKEN_CLS_MAP = {
-	string: 'text-ce-token-string',
-	number: 'text-ce-token-number',
-	boolean: 'text-ce-token-boolean',
-	null: 'text-ce-token-null',
-	punctuation: 'text-ce-token-punctuation',
-	whitespace: 'text-ce-token-whitespace',
-	unknown: 'text-ce-token-unknown',
+	string: 'text-ceMarkupToken-string',
+	number: 'text-ceMarkupToken-number',
+	boolean: 'text-ceMarkupToken-boolean',
+	null: 'text-ceMarkupToken-null',
+	punctuation: 'text-ceMarkupToken-punctuation',
+	whitespace: 'text-ceMarkupToken-whitespace',
+	unknown: 'text-ceMarkupToken-unknown',
 } as const;
 
 export function contentTokeniserJson(content: Content): TokenisedLine[] {

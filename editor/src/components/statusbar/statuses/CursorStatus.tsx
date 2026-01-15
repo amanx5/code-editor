@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import type { CursorPosition } from '../../../hooks';
 import { EditorApiContext } from '../../../contexts';
+import { StatusButton } from './StatusButton';
 
 export function CursorStatus() {
 	const { cursorApi } = useContext(EditorApiContext);
@@ -23,5 +24,15 @@ export function CursorStatus() {
 
 	const { lineNumber, lineColumn } = cursorPosition;
 
-	return <div>{`Ln ${lineNumber}, Col ${lineColumn}`}</div>;
+	return (
+		<StatusButton
+			className='px-1'
+			onClick={onClick}
+			title='Cursor Position'
+		>{`Ln ${lineNumber}, Col ${lineColumn}`}</StatusButton>
+	);
+
+	function onClick() {
+		// TODO: Implement go to line functionality
+	}
 }

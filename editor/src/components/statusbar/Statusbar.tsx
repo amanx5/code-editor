@@ -6,10 +6,9 @@ export const Statusbar = memo(function Statusbar() {
 	return (
 		<div
 			className={cls(
-				'bg-ce-bg-toolbar  border-t border-t-ce-border-subtle',
-				'flex items-center justify-end',
-				'h-8 max-h-8',
-				'px-6'
+				'border-t border-t-cePanel',
+				'flex items-stretch justify-end',
+				'h-6 max-h-6',
 			)}
 		>
             <CursorStatus />

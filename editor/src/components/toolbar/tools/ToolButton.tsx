@@ -5,7 +5,10 @@ export function ToolButton(props: React.ComponentProps<'button'>) {
 		<button
 			className={cls(
 				'flex items-center justify-center',
-				'rounded-md hover:bg-surface-muted'
+				'px-2',
+				'text-ceToolbarItem-normal',
+				'hover:text-ceToolbarItem-hover hover:bg-ceToolbarItem-hover',
+				props.className
 			)}
 			{...props}
 		/>

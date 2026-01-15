@@ -1,5 +1,5 @@
-import { cls } from '../utils';
-import type { CodeLineNumber } from './markup-layer';
+import { cls } from "../../utils";
+import type { CodeLineNumber } from "./layers";
 
 export function LineNumber({
 	isWrapEnabled,
@@ -11,11 +11,11 @@ export function LineNumber({
 	return (
 		<span
 			className={cls(
-				'ce-content',
 				'align-top',
+				'ceContent',
 				'w-12 min-w-12 pr-4',
 				'text-right text-text-muted select-none',
-				!isWrapEnabled && 'bg-ce-bg-root' // to hide any content behind the line-numbers when scrolled
+				!isWrapEnabled && 'bg-ceRoot' // to hide any content behind the line-numbers when scrolled
 			)}
 		>
 			{lineNumber}
