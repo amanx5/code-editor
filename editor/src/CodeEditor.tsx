@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
 	type MarkupOptions,
 	type ToolbarOptions,
@@ -6,11 +6,16 @@ import {
 	CursorLayer,
 	MarkupLayer,
 	Root,
+	Statusbar,
 	Toolbar,
 	ToolbarOptionsDefault,
 	MarkupOptionsDefault,
 } from './components';
-import { type EditorDocument, EditorDocumentContext } from './contexts';
+import {
+	EditorApiContext,
+	type EditorDocument,
+	EditorDocumentContext,
+} from './contexts';
 import { type Content, type EditorError } from './utils';
 import {
 	ToolbarStatesContext,
@@ -38,12 +43,16 @@ export type CodeEditorProps = {
 export function CodeEditor({
 	document,
 	listeners,
-	markupOptions = MarkupOptionsDefault,
-	toolbarOptions = ToolbarOptionsDefault,
+	markupOptions = {},
+	toolbarOptions = {},
 }: CodeEditorProps) {
+	markupOptions = applyDefaults(markupOptions, MarkupOptionsDefault);
+	toolbarOptions = applyDefaults(toolbarOptions, ToolbarOptionsDefault);
+
 	const [isWrapEnabled, setIsWrapEnabled] = useState(
 		ToolbarStatesDefault.isWrapEnabled
 	);
+
 	const [isFormatEnabled, setIsFormatEnabled] = useState(
 		ToolbarStatesDefault.isFormatEnabled
 	);
@@ -65,20 +74,37 @@ export function CodeEditor({
 
 	const cursorApi = useCursorApi(markupApi);
 
-	return (
-		<EditorDocumentContext.Provider value={document}>
-			<ToolbarStatesContext.Provider value={toolbarStates}>
-				<Root>
-					<Toolbar options={toolbarOptions} />
-					<Body>
-						<MarkupLayer
-							cursorApi={cursorApi}
-							markupApi={markupApi}
-						/>
-						<CursorLayer cursorApi={cursorApi} />
-					</Body>
-				</Root>
-			</ToolbarStatesContext.Provider>
-		</EditorDocumentContext.Provider>
+	const apiContextValue = useMemo(
+		() => ({
+			cursorApi,
+			markupApi,
+		}),
+		[cursorApi, markupApi]
 	);
+
+	return (
+		<EditorApiContext.Provider value={apiContextValue}>
+			<EditorDocumentContext.Provider value={document}>
+				<ToolbarStatesContext.Provider value={toolbarStates}>
+					<Root>
+						<Toolbar options={toolbarOptions} />
+
+						<Body>
+							<MarkupLayer />
+							<CursorLayer />
+						</Body>
+
+						<Statusbar />
+					</Root>
+				</ToolbarStatesContext.Provider>
+			</EditorDocumentContext.Provider>
+		</EditorApiContext.Provider>
+	);
+}
+
+export function applyDefaults<T>(overrides: Partial<T>, defaults: T): T {
+	return {
+		...defaults,
+		...overrides,
+	};
 }

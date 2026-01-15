@@ -1,11 +1,14 @@
-import type { CursorApi } from '../../../hooks';
+import { useContext } from 'react';
+import { EditorApiContext } from '../../../contexts';
 import { cls } from '../../../utils';
 
 export type CursorElement = HTMLDivElement;
 
 // TODO
 // - Keep cursor stable while typing
-export function CursorLayer({ cursorApi }: { cursorApi: CursorApi }) {
+export function CursorLayer() {
+	const { cursorApi } = useContext(EditorApiContext);
+	
 	return (
 		<div aria-hidden className='absolute'>
 			<div

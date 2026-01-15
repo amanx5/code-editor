@@ -1,7 +1,6 @@
-import { useMemo } from 'react';
-import type { MarkupApi } from '../../../hooks';
-import type { CursorApi } from '../../../hooks/useCursorApi';
+import { useContext, useMemo } from 'react';
 import { cls, getEventHandlers } from '../../../utils';
+import { EditorApiContext } from '../../../contexts';
 
 export type CodeLineNumber = number;
 
@@ -19,13 +18,9 @@ export const MarkupOptionsDefault: MarkupOptions = {
 
 export type MarkupElement = HTMLDivElement;
 
-export function MarkupLayer({
-	cursorApi,
-	markupApi,
-}: {
-	cursorApi: CursorApi;
-	markupApi: MarkupApi;
-}) {
+export function MarkupLayer() {
+	const { cursorApi, markupApi } = useContext(EditorApiContext);
+
 	const eventHandlers = useMemo(
 		() =>
 			getEventHandlers({

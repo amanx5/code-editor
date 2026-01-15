@@ -22,12 +22,7 @@ export type ToolbarProps = {
 };
 
 export const Toolbar = memo(function Toolbar({ options }: ToolbarProps) {
-	const {
-		hideToolbar = ToolbarOptionsDefault.hideToolbar,
-		showWrapTool = ToolbarOptionsDefault.showWrapTool,
-		showCopyTool = ToolbarOptionsDefault.showCopyTool,
-		showFormatTool = ToolbarOptionsDefault.showFormatTool,
-	} = options;
+	const { hideToolbar, showWrapTool, showCopyTool, showFormatTool } = options;
 
 	if (hideToolbar) return null;
 
@@ -35,9 +30,9 @@ export const Toolbar = memo(function Toolbar({ options }: ToolbarProps) {
 		<div
 			className={cls(
 				'bg-ce-bg-toolbar border-b border-b-ce-border-subtle',
-				'flex justify-between',
+				'flex items-center justify-between',
 				'h-12 max-h-12',
-				'px-6 py-2'
+				'px-6'
 			)}
 		>
 			<Title />
