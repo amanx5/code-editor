@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import {
 	type Content,
 	type EditorError,
@@ -6,11 +6,12 @@ import {
 	isPlainObject,
 	validateContent,
 } from '../utils';
-import type { EditorDocument, ToolbarStateValues } from '../contexts';
+import type { EditorDocument } from '../contexts';
 import type {
 	CodeLineNumber,
 	MarkupElement,
 	MarkupOptions,
+	ToolbarStateValues,
 } from '../components';
 import type { EditorListeners } from '../CodeEditor';
 import {
@@ -37,136 +38,160 @@ export type MarkupCommit = {
 export type MarkupLineElement = HTMLPreElement;
 
 export type MarkupApi = {
-	getElement: () => MarkupElement | null;
-	
-	getElementRef: () => React.RefObject<MarkupElement | null>;
+	getElement(): MarkupElement | null;
 
-	getLineElement: (
+	getElementRef(): React.RefObject<MarkupElement | null>;
+
+	getLineElement(
 		position?: CodeLineNumber | 'first' | 'last' | { near: HTMLElement },
 		referenceEl?: HTMLElement
-	) => MarkupLineElement | null;
+	): MarkupLineElement | null;
 
-	getMetrics: () => MarkupMetrics | null;
+	getMetrics(): MarkupMetrics | null;
 
-	setMetrics: (metrics: MarkupMetrics) => void;
+	setMetrics(metrics: MarkupMetrics): void;
 
-	updateDocumentContent: (
-		arg: Content | ((prev: Content) => Content)
-	) => void;
+	updateDocumentContent(arg: Content | ((prev: Content) => Content)): void;
 };
 
+/**
+ * Markup API hook
+ *
+ * NOTE: This is a single use hook per editor instance.
+ */
 export function useMarkupApi(
 	document: EditorDocument,
 	renderOptions: RenderOptions,
 	listeners?: EditorListeners
 ): MarkupApi {
-	const markupElementRef = useRef<MarkupElement>(null);
-	const markupCommitRef = useRef<MarkupCommit>(null);
-	const markupMetricsRef = useRef<MarkupMetrics>(null);
+	const apiRef = useRef<MarkupApi>(null);
+	const elementRef = useRef<MarkupElement>(null);
+	const commitRef = useRef<MarkupCommit>(null);
+	const metricsRef = useRef<MarkupMetrics>(null);
+	const listenersRef = useRef(listeners);
 
-	const renderDocument = useCallback(
-		(newDocument?: EditorDocument, newRenderOptions?: RenderOptions) => {
-			newDocument = newDocument ?? document;
-			newRenderOptions = newRenderOptions ?? renderOptions;
+	useEffect(() => {
+		listenersRef.current = listeners;
+	}, [listeners]);
 
-			const isFirstRender = markupCommitRef.current === null;
-			const isDocumentChanged = !isEqualObjects(
-				markupCommitRef.current?.document,
-				newDocument
-			);
+	useLayoutEffect(() => {
+		renderDocument(document, renderOptions);
+	}, [document, renderOptions]);
 
-			const isOptionsChanged = !isEqualObjects(
-				markupCommitRef.current?.renderOptions,
-				newRenderOptions
-			);
+	// prevent unnecessary re-creations of the API object because if the api reference is changed, the editor will rerender.
+	// dont use ?? even though it prevents overwriting, the assignment itself runs every render, which is a smell and can break in StrictMode or future refactors.
+	if (!apiRef.current) {
+		apiRef.current = {
+			getElement() {
+				return elementRef.current ?? null;
+			},
+			getElementRef() {
+				return elementRef;
+			},
 
-			if (isFirstRender || isDocumentChanged || isOptionsChanged) {
-				const newError = validateContent(newDocument);
-				const newMarkupMeta = generateMarkupMeta(newDocument, newError);
+			getLineElement(position = 'first') {
+				const markupEl = this.getElement();
+				if (!markupEl) return null;
 
-				renderMarkup(markupApi, newMarkupMeta, newRenderOptions);
+				const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
+				let lineEl;
 
-				markupCommitRef.current = {
-					document: newDocument,
-					error: newError,
-					markupMeta: newMarkupMeta,
-					renderOptions: newRenderOptions,
-				};
+				if (isPlainObject(position) && 'near' in position) {
+					lineEl = position.near.closest(`[${lineNumAttr}]`);
+				} else {
+					const selector =
+						position === 'first'
+							? `[${lineNumAttr}='1']`
+							: position === 'last'
+							? `[${lineNumAttr}]:last-child`
+							: `[${lineNumAttr}='${position}']`;
 
-				// fire onChange only in the subsequent renders
-				if (!isFirstRender) {
-					listeners?.onChange?.(newDocument.content);
+					lineEl = markupEl.querySelector(selector);
 				}
-				// fire onError always
-				listeners?.onError?.(newError);
 
-				// TODO: Don't cache metrics, we need to re-calculate metrics everytime cursor changes.
-				// Assuming that content change doesn't have impact on metrics is wrong, since
-				// not all glyphs acquire same column width
-				if (isOptionsChanged) {
-					updateMarkupMetrics(markupApi);
+				if (lineEl) {
+					return lineEl as MarkupLineElement;
 				}
-			}
-		},
-		[document, renderOptions]
-	);
 
-	useEffect(renderDocument, [document, renderOptions]);
+				return null;
+			},
 
-	const markupApi: MarkupApi = {
-		getElement: () => markupElementRef.current ?? null,
-		getElementRef: () => markupElementRef,
+			getMetrics() {
+				return metricsRef.current ?? null;
+			},
 
-		getLineElement: (position = 'first') => {
-			const markupEl = markupApi.getElement();
-			if (!markupEl) return null;
+			setMetrics(metrics: MarkupMetrics) {
+				return (metricsRef.current = metrics);
+			},
 
-			const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
-			let lineEl;
-
-			if (isPlainObject(position) && 'near' in position) {
-				lineEl = position.near.closest(`[${lineNumAttr}]`);
-			} else {
-				const selector =
-					position === 'first'
-						? `[${lineNumAttr}='1']`
-						: position === 'last'
-						? `[${lineNumAttr}]:last-child`
-						: `[${lineNumAttr}='${position}']`;
-
-				lineEl = markupEl.querySelector(selector);
-			}
-
-			if (lineEl) {
-				return lineEl as MarkupLineElement;
-			}
-
-			return null;
-		},
-
-		getMetrics: () => markupMetricsRef.current ?? null,
-
-		setMetrics: (metrics: MarkupMetrics) => {
-			markupMetricsRef.current = metrics;
-		},
-
-		updateDocumentContent: useCallback(
-			(arg) => {
-				if (!markupCommitRef.current) return;
+			updateDocumentContent(arg) {
+				if (!commitRef.current) return;
 
 				const newContent =
 					typeof arg === 'function'
-						? arg(markupCommitRef.current.document.content)
+						? arg(commitRef.current.document.content)
 						: arg;
 
-				renderDocument({
-					...markupCommitRef.current.document,
+				const newDocument = {
+					...commitRef.current.document,
 					content: newContent,
-				});
-			},
-			[renderDocument]
-		),
-	};
+				};
 
-	return markupApi;
+				renderDocument(newDocument, commitRef.current.renderOptions);
+			},
+		};
+	}
+
+	return apiRef.current;
+
+	function renderDocument(
+		newDocument: EditorDocument,
+		newRenderOptions: RenderOptions
+	) {
+		const markupApi = apiRef.current;
+		if (!markupApi) return;
+
+		const latestCommit = commitRef.current;
+
+		const isFirstRender = latestCommit === null;
+
+		const isDocumentChanged = !isEqualObjects(
+			latestCommit?.document,
+			newDocument
+		);
+
+		const isOptionsChanged = !isEqualObjects(
+			latestCommit?.renderOptions,
+			newRenderOptions
+		);
+
+		if (isFirstRender || isDocumentChanged || isOptionsChanged) {
+			const newError = validateContent(newDocument);
+			const newMarkupMeta = generateMarkupMeta(newDocument, newError);
+
+			renderMarkup(markupApi, newMarkupMeta, newRenderOptions);
+
+			commitRef.current = {
+				document: newDocument,
+				error: newError,
+				markupMeta: newMarkupMeta,
+				renderOptions: newRenderOptions,
+			};
+
+			const listeners = listenersRef.current;
+			// don't fire onChange on first render
+			if (!isFirstRender) {
+				listeners?.onChange?.(newDocument.content);
+			}
+			// fire onError on each render
+			listeners?.onError?.(newError);
+
+			// TODO: Don't cache metrics, we need to re-calculate metrics everytime cursor changes.
+			// Assuming that content change doesn't have impact on metrics is wrong, since
+			// not all glyphs acquire same column width
+			if (isOptionsChanged) {
+				updateMarkupMetrics(markupApi);
+			}
+		}
+	}
 }
