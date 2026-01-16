@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
 	type MarkupOptions,
 	type ToolbarOptions,
@@ -17,12 +16,7 @@ import {
 	EditorDocumentContext,
 } from './contexts';
 import { type Content, type EditorError } from './utils';
-import {
-	useCursorApi,
-	useMarkupApi,
-	useToolbarStates,
-	type RenderOptions,
-} from './hooks';
+import { useEditorApi, useToolbarStates, type RenderOptions } from './hooks';
 
 export type EditorListeners = {
 	onChange?: (content: Content) => void;
@@ -59,20 +53,10 @@ export function CodeEditor({
 		...markupOptions,
 	};
 
-	const markupApi = useMarkupApi(document, renderOptions, listeners);
-
-	const cursorApi = useCursorApi(markupApi);
-
-	const apiContextValue = useMemo(
-		() => ({
-			cursorApi,
-			markupApi,
-		}),
-		[cursorApi, markupApi]
-	);
+	const editorApi = useEditorApi(document, renderOptions, listeners);
 
 	return (
-		<EditorApiContext.Provider value={apiContextValue}>
+		<EditorApiContext.Provider value={editorApi}>
 			<EditorDocumentContext.Provider value={document}>
 				<Root>
 					<Toolbar options={toolbarOptions} states={toolbarStates} />
