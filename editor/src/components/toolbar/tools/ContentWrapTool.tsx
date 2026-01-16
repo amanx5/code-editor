@@ -1,12 +1,13 @@
-import { useContext } from 'react';
 import { WrapTextSvg } from '../../svg/WrapTextSvg';
 import { ToolDefaultSvgProps, ToolButton } from './ToolButton';
-import { ToolbarStatesContext } from '../../../contexts/ToolbarStatesContext';
 
-export function ContentWrapTool() {
-	const { isWrapEnabled, setIsWrapEnabled } =
-		useContext(ToolbarStatesContext);
-
+export function ContentWrapTool({
+	isWrapEnabled,
+	setIsWrapEnabled,
+}: {
+	isWrapEnabled: boolean;
+	setIsWrapEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
 	const readerText = isWrapEnabled ? 'Disable Code Wrap' : 'Enable Code Wrap';
 
 	return (

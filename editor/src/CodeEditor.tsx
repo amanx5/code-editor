@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
 	type MarkupOptions,
 	type ToolbarOptions,
@@ -18,10 +18,11 @@ import {
 } from './contexts';
 import { type Content, type EditorError } from './utils';
 import {
-	ToolbarStatesContext,
-	ToolbarStatesDefault,
-} from './contexts/ToolbarStatesContext';
-import { useCursorApi, useMarkupApi, type RenderOptions } from './hooks';
+	useCursorApi,
+	useMarkupApi,
+	useToolbarStates,
+	type RenderOptions,
+} from './hooks';
 
 export type EditorListeners = {
 	onChange?: (content: Content) => void;
@@ -49,25 +50,13 @@ export function CodeEditor({
 	markupOptions = applyDefaults(markupOptions, MarkupOptionsDefault);
 	toolbarOptions = applyDefaults(toolbarOptions, ToolbarOptionsDefault);
 
-	const [isWrapEnabled, setIsWrapEnabled] = useState(
-		ToolbarStatesDefault.isWrapEnabled
-	);
-
-	const [isFormatEnabled, setIsFormatEnabled] = useState(
-		ToolbarStatesDefault.isFormatEnabled
-	);
-
-	const toolbarStates = {
-		isWrapEnabled,
-		isFormatEnabled,
-		setIsWrapEnabled,
-		setIsFormatEnabled,
-	};
+	const toolbarStates = useToolbarStates();
+	const { isWrapEnabled, isFormatEnabled } = toolbarStates;
 
 	const renderOptions: RenderOptions = {
-		...markupOptions,
 		isWrapEnabled,
 		isFormatEnabled,
+		...markupOptions,
 	};
 
 	const markupApi = useMarkupApi(document, renderOptions, listeners);
@@ -85,18 +74,16 @@ export function CodeEditor({
 	return (
 		<EditorApiContext.Provider value={apiContextValue}>
 			<EditorDocumentContext.Provider value={document}>
-				<ToolbarStatesContext.Provider value={toolbarStates}>
-					<Root>
-						<Toolbar options={toolbarOptions} />
+				<Root>
+					<Toolbar options={toolbarOptions} states={toolbarStates} />
 
-						<Body>
-							<MarkupLayer />
-							<CursorLayer />
-						</Body>
+					<Body>
+						<MarkupLayer />
+						<CursorLayer />
+					</Body>
 
-						<Statusbar />
-					</Root>
-				</ToolbarStatesContext.Provider>
+					<Statusbar />
+				</Root>
 			</EditorDocumentContext.Provider>
 		</EditorApiContext.Provider>
 	);

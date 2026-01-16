@@ -17,11 +17,40 @@ export const ToolbarOptionsDefault = {
 	showFormatTool: false,
 };
 
-export type ToolbarProps = {
-	options: ToolbarOptions;
+export type ToolbarStateValues = {
+	isWrapEnabled: boolean;
+	isFormatEnabled: boolean;
 };
 
-export const Toolbar = memo(function Toolbar({ options }: ToolbarProps) {
+export type ToolbarStateSetters = {
+	setIsWrapEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+	setIsFormatEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+export type ToolbarStates = ToolbarStateValues & ToolbarStateSetters;
+
+export const ToolbarStatesDefault: ToolbarStates = {
+	isWrapEnabled: false,
+	isFormatEnabled: false,
+	setIsWrapEnabled: () => {},
+	setIsFormatEnabled: () => {},
+};
+
+export type ToolbarProps = {
+	options: ToolbarOptions;
+	states: ToolbarStates;
+};
+
+export const Toolbar = memo(function Toolbar({
+	options,
+	states,
+}: ToolbarProps) {
+	const {
+		isWrapEnabled,
+		isFormatEnabled,
+		setIsWrapEnabled,
+		setIsFormatEnabled,
+	} = states;
 	const { hideToolbar, showWrapTool, showCopyTool, showFormatTool } = options;
 
 	if (hideToolbar) return null;
@@ -31,15 +60,25 @@ export const Toolbar = memo(function Toolbar({ options }: ToolbarProps) {
 			className={cls(
 				'border-b border-b-cePanel',
 				'flex items-stretch justify-between',
-				'h-9 max-h-9',
+				'h-9 max-h-9'
 			)}
 		>
 			<Title />
 
 			<div className='flex h-full items-stretch'>
-				{showWrapTool && <ContentWrapTool />}
+				{showWrapTool && (
+					<ContentWrapTool
+						isWrapEnabled={isWrapEnabled}
+						setIsWrapEnabled={setIsWrapEnabled}
+					/>
+				)}
 				{showCopyTool && <ContentCopyTool />}
-				{showFormatTool && <ContentFormatTool />}
+				{showFormatTool && (
+					<ContentFormatTool
+						isFormatEnabled={isFormatEnabled}
+						setIsFormatEnabled={setIsFormatEnabled}
+					/>
+				)}
 			</div>
 		</div>
 	);
