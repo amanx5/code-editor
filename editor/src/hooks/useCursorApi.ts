@@ -16,7 +16,10 @@ export type CursorApi = {
 	getElementRef(): React.RefObject<CursorElement | null>;
 
 	getPosition(): CursorPosition;
-	setPosition(cursorPosition: CursorPosition): void;
+
+	setPosition(
+		arg: CursorPosition | ((prev: CursorPosition) => CursorPosition)
+	): void;
 
 	setPositionOnPointer(e: React.PointerEvent): void;
 
@@ -25,7 +28,15 @@ export type CursorApi = {
 	subscribePosition(listener: CursorPositionStoreListener): () => void;
 };
 
-// FIXME: Cursor renders blurry on alternate columns (dom render issue)
+/**
+ *
+ * Cursor API hook
+ *
+ * NOTE: This is a single use hook per editor instance.
+ *
+ * To prevent unnecessary re-creations of the API object on rerenders, the returned API object is memoized internally by keeping it in a ref.
+ */
+// FIXME: Cursor renders blurry and wider on alternate columns. But looks fine on high zoom levels.
 export function useCursorApi(markupApi: MarkupApi): CursorApi {
 	const apiRef = useRef<CursorApi>(null);
 	const elementRef = useRef<CursorElement>(null);
@@ -39,119 +50,135 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 	// sync initial cursor coordinates
 	useLayoutEffect(syncCoordinates, []);
 
-	// prevent unnecessary re-creations of the API object on rerenders
-	apiRef.current = apiRef.current ?? {
-		getElement() {
-			return elementRef.current ?? null;
-		},
+	// prevent unnecessary re-creations of the API object because if the api reference is changed, the editor will rerender.
+	// dont use ?? even though it prevents overwriting, the assignment itself runs every render, which is a smell and can break in StrictMode or future refactors.
+	if (!apiRef.current) {
+		apiRef.current = {
+			getElement() {
+				return elementRef.current ?? null;
+			},
 
-		getElementRef() {
-			return elementRef;
-		},
+			getElementRef() {
+				return elementRef;
+			},
 
-		getPosition() {
-			return positionRef.current;
-		},
+			getPosition() {
+				return positionRef.current;
+			},
 
-		setPosition(cursorPosition: CursorPosition) {
-			const isPositionChanged = !isEqualObjects(
-				positionRef.current,
-				cursorPosition
-			); // compare by value instead of reference
+			setPosition(arg) {
+				const newPosition =
+					typeof arg === 'function' ? arg(this.getPosition()) : arg;
 
-			if (isPositionChanged) {
-				const newPosition = { ...cursorPosition }; // force new reference (needed for useSyncExternalStore), (maybe setter invoker reused the old position object)
-				positionRef.current = newPosition;
-
-				syncCoordinates();
-				notifyPositionListeners();
-			} else {
-				this.setVisible(true);
-			}
-		},
-
-		setPositionOnPointer(e) {
-			const markupMetrics = markupApi.getMetrics();
-			if (!markupMetrics) return;
-
-			const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
-			const targetEl = e.target as HTMLElement;
-
-			let lineColumn, lineNumber;
-
-			const closestLineEl = markupApi.getLineElement({
-				near: targetEl,
-			});
-			const lastLineEl = markupApi.getLineElement('last');
-
-			if (closestLineEl) {
-				const lineStartClientX =
-					closestLineEl.getBoundingClientRect().left +
-					toNumber(markupMetrics.line.paddingLeft);
-
-				const targettedColumnDistanceFromLineStart =
-					e.clientX - lineStartClientX;
-
-				const targettedColumn = Math.round(
-					targettedColumnDistanceFromLineStart /
-						markupMetrics.column.width
+				const isPositionChanged = !isEqualObjects(
+					// compare by value instead of reference
+					positionRef.current,
+					newPosition
 				);
 
-				const lastColumn = closestLineEl.textContent.length;
-
-				if (targettedColumn < 1) {
-					lineColumn = 1; // before first character
-				} else if (targettedColumn > lastColumn) {
-					lineColumn = lastColumn + 1; // after last character
+				if (isPositionChanged) {
+					positionRef.current = normalizePosition(newPosition);
+					syncCoordinates();
+					notifyPositionListeners();
 				} else {
-					lineColumn = targettedColumn + 1; // +1 for 1-based index
+					this.setVisible(true);
+				}
+			},
+
+			setPositionOnPointer(e) {
+				const markupMetrics = markupApi.getMetrics();
+				if (!markupMetrics) return;
+
+				const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
+				const targetEl = e.target as HTMLElement;
+
+				let lineColumn, lineNumber;
+
+				const closestLineEl = markupApi.getLineElement({
+					near: targetEl,
+				});
+				const lastLineEl = markupApi.getLineElement('last');
+
+				if (closestLineEl) {
+					const lineStartClientX =
+						closestLineEl.getBoundingClientRect().left +
+						toNumber(markupMetrics.line.paddingLeft);
+
+					const targettedColumnDistanceFromLineStart =
+						e.clientX - lineStartClientX;
+
+					const targettedColumn = Math.round(
+						targettedColumnDistanceFromLineStart /
+							markupMetrics.column.width
+					);
+
+					const lastColumn = closestLineEl.textContent.length;
+
+					if (targettedColumn < 1) {
+						lineColumn = 1; // before first character
+					} else if (targettedColumn > lastColumn) {
+						lineColumn = lastColumn + 1; // after last character
+					} else {
+						lineColumn = targettedColumn + 1; // +1 for 1-based index
+					}
+
+					lineNumber = Number(
+						closestLineEl.getAttribute(lineNumAttr)
+					);
+				} else if (lastLineEl) {
+					const lastLineColumn = lastLineEl.textContent.length;
+
+					lineColumn = lastLineColumn + 1; // after last character
+					lineNumber = Number(lastLineEl.getAttribute(lineNumAttr));
 				}
 
-				lineNumber = Number(closestLineEl.getAttribute(lineNumAttr));
-			} else if (lastLineEl) {
-				const lastLineColumn = lastLineEl.textContent.length;
+				if (lineColumn != null && lineNumber != null) {
+					this.setPosition({
+						lineColumn,
+						lineNumber,
+					});
+				}
+			},
 
-				lineColumn = lastLineColumn + 1; // after last character
-				lineNumber = Number(lastLineEl.getAttribute(lineNumAttr));
-			}
+			setVisible(isVisible: boolean) {
+				const cursorEl = this.getElement();
 
-			if (lineColumn != null && lineNumber != null) {
-				this.setPosition({
-					lineColumn,
-					lineNumber,
-				});
-			}
-		},
+				if (!cursorEl) return;
 
-		setVisible(isVisible: boolean) {
-			const cursorEl = this.getElement();
+				cursorEl.classList.toggle('hidden', !isVisible);
 
-			if (!cursorEl) return;
+				if (isVisible) {
+					cursorEl.scrollIntoView({
+						behavior: 'instant',
+						block: 'nearest',
+						inline: 'nearest',
+					});
+				}
+			},
 
-			cursorEl.classList.toggle('hidden', !isVisible);
+			subscribePosition(listener: CursorPositionStoreListener) {
+				positionListenersRef.current.push(listener);
 
-			if (isVisible) {
-				cursorEl.scrollIntoView({
-					behavior: 'instant',
-					block: 'nearest',
-					inline: 'nearest',
-				});
-			}
-		},
-
-		subscribePosition(listener: CursorPositionStoreListener) {
-			positionListenersRef.current.push(listener);
-
-			return () => {
-				positionListenersRef.current =
-					positionListenersRef.current.filter(
-						(li) => li !== listener
-					);
-			};
-		},
-	};
+				return () => {
+					positionListenersRef.current =
+						positionListenersRef.current.filter(
+							(li) => li !== listener
+						);
+				};
+			},
+		};
+	}
 
 	return apiRef.current;
+
+	function normalizePosition(position: CursorPosition): CursorPosition {
+		// TODO normalize overflowing positions to max column and max line number
+		// force new reference (needed for useSyncExternalStore), (maybe setter invoker reused the old position object)
+		return {
+			lineColumn: Math.max(1, position.lineColumn),
+			lineNumber: Math.max(1, position.lineNumber),
+		};
+	}
 
 	function syncCoordinates() {
 		const cursorApi = apiRef.current;
