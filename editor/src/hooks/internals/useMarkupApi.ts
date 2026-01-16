@@ -40,14 +40,14 @@ export type MarkupLineElement = HTMLPreElement;
 export type MarkupApi = {
 	getElement(): MarkupElement | null;
 
-	getElementRef(): React.RefObject<MarkupElement | null>;
-
 	getLineElement(
 		position?: CodeLineNumber | 'first' | 'last' | { near: HTMLElement },
 		referenceEl?: HTMLElement
 	): MarkupLineElement | null;
 
 	getMetrics(): MarkupMetrics | null;
+
+	setElement(element: MarkupElement): void;
 
 	setMetrics(metrics: MarkupMetrics): void;
 
@@ -78,15 +78,13 @@ export function useMarkupApi(
 		renderDocument(document, renderOptions);
 	}, [document, renderOptions]);
 
-	// prevent unnecessary re-creations of the API object because if the api reference is changed, the editor will rerender.
+	// Create the Markup API only once to keep a stable imperative API reference.
+	// Recreating this object would break functions holding the old reference
 	// dont use ?? even though it prevents overwriting, the assignment itself runs every render, which is a smell and can break in StrictMode or future refactors.
 	if (!apiRef.current) {
 		apiRef.current = {
 			getElement() {
 				return elementRef.current ?? null;
-			},
-			getElementRef() {
-				return elementRef;
 			},
 
 			getLineElement(position = 'first') {
@@ -103,8 +101,8 @@ export function useMarkupApi(
 						position === 'first'
 							? `[${lineNumAttr}='1']`
 							: position === 'last'
-							? `[${lineNumAttr}]:last-child`
-							: `[${lineNumAttr}='${position}']`;
+								? `[${lineNumAttr}]:last-child`
+								: `[${lineNumAttr}='${position}']`;
 
 					lineEl = markupEl.querySelector(selector);
 				}
@@ -118,6 +116,10 @@ export function useMarkupApi(
 
 			getMetrics() {
 				return metricsRef.current ?? null;
+			},
+
+			setElement(el) {
+				elementRef.current = el;
 			},
 
 			setMetrics(metrics: MarkupMetrics) {

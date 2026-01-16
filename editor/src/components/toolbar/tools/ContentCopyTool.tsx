@@ -1,11 +1,12 @@
-import { useContext, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { ClipboardSvg } from '../../svg/ClipboardSvg';
 import { ToolDefaultSvgProps, ToolButton } from './ToolButton';
-import { EditorDocumentContext } from '../../../contexts';
+import { useDocument } from '../../../hooks/';
 
 export function ContentCopyTool() {
-	// TODO: use the content from editordataref
-	const { content } = useContext(EditorDocumentContext);
+	// TODO: use the content from editordataref as consumer might not be syncing its own document with editor document
+	// as consumer may or may not provide onChange listener.
+	const { content } = useDocument();
 
 	const [isCopied, setIsCopied] = useState(false);
 	const readerText = 'Copy code to clipboard';

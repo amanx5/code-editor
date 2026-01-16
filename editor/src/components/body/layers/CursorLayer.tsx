@@ -1,13 +1,12 @@
-import { useContext } from 'react';
-import { EditorApiContext } from '../../../contexts';
 import { cls } from '../../../utils';
+import { useEditor } from '../../../hooks';
 
 export type CursorElement = HTMLDivElement;
 
 // TODO
 // - Add Blink effect (make sure to pause blink when typing)
 export function CursorLayer() {
-	const { cursorApi } = useContext(EditorApiContext);
+	const { cursorApi } = useEditor();
 	
 	return (
 		<div aria-hidden className='absolute'>
@@ -20,7 +19,7 @@ export function CursorLayer() {
 					'pointer-events-none',
 					'z-10'
 				)}
-				ref={cursorApi.getElementRef()}
+				ref={cursorApi.setElement} // callback ref
 			></div>
 		</div>
 	);

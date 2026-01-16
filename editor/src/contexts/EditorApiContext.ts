@@ -6,7 +6,4 @@ export type EditorApi = {
 	markupApi: MarkupApi;
 };
 
-export const EditorApiContext = createContext<EditorApi>({
-	cursorApi: {} as CursorApi, // FIXME temporary cast
-	markupApi: {} as MarkupApi,
-});
+export const EditorApiContext = createContext<EditorApi | null>(null);

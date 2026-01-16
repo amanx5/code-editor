@@ -1,5 +1,4 @@
 import type { MarkupElement } from '../../components';
-import type { CursorApi, MarkupApi } from '../../hooks';
 import { handleBlur, handleFocus } from './focus';
 import { handleKeyDown } from './keyboard';
 import { handlePaste } from './clipboard';
@@ -8,11 +7,7 @@ import {
 	handlePointerMove,
 	handlePointerUp,
 } from './pointer';
-
-export type ApiMap = {
-	cursorApi: CursorApi;
-	markupApi: MarkupApi;
-};
+import type { EditorApi } from '../../contexts';
 
 export type EditorEventName = keyof EditorEventHandlerInvoker;
 
@@ -22,7 +17,7 @@ export type EditorEventObject<N extends EditorEventName> = Parameters<
 
 export type EditorEventHandler<N extends EditorEventName> = (
 	e: EditorEventObject<N>,
-	apiMap: ApiMap
+	editorApi: EditorApi
 ) => void;
 
 export type EditorEventHandlerInvoker = Pick<
@@ -43,21 +38,23 @@ export type EditorEventHandlerInvoker = Pick<
 	| 'onPointerUp'
 >;
 
-export function getEventHandlers(apiMap: ApiMap): EditorEventHandlerInvoker {
+export function getEventHandlers(
+	editorApi: EditorApi
+): EditorEventHandlerInvoker {
 	return {
 		// Clipboard Events
-		onPaste: (e) => handlePaste(e, apiMap),
+		onPaste: (e) => handlePaste(e, editorApi),
 
 		// Focus Events
-		onFocus: (e) => handleFocus(e, apiMap),
-		onBlur: (e) => handleBlur(e, apiMap),
+		onFocus: (e) => handleFocus(e, editorApi),
+		onBlur: (e) => handleBlur(e, editorApi),
 
 		// Keyboard Events
-		onKeyDown: (e) => handleKeyDown(e, apiMap),
+		onKeyDown: (e) => handleKeyDown(e, editorApi),
 
 		// Pointer Events
-		onPointerDown: (e) => handlePointerDown(e, apiMap),
-		onPointerMove: (e) => handlePointerMove(e, apiMap),
-		onPointerUp: (e) => handlePointerUp(e, apiMap),
+		onPointerDown: (e) => handlePointerDown(e, editorApi),
+		onPointerMove: (e) => handlePointerMove(e, editorApi),
+		onPointerUp: (e) => handlePointerUp(e, editorApi),
 	};
 }

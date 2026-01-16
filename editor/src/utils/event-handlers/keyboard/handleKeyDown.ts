@@ -1,6 +1,6 @@
 import type { EditorEventHandler } from '../get-event-handlers';
 
-export const handleKeyDown: EditorEventHandler<'onKeyDown'> = (e, apiMap) => {
+export const handleKeyDown: EditorEventHandler<'onKeyDown'> = (e, editorApi) => {
 	const key = e.key;
 
 	switch (key) {

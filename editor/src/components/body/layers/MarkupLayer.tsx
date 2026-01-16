@@ -1,6 +1,5 @@
-import { useContext, useMemo } from 'react';
 import { cls, getEventHandlers } from '../../../utils';
-import { EditorApiContext } from '../../../contexts';
+import { useEditor } from '../../../hooks';
 
 export type CodeLineNumber = number;
 
@@ -19,16 +18,9 @@ export const MarkupOptionsDefault: MarkupOptions = {
 export type MarkupElement = HTMLDivElement;
 
 export function MarkupLayer() {
-	const { cursorApi, markupApi } = useContext(EditorApiContext);
-
-	const eventHandlers = useMemo(
-		() =>
-			getEventHandlers({
-				cursorApi,
-				markupApi,
-			}),
-		[cursorApi, markupApi]
-	);
+	const editorApi = useEditor();
+	const { markupApi } = editorApi;
+	const eventHandlers = getEventHandlers(editorApi);
 
 	return (
 		<div
@@ -41,7 +33,7 @@ export function MarkupLayer() {
 				'selection:bg-blue-100',
 				'z-10'
 			)}
-			ref={markupApi.getElementRef()}
+			ref={markupApi.setElement} // callback ref
 			role='textbox'
 			spellCheck={false}
 			tabIndex={0}

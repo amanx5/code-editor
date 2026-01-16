@@ -13,10 +13,10 @@ export type CursorPositionStoreListener = () => void;
 export type CursorApi = {
 	getElement(): CursorElement | null;
 
-	getElementRef(): React.RefObject<CursorElement | null>;
-
 	getPosition(): CursorPosition;
 
+	setElement(element: CursorElement): void;
+	
 	setPosition(
 		arg: CursorPosition | ((prev: CursorPosition) => CursorPosition)
 	): void;
@@ -50,7 +50,8 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 	// sync initial cursor coordinates
 	useLayoutEffect(syncCoordinates, []);
 
-	// prevent unnecessary re-creations of the API object because if the api reference is changed, the editor will rerender.
+	// Create the Cursor API only once to keep a stable imperative API reference.
+	// Recreating this object would break functions holding the old reference
 	// dont use ?? even though it prevents overwriting, the assignment itself runs every render, which is a smell and can break in StrictMode or future refactors.
 	if (!apiRef.current) {
 		apiRef.current = {
@@ -58,12 +59,12 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 				return elementRef.current ?? null;
 			},
 
-			getElementRef() {
-				return elementRef;
-			},
-
 			getPosition() {
 				return positionRef.current;
+			},
+
+			setElement(el) {
+				elementRef.current = el;
 			},
 
 			setPosition(arg) {

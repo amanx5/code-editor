@@ -4,6 +4,13 @@ import type { EditorApi, EditorDocument } from '../../contexts';
 import { useCursorApi } from './useCursorApi';
 import { useMarkupApi, type RenderOptions } from './useMarkupApi';
 
+/**
+ * Hook to setup all the editor APIs.
+ * 
+ * NOTE: This is a single use hook per editor instance.
+ * 
+ * Don't use this hook for reading the editor APIs. Use `useEditor` hook for reading the editor APIs.
+ */
 export function useEditorApi(
 	document: EditorDocument,
 	renderOptions: RenderOptions,

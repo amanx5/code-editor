@@ -1,10 +1,8 @@
-import { useContext } from 'react';
-import { useCursorPosition } from '../../../hooks';
+import { useCursorPosition, useEditor } from '../../../hooks';
 import { StatusButton } from './StatusButton';
-import { EditorApiContext } from '../../../contexts';
 
 export function CursorStatus() {
-	const { cursorApi } = useContext(EditorApiContext);
+	const { cursorApi } = useEditor();
 	const { lineNumber, lineColumn } = useCursorPosition();
 
 	return (

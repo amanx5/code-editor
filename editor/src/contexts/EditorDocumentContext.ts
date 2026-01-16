@@ -6,7 +6,4 @@ export type EditorDocument = {
 	language: Language;
 	name?: string;
 };
-export const EditorDocumentContext = createContext<EditorDocument>({
-	content: '',
-	language: 'txt',
-});
+export const EditorDocumentContext = createContext<EditorDocument | null>(null);
