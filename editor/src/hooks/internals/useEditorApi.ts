@@ -1,6 +1,6 @@
 import { useRef } from 'react';
-import type { EditorListeners } from '../CodeEditor';
-import type { EditorApi, EditorDocument } from '../contexts';
+import type { EditorListeners } from '../../CodeEditor';
+import type { EditorApi, EditorDocument } from '../../contexts';
 import { useCursorApi } from './useCursorApi';
 import { useMarkupApi, type RenderOptions } from './useMarkupApi';
 

@@ -1,6 +1,6 @@
 import { useContext, useSyncExternalStore } from 'react';
-import type { CursorPosition } from '../useCursorApi';
-import { EditorApiContext } from '../../contexts';
+import type { CursorPosition } from './internals';
+import { EditorApiContext } from '../contexts';
 
 export function useCursorPosition(): CursorPosition {
 	const { cursorApi } = useContext(EditorApiContext);

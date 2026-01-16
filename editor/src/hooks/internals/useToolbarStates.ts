@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ToolbarStatesDefault, type ToolbarStates } from "../components";
+import { ToolbarStatesDefault, type ToolbarStates } from "../../components";
 
 export function useToolbarStates(): ToolbarStates {
     const [isWrapEnabled, setIsWrapEnabled] = useState(

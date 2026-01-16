@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
-import type { CodeLineNumber, CursorElement } from '../components';
+import type { CodeLineNumber, CursorElement } from '../../components';
 import { MARKUP_LINE_ATTRIBUTES, type MarkupApi } from './useMarkupApi';
-import { isEqualObjects, toNumber } from '../utils';
+import { isEqualObjects, toNumber } from '../../utils';
 
 export type CursorPosition = {
 	lineColumn: number;

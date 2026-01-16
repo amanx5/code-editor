@@ -5,22 +5,22 @@ import {
 	isEqualObjects,
 	isPlainObject,
 	validateContent,
-} from '../utils';
-import type { EditorDocument } from '../contexts';
+} from '../../utils';
+import type { EditorDocument } from '../../contexts';
 import type {
 	CodeLineNumber,
 	MarkupElement,
 	MarkupOptions,
 	ToolbarStateValues,
-} from '../components';
-import type { EditorListeners } from '../CodeEditor';
+} from '../../components';
+import type { EditorListeners } from '../../CodeEditor';
 import {
 	updateMarkupMetrics,
 	type MarkupMetrics,
 	type EditorMarkupMeta,
 	generateMarkupMeta,
 	renderMarkup,
-} from '../hooks';
+} from './markup-api';
 
 export const MARKUP_LINE_ATTRIBUTES = {
 	lineNumber: 'data-line-num',

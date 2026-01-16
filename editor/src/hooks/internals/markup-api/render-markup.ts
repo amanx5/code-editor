@@ -1,12 +1,10 @@
 import {
 	MARKUP_LINE_ATTRIBUTES,
-	type EditorMarkupMeta,
-	type LineMeta,
 	type MarkupApi,
 	type RenderOptions,
-} from '../../hooks';
-import { cls } from '../../utils/styling';
-import { type TokenMeta } from '../../utils';
+} from '../..';
+import { type TokenMeta, cls } from '../../../utils';
+import type { EditorMarkupMeta, LineMeta } from './generate-markup-meta';
 
 // TODO: Perform a minimal diff of changed lines and only add new token markup instead of re-rendering complete markup
 export function renderMarkup(

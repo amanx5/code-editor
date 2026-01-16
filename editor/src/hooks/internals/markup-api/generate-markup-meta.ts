@@ -1,10 +1,10 @@
-import type { CodeLineNumber } from '../../components';
-import type { EditorDocument } from '../../contexts';
+import type { CodeLineNumber } from '../../../components';
+import type { EditorDocument } from '../../../contexts';
 import {
 	tokeniseContent,
 	type EditorError,
 	type TokenisedLine,
-} from '../../utils';
+} from '../../../utils';
 
 export type LineMeta = {
 	error: EditorError | null;
@@ -35,5 +35,3 @@ export function generateMarkupMeta(
 
 	return markup;
 }
-
-
