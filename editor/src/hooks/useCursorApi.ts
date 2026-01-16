@@ -1,87 +1,130 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import type { CodeLineNumber, CursorElement } from '../components';
 import { MARKUP_LINE_ATTRIBUTES, type MarkupApi } from './useMarkupApi';
-import { isEqualObjects, toNumber, type ApiMap } from '../utils';
+import { isEqualObjects, toNumber } from '../utils';
 
 export type CursorPosition = {
 	lineColumn: number;
 	lineNumber: CodeLineNumber;
 };
 
-export type CursorEventName = keyof CursorEventListener;
-
-export type CursorEventListener = {
-	positionChange: (cursorPosition: CursorPosition) => void;
-};
-
-export type CursorEventListeners = {
-	[E in CursorEventName]: Array<CursorEventListener[E]>;
-};
+export type CursorPositionStoreListener = () => void;
 
 export type CursorApi = {
-	addListener: <E extends CursorEventName = CursorEventName>(
-		event: E,
-		listener: CursorEventListener[E]
-	) => void;
+	getElement(): CursorElement | null;
 
-	getElement: () => CursorElement | null;
+	getElementRef(): React.RefObject<CursorElement | null>;
 
-	getElementRef: () => React.RefObject<CursorElement | null>;
+	getPosition(): CursorPosition;
+	setPosition(cursorPosition: CursorPosition): void;
 
-	removeListener: <E extends CursorEventName = CursorEventName>(
-		event: E,
-		listener: CursorEventListener[E]
-	) => void;
+	setPositionOnPointer(e: React.PointerEvent): void;
 
-	getPosition: () => CursorPosition;
+	setVisible(isVisible: boolean): void;
 
-	setPosition: (cursorPosition: CursorPosition) => void;
-
-	setVisible: (isVisible: boolean) => void;
+	subscribePosition(listener: CursorPositionStoreListener): () => void;
 };
 
+// FIXME: Cursor renders blurry on alternate columns (dom render issue)
 export function useCursorApi(markupApi: MarkupApi): CursorApi {
+	const apiRef = useRef<CursorApi>(null);
 	const elementRef = useRef<CursorElement>(null);
 	const positionRef = useRef<CursorPosition>({
 		lineColumn: 1,
 		lineNumber: 1,
 	});
-	const listenersRef = useRef<CursorEventListeners>({
-		positionChange: [],
-	});
 
-	const cursorApi: CursorApi = {
-		addListener: (event, listener) => {
-			listenersRef.current[event].push(listener);
+	const positionListenersRef = useRef<CursorPositionStoreListener[]>([]);
+
+	// sync initial cursor coordinates
+	useLayoutEffect(syncCoordinates, []);
+
+	// prevent unnecessary re-creations of the API object on rerenders
+	apiRef.current = apiRef.current ?? {
+		getElement() {
+			return elementRef.current ?? null;
 		},
 
-		getElement: () => elementRef.current ?? null,
+		getElementRef() {
+			return elementRef;
+		},
 
-		getElementRef: () => elementRef,
+		getPosition() {
+			return positionRef.current;
+		},
 
-		getPosition: () => positionRef.current,
+		setPosition(cursorPosition: CursorPosition) {
+			const isPositionChanged = !isEqualObjects(
+				positionRef.current,
+				cursorPosition
+			); // compare by value instead of reference
 
-		removeListener: (event, listener) => {
-			const listeners = listenersRef.current[event];
-			const listenerIndex = listeners.indexOf(listener);
+			if (isPositionChanged) {
+				const newPosition = { ...cursorPosition }; // force new reference (needed for useSyncExternalStore), (maybe setter invoker reused the old position object)
+				positionRef.current = newPosition;
 
-			if (listenerIndex !== -1) {
-				listeners.splice(listenerIndex, 1);
+				syncCoordinates();
+				notifyPositionListeners();
+			} else {
+				this.setVisible(true);
 			}
 		},
 
-		setPosition: (cursorPosition: CursorPosition) => {
-			cursorApi.setVisible(true);
+		setPositionOnPointer(e) {
+			const markupMetrics = markupApi.getMetrics();
+			if (!markupMetrics) return;
 
-			if (!isEqualObjects(positionRef.current, cursorPosition)) {
-				positionRef.current = cursorPosition;
-				applyCursorPosition();
-				fireEvent('positionChange');
+			const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
+			const targetEl = e.target as HTMLElement;
+
+			let lineColumn, lineNumber;
+
+			const closestLineEl = markupApi.getLineElement({
+				near: targetEl,
+			});
+			const lastLineEl = markupApi.getLineElement('last');
+
+			if (closestLineEl) {
+				const lineStartClientX =
+					closestLineEl.getBoundingClientRect().left +
+					toNumber(markupMetrics.line.paddingLeft);
+
+				const targettedColumnDistanceFromLineStart =
+					e.clientX - lineStartClientX;
+
+				const targettedColumn = Math.round(
+					targettedColumnDistanceFromLineStart /
+						markupMetrics.column.width
+				);
+
+				const lastColumn = closestLineEl.textContent.length;
+
+				if (targettedColumn < 1) {
+					lineColumn = 1; // before first character
+				} else if (targettedColumn > lastColumn) {
+					lineColumn = lastColumn + 1; // after last character
+				} else {
+					lineColumn = targettedColumn + 1; // +1 for 1-based index
+				}
+
+				lineNumber = Number(closestLineEl.getAttribute(lineNumAttr));
+			} else if (lastLineEl) {
+				const lastLineColumn = lastLineEl.textContent.length;
+
+				lineColumn = lastLineColumn + 1; // after last character
+				lineNumber = Number(lastLineEl.getAttribute(lineNumAttr));
+			}
+
+			if (lineColumn != null && lineNumber != null) {
+				this.setPosition({
+					lineColumn,
+					lineNumber,
+				});
 			}
 		},
 
-		setVisible: (isVisible: boolean) => {
-			const cursorEl = cursorApi.getElement();
+		setVisible(isVisible: boolean) {
+			const cursorEl = this.getElement();
 
 			if (!cursorEl) return;
 
@@ -95,24 +138,32 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 				});
 			}
 		},
+
+		subscribePosition(listener: CursorPositionStoreListener) {
+			positionListenersRef.current.push(listener);
+
+			return () => {
+				positionListenersRef.current =
+					positionListenersRef.current.filter(
+						(li) => li !== listener
+					);
+			};
+		},
 	};
 
-	useEffect(() => {
-		applyCursorPosition();
-	}, []);
+	return apiRef.current;
 
-	return cursorApi;
+	function syncCoordinates() {
+		const cursorApi = apiRef.current;
+		if (!cursorApi) return;
 
-	function applyCursorPosition() {
 		const cursorPosition = cursorApi.getPosition();
 		const markupMetrics = markupApi.getMetrics();
-
 		if (!markupMetrics) return;
 
 		const cursorEl = cursorApi.getElement();
 		const markupEl = markupApi.getElement();
 		const lineEl = markupApi.getLineElement(cursorPosition.lineNumber);
-
 		if (!cursorEl || !lineEl || !markupEl) return;
 
 		// TODO: Calculate metrics everytime based on lineContentTillCursor
@@ -138,72 +189,13 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 			markupEl.getBoundingClientRect().top;
 
 		cursorEl.style.transform = `translate(${newX}px, ${newY}px)`;
+
+		cursorApi.setVisible(true);
 	}
 
-	function fireEvent(event: CursorEventName) {
-		switch (event) {
-			case 'positionChange':
-				const listeners = listenersRef.current.positionChange;
-				listeners.forEach((listener) =>
-					listener(cursorApi.getPosition()!)
-				);
-
-				break;
+	function notifyPositionListeners() {
+		for (const listener of positionListenersRef.current) {
+			listener();
 		}
-	}
-}
-
-export function setCursorPositionOnEvent(
-	e: React.PointerEvent,
-	apiMap: ApiMap
-) {
-	const { cursorApi, markupApi } = apiMap;
-
-	const markupMetrics = markupApi.getMetrics();
-	if (!markupMetrics) return;
-
-	const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
-	const targetEl = e.target as HTMLElement;
-
-	let lineColumn, lineNumber;
-
-	const closestLineEl = markupApi.getLineElement({ near: targetEl });
-	const lastLineEl = markupApi.getLineElement('last');
-
-	if (closestLineEl) {
-		const lineStartClientX =
-			closestLineEl.getBoundingClientRect().left +
-			toNumber(markupMetrics.line.paddingLeft);
-
-		const targettedColumnDistanceFromLineStart =
-			e.clientX - lineStartClientX;
-
-		const targettedColumn = Math.round(
-			targettedColumnDistanceFromLineStart / markupMetrics.column.width
-		);
-
-		const lastColumn = closestLineEl.textContent.length;
-
-		if (targettedColumn < 1) {
-			lineColumn = 1; // before first character
-		} else if (targettedColumn > lastColumn) {
-			lineColumn = lastColumn + 1; // after last character
-		} else {
-			lineColumn = targettedColumn + 1; // +1 for 1-based index
-		}
-
-		lineNumber = Number(closestLineEl.getAttribute(lineNumAttr));
-	} else if (lastLineEl) {
-		const lastLineColumn = lastLineEl.textContent.length;
-
-		lineColumn = lastLineColumn + 1; // after last character
-		lineNumber = Number(lastLineEl.getAttribute(lineNumAttr));
-	}
-
-	if (lineColumn != null && lineNumber != null) {
-		cursorApi.setPosition({
-			lineColumn,
-			lineNumber,
-		});
 	}
 }
