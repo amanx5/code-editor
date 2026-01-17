@@ -1,21 +1,23 @@
-import type { Content } from '../language-util';
-import type { TokenisedLine } from '../tokenise-content';
+import type { ContentTokeniser, TokenisedLine } from '../tokenise-content';
 
-export function contentTokeniserTxt(content: Content): TokenisedLine[] {
-	const plainLines = content.split('\n');
+export const contentTokeniserTxt: ContentTokeniser = (content) => {
+	const contentLines = content.split('\n');
 
-	let tokenisedLines: TokenisedLine[] = [];
+	let result = [];
 
-	for (const line of plainLines) {
-		const tokenisedLine: TokenisedLine = [
-			{
-				cls: '',
-				value: line,
-			},
-		];
+	for (const line of contentLines) {
+		const tokenisedLine: TokenisedLine = {
+			content: line,
+			tokens: [
+				{
+					cls: '',
+					value: line,
+				},
+			],
+		};
 
-		tokenisedLines.push(tokenisedLine);
+		result.push(tokenisedLine);
 	}
 
-	return tokenisedLines;
-}
+	return result;
+};

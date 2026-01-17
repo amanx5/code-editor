@@ -7,7 +7,7 @@ import {
 	handlePointerMove,
 	handlePointerUp,
 } from './pointer';
-import type { EditorApi } from '../../contexts';
+import type { EditorApi } from '../../hooks';
 
 export type EditorEventName = keyof EditorEventHandlerInvoker;
 
@@ -17,7 +17,7 @@ export type EditorEventObject<N extends EditorEventName> = Parameters<
 
 export type EditorEventHandler<N extends EditorEventName> = (
 	e: EditorEventObject<N>,
-	editorApi: EditorApi
+	editorApi: EditorApi,
 ) => void;
 
 export type EditorEventHandlerInvoker = Pick<
@@ -39,7 +39,7 @@ export type EditorEventHandlerInvoker = Pick<
 >;
 
 export function getEventHandlers(
-	editorApi: EditorApi
+	editorApi: EditorApi,
 ): EditorEventHandlerInvoker {
 	return {
 		// Clipboard Events

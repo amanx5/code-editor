@@ -11,6 +11,9 @@ export function isPlainObject(arg: unknown): arg is PlainObject {
 	return false;
 }
 
+/**
+ * Returns shallow comparison of 2 objects by their property values.
+ */
 export function isEqualObjects(object1: unknown, object2: unknown) {
 	if (!isPlainObject(object1) || !isPlainObject(object2)) {
 		return false;

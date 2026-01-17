@@ -4,11 +4,12 @@ import {
 	type EditorError,
 	isEqualObjects,
 	isPlainObject,
+	resolveSetterValue,
+	type SetterValue,
 	validateContent,
 } from '../../utils';
 import type { EditorDocument } from '../../contexts';
 import type {
-	CodeLineNumber,
 	MarkupElement,
 	MarkupOptions,
 	ToolbarStateValues,
@@ -20,11 +21,10 @@ import {
 	type EditorMarkupMeta,
 	generateMarkupMeta,
 	renderMarkup,
+	type MarkupLineAttribute,
+	MarkupLineAttributeDomName,
 } from './markup-api';
-
-export const MARKUP_LINE_ATTRIBUTES = {
-	lineNumber: 'data-line-num',
-};
+import { type LineNumber } from './useCursorApi';
 
 export type RenderOptions = MarkupOptions & ToolbarStateValues;
 
@@ -38,12 +38,19 @@ export type MarkupCommit = {
 export type MarkupLineElement = HTMLPreElement;
 
 export type MarkupApi = {
+	getCurrentCommit(): MarkupCommit | null;
+
 	getElement(): MarkupElement | null;
 
 	getLineElement(
-		position?: CodeLineNumber | 'first' | 'last' | { near: HTMLElement },
-		referenceEl?: HTMLElement
+		position?: LineNumber | 'first' | 'last' | { near: HTMLElement },
+		referenceEl?: HTMLElement,
 	): MarkupLineElement | null;
+
+	getLineElementAttribute(
+		lineElement: MarkupLineElement,
+		attribute: MarkupLineAttribute,
+	): string;
 
 	getMetrics(): MarkupMetrics | null;
 
@@ -51,7 +58,7 @@ export type MarkupApi = {
 
 	setMetrics(metrics: MarkupMetrics): void;
 
-	updateDocumentContent(arg: Content | ((prev: Content) => Content)): void;
+	updateDocumentContent(arg: SetterValue<Content>): void;
 };
 
 /**
@@ -62,7 +69,7 @@ export type MarkupApi = {
 export function useMarkupApi(
 	document: EditorDocument,
 	renderOptions: RenderOptions,
-	listeners?: EditorListeners
+	listeners?: EditorListeners,
 ): MarkupApi {
 	const apiRef = useRef<MarkupApi>(null);
 	const elementRef = useRef<MarkupElement>(null);
@@ -83,6 +90,10 @@ export function useMarkupApi(
 	// dont use ?? even though it prevents overwriting, the assignment itself runs every render, which is a smell and can break in StrictMode or future refactors.
 	if (!apiRef.current) {
 		apiRef.current = {
+			getCurrentCommit() {
+				return commitRef.current ?? null;
+			},
+
 			getElement() {
 				return elementRef.current ?? null;
 			},
@@ -91,7 +102,7 @@ export function useMarkupApi(
 				const markupEl = this.getElement();
 				if (!markupEl) return null;
 
-				const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
+				const lineNumAttr = MarkupLineAttributeDomName.lineNumber;
 				let lineEl;
 
 				if (isPlainObject(position) && 'near' in position) {
@@ -114,6 +125,19 @@ export function useMarkupApi(
 				return null;
 			},
 
+			getLineElementAttribute(lineElement, attribute) {
+				const attrDomName = MarkupLineAttributeDomName[attribute];
+				const attrValue = lineElement.getAttribute(attrDomName);
+
+				if (attrValue == null) {
+					throw new Error(
+						`No value is assigned to this line element for attribute "${attribute}". Searched using dom name "${attrDomName}" `,
+					);
+				}
+
+				return attrValue;
+			},
+
 			getMetrics() {
 				return metricsRef.current ?? null;
 			},
@@ -126,13 +150,13 @@ export function useMarkupApi(
 				return (metricsRef.current = metrics);
 			},
 
-			updateDocumentContent(arg) {
+			updateDocumentContent(value) {
 				if (!commitRef.current) return;
 
-				const newContent =
-					typeof arg === 'function'
-						? arg(commitRef.current.document.content)
-						: arg;
+				const newContent = resolveSetterValue(
+					value,
+					commitRef.current.document.content,
+				);
 
 				const newDocument = {
 					...commitRef.current.document,
@@ -148,7 +172,7 @@ export function useMarkupApi(
 
 	function renderDocument(
 		newDocument: EditorDocument,
-		newRenderOptions: RenderOptions
+		newRenderOptions: RenderOptions,
 	) {
 		const markupApi = apiRef.current;
 		if (!markupApi) return;
@@ -159,12 +183,12 @@ export function useMarkupApi(
 
 		const isDocumentChanged = !isEqualObjects(
 			latestCommit?.document,
-			newDocument
+			newDocument,
 		);
 
 		const isOptionsChanged = !isEqualObjects(
 			latestCommit?.renderOptions,
-			newRenderOptions
+			newRenderOptions,
 		);
 
 		if (isFirstRender || isDocumentChanged || isOptionsChanged) {

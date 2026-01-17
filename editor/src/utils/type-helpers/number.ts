@@ -1,10 +1,9 @@
 export function toNumber(
 	value: string,
-	convertTo: 'integer' | 'float' = 'float',
-	fallbackValue: null | number = 0
+	convertTo: 'int' | 'float' = 'float',
+	fallbackValue: null | number = 0,
 ): number {
-	const converter =
-		convertTo === 'integer' ? Number.parseInt : Number.parseFloat;
+	const converter = convertTo === 'int' ? Number.parseInt : Number.parseFloat;
 
 	const result = converter(value, 10);
 

@@ -1,12 +1,12 @@
 import { cls } from "../../utils";
-import type { CodeLineNumber } from "./layers";
+import type { LineNumber } from "../../hooks";
 
-export function LineNumber({
+export function LineNum({
 	isWrapEnabled,
 	lineNumber,
 }: {
 	isWrapEnabled?: boolean;
-	lineNumber: CodeLineNumber;
+	lineNumber: LineNumber;
 }) {
 	return (
 		<span

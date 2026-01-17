@@ -1,9 +1,10 @@
-import { useCursorPosition, useEditor } from '../../../hooks';
+import { useCursorSelection, useEditor } from '../../../hooks';
+import { toNumber } from '../../../utils';
 import { StatusButton } from './StatusButton';
 
 export function CursorStatus() {
 	const { cursorApi } = useEditor();
-	const { lineNumber, lineColumn } = useCursorPosition();
+	const { end } = useCursorSelection();
 
 	return (
 		<StatusButton
@@ -11,21 +12,26 @@ export function CursorStatus() {
 			onClick={onClick}
 			title='Cursor Position'
 		>
-			Ln {lineNumber}, Col {lineColumn}
+			Ln {end.lineNumber}, Col {end.lineColumn}
 		</StatusButton>
 	);
 
 	function onClick() {
 		// TODO: Implement go to line functionality component
 		const input = prompt(
-			'Type a line number or column to go to (line:column)'
+			'Type a line number to go to (optionally add :column)',
 		);
 
 		const [line, column] = input?.split(':') ?? [];
 
-		cursorApi.setPosition((prev) => ({
-			lineColumn: column ? parseInt(column, 10) : prev.lineColumn,
-			lineNumber: line ? parseInt(line, 10) : prev.lineNumber,
-		}));
+		if (line) {
+			const lineColumn = toNumber(column, 'int');
+			const lineNumber = toNumber(line, 'int');
+
+			cursorApi.setSelectionCollapsed({
+				lineColumn,
+				lineNumber,
+			});
+		}
 	}
 }

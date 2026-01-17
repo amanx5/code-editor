@@ -1,5 +1,6 @@
 import { useContext } from 'react';
-import { EditorApiContext, type EditorApi } from '../contexts';
+import { EditorApiContext } from '../contexts';
+import type { EditorApi } from './internals';
 
 /**
  * Hook to read/access the Editor API.
@@ -10,7 +11,7 @@ export function useEditor(): EditorApi {
 
 	if (!editorApi) {
 		throw new Error(
-			'Invalid usage of `useEditor` hook. This hook is only meant to be used inside `CodeEditor` child components or hooks.'
+			'Invalid usage of `useEditor` hook. This hook is only meant to be used inside `CodeEditor` child components or hooks.',
 		);
 	}
 

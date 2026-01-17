@@ -1,31 +1,61 @@
 import { useLayoutEffect, useRef } from 'react';
-import type { CodeLineNumber, CursorElement } from '../../components';
-import { MARKUP_LINE_ATTRIBUTES, type MarkupApi } from './useMarkupApi';
-import { isEqualObjects, toNumber } from '../../utils';
+import type { CursorElement } from '../../components';
+import { type MarkupApi } from './useMarkupApi';
+import {
+	isEqualObjects,
+	resolveSetterValue,
+	toNumber,
+	type SetterValue,
+} from '../../utils';
+
+export type LineColumn = number;
+export type LineNumber = number;
+
+export const MIN_LINE_COLUMN: LineColumn = 1;
+export const MIN_LINE_NUMBER: LineNumber = 1;
 
 export type CursorPosition = {
-	lineColumn: number;
-	lineNumber: CodeLineNumber;
+	lineColumn: LineColumn;
+	lineNumber: LineNumber;
 };
 
-export type CursorPositionStoreListener = () => void;
+export enum PositionComparison {
+	BEFORE = -1,
+	EQUAL = 0,
+	AFTER = 1,
+}
+
+export type CursorSelection = {
+	start: CursorPosition;
+	end: CursorPosition;
+};
+
+export type CursorSelectionListener = () => void;
 
 export type CursorApi = {
+	calculatePosition(e: React.PointerEvent): CursorPosition | null;
+
 	getElement(): CursorElement | null;
 
-	getPosition(): CursorPosition;
+	getMaxLineColumn(lineNumber: LineNumber): LineColumn;
+
+	getMaxLineNumber(): LineNumber;
+
+	getSelection(): CursorSelection;
 
 	setElement(element: CursorElement): void;
-	
-	setPosition(
-		arg: CursorPosition | ((prev: CursorPosition) => CursorPosition)
-	): void;
 
-	setPositionOnPointer(e: React.PointerEvent): void;
+	setSelection(arg: SetterValue<CursorSelection>): void;
+
+	setSelectionCollapsed(cursorPosition: CursorPosition): void;
+
+	setSelectionStart(cursorPosition: CursorPosition): void;
+
+	setSelectionEnd(cursorPosition: CursorPosition): void;
 
 	setVisible(isVisible: boolean): void;
 
-	subscribePosition(listener: CursorPositionStoreListener): () => void;
+	subscribeSelection(listener: CursorSelectionListener): () => void;
 };
 
 /**
@@ -38,14 +68,18 @@ export type CursorApi = {
  */
 // FIXME: Cursor renders blurry and wider on alternate columns. But looks fine on high zoom levels.
 export function useCursorApi(markupApi: MarkupApi): CursorApi {
-	const apiRef = useRef<CursorApi>(null);
-	const elementRef = useRef<CursorElement>(null);
-	const positionRef = useRef<CursorPosition>({
+	const defaultPosition = {
 		lineColumn: 1,
 		lineNumber: 1,
+	};
+	const apiRef = useRef<CursorApi>(null);
+	const elementRef = useRef<CursorElement>(null);
+	const selectionRef = useRef<CursorSelection>({
+		start: defaultPosition,
+		end: defaultPosition,
 	});
 
-	const positionListenersRef = useRef<CursorPositionStoreListener[]>([]);
+	const selectionListenersRef = useRef<CursorSelectionListener[]>([]);
 
 	// sync initial cursor coordinates
 	useLayoutEffect(syncCoordinates, []);
@@ -55,42 +89,10 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 	// dont use ?? even though it prevents overwriting, the assignment itself runs every render, which is a smell and can break in StrictMode or future refactors.
 	if (!apiRef.current) {
 		apiRef.current = {
-			getElement() {
-				return elementRef.current ?? null;
-			},
-
-			getPosition() {
-				return positionRef.current;
-			},
-
-			setElement(el) {
-				elementRef.current = el;
-			},
-
-			setPosition(arg) {
-				const newPosition =
-					typeof arg === 'function' ? arg(this.getPosition()) : arg;
-
-				const isPositionChanged = !isEqualObjects(
-					// compare by value instead of reference
-					positionRef.current,
-					newPosition
-				);
-
-				if (isPositionChanged) {
-					positionRef.current = normalizePosition(newPosition);
-					syncCoordinates();
-					notifyPositionListeners();
-				} else {
-					this.setVisible(true);
-				}
-			},
-
-			setPositionOnPointer(e) {
+			calculatePosition(e) {
 				const markupMetrics = markupApi.getMetrics();
-				if (!markupMetrics) return;
+				if (!markupMetrics) return null;
 
-				const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
 				const targetEl = e.target as HTMLElement;
 
 				let lineColumn, lineNumber;
@@ -101,6 +103,12 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 				const lastLineEl = markupApi.getLineElement('last');
 
 				if (closestLineEl) {
+					const lineNumAttrVal = markupApi.getLineElementAttribute(
+						closestLineEl,
+						'lineNumber',
+					);
+					lineNumber = toNumber(lineNumAttrVal);
+
 					const lineStartClientX =
 						closestLineEl.getBoundingClientRect().left +
 						toNumber(markupMetrics.line.paddingLeft);
@@ -110,35 +118,122 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 
 					const targettedColumn = Math.round(
 						targettedColumnDistanceFromLineStart /
-							markupMetrics.column.width
+							markupMetrics.column.width,
 					);
 
-					const lastColumn = closestLineEl.textContent.length;
+					const lastColumn = this.getMaxLineColumn(lineNumber);
 
-					if (targettedColumn < 1) {
-						lineColumn = 1; // before first character
+					if (targettedColumn < MIN_LINE_COLUMN) {
+						lineColumn = MIN_LINE_COLUMN; // before first character
 					} else if (targettedColumn > lastColumn) {
 						lineColumn = lastColumn + 1; // after last character
 					} else {
 						lineColumn = targettedColumn + 1; // +1 for 1-based index
 					}
-
-					lineNumber = Number(
-						closestLineEl.getAttribute(lineNumAttr)
-					);
 				} else if (lastLineEl) {
-					const lastLineColumn = lastLineEl.textContent.length;
+					const lineNumAttrVal = markupApi.getLineElementAttribute(
+						lastLineEl,
+						'lineNumber',
+					);
+					lineNumber = toNumber(lineNumAttrVal);
 
-					lineColumn = lastLineColumn + 1; // after last character
-					lineNumber = Number(lastLineEl.getAttribute(lineNumAttr));
+					const lastColumn = this.getMaxLineColumn(lineNumber);
+					lineColumn = lastColumn + 1; // after last character
 				}
 
 				if (lineColumn != null && lineNumber != null) {
-					this.setPosition({
+					return {
 						lineColumn,
 						lineNumber,
-					});
+					};
 				}
+
+				return null;
+			},
+
+			getElement() {
+				return elementRef.current ?? null;
+			},
+
+			getMaxLineColumn(lineNumber) {
+				const currentCommit = markupApi.getCurrentCommit();
+				if (!currentCommit) return MIN_LINE_COLUMN;
+
+				const lineMeta = currentCommit.markupMeta.find(
+					(lineMeta) => lineMeta.number === lineNumber,
+				);
+
+				if (!lineMeta) {
+					throw new Error(
+						`Line meta doesn't exist for line number: ${lineNumber}`,
+					);
+				}
+
+				return lineMeta.content.length;
+			},
+
+			getMaxLineNumber() {
+				const currentCommit = markupApi.getCurrentCommit();
+				if (!currentCommit) return MIN_LINE_NUMBER;
+
+				return currentCommit.markupMeta.length;
+			},
+
+			getSelection() {
+				return selectionRef.current;
+			},
+
+			setElement(el) {
+				elementRef.current = el;
+			},
+
+			setSelection(value) {
+				const newSelection = resolveSetterValue(
+					value,
+					this.getSelection(),
+				);
+
+				const newSelectionNormalized = normalizeSelection(newSelection);
+
+				const isSelectionChanged =
+					!isEqualObjects(
+						selectionRef.current.start,
+						newSelectionNormalized.start,
+					) ||
+					!isEqualObjects(
+						selectionRef.current.end,
+						newSelectionNormalized.end,
+					);
+
+				if (isSelectionChanged) {
+					selectionRef.current = newSelectionNormalized;
+
+					syncCoordinates();
+					notifySelectionListeners();
+				} else {
+					this.setVisible(true);
+				}
+			},
+
+			setSelectionCollapsed(cursorPosition) {
+				this.setSelection({
+					start: cursorPosition,
+					end: cursorPosition,
+				});
+			},
+
+			setSelectionStart(cursorPosition) {
+				this.setSelection((prev) => ({
+					start: cursorPosition,
+					end: prev.end,
+				}));
+			},
+
+			setSelectionEnd(cursorPosition) {
+				this.setSelection((prev) => ({
+					start: prev.start,
+					end: cursorPosition,
+				}));
 			},
 
 			setVisible(isVisible: boolean) {
@@ -157,13 +252,13 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 				}
 			},
 
-			subscribePosition(listener: CursorPositionStoreListener) {
-				positionListenersRef.current.push(listener);
+			subscribeSelection(listener: CursorSelectionListener) {
+				selectionListenersRef.current.push(listener);
 
 				return () => {
-					positionListenersRef.current =
-						positionListenersRef.current.filter(
-							(li) => li !== listener
+					selectionListenersRef.current =
+						selectionListenersRef.current.filter(
+							(li) => li !== listener,
 						);
 				};
 			},
@@ -172,20 +267,55 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 
 	return apiRef.current;
 
-	function normalizePosition(position: CursorPosition): CursorPosition {
-		// TODO normalize overflowing positions to max column and max line number
-		// force new reference (needed for useSyncExternalStore), (maybe setter invoker reused the old position object)
+	function normalizeSelection(selection: CursorSelection): CursorSelection {
+		const { start, end } = selection;
+
 		return {
-			lineColumn: Math.max(1, position.lineColumn),
-			lineNumber: Math.max(1, position.lineNumber),
+			start: normalizePosition(start),
+			end: normalizePosition(end),
 		};
+	}
+
+	function normalizePosition(position: CursorPosition): CursorPosition {
+		const cursorApi = apiRef.current;
+
+		let lineColumnNormalized, lineNumberNormalized;
+
+		if (cursorApi) {
+			lineNumberNormalized = Math.max(
+				MIN_LINE_NUMBER,
+				Math.min(position.lineNumber, cursorApi.getMaxLineNumber()),
+			);
+
+			lineColumnNormalized = Math.max(
+				MIN_LINE_COLUMN,
+				Math.min(
+					position.lineColumn,
+					cursorApi.getMaxLineColumn(lineNumberNormalized) + 1,
+				),
+			);
+		} else {
+			lineColumnNormalized = MIN_LINE_COLUMN;
+			lineNumberNormalized = MIN_LINE_NUMBER;
+		}
+
+		return {
+			lineColumn: lineColumnNormalized,
+			lineNumber: lineNumberNormalized,
+		};
+	}
+
+	function notifySelectionListeners() {
+		for (const listener of selectionListenersRef.current) {
+			listener();
+		}
 	}
 
 	function syncCoordinates() {
 		const cursorApi = apiRef.current;
 		if (!cursorApi) return;
 
-		const cursorPosition = cursorApi.getPosition();
+		const cursorPosition = cursorApi.getSelection().end;
 		const markupMetrics = markupApi.getMetrics();
 		if (!markupMetrics) return;
 
@@ -220,10 +350,22 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 
 		cursorApi.setVisible(true);
 	}
+}
 
-	function notifyPositionListeners() {
-		for (const listener of positionListenersRef.current) {
-			listener();
-		}
+export function comparePositions(
+	a: CursorPosition,
+	b: CursorPosition,
+): PositionComparison {
+	const { lineNumber: ln1, lineColumn: lc1 } = a;
+	const { lineNumber: ln2, lineColumn: lc2 } = b;
+
+	if (ln1 !== ln2) {
+		return ln1 > ln2 ? PositionComparison.AFTER : PositionComparison.BEFORE;
 	}
+
+	if (lc1 !== lc2) {
+		return lc1 > lc2 ? PositionComparison.AFTER : PositionComparison.BEFORE;
+	}
+
+	return PositionComparison.EQUAL;
 }

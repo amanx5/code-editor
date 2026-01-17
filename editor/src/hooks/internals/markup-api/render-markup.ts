@@ -1,16 +1,18 @@
-import {
-	MARKUP_LINE_ATTRIBUTES,
-	type MarkupApi,
-	type RenderOptions,
-} from '../..';
+import { type MarkupApi, type RenderOptions } from '../..';
 import { type TokenMeta, cls } from '../../../utils';
 import type { EditorMarkupMeta, LineMeta } from './generate-markup-meta';
+
+export type MarkupLineAttribute = keyof typeof MarkupLineAttributeDomName;
+
+export enum MarkupLineAttributeDomName {
+	lineNumber = 'data-line-num',
+}
 
 // TODO: Perform a minimal diff of changed lines and only add new token markup instead of re-rendering complete markup
 export function renderMarkup(
 	markupApi: MarkupApi,
 	markupMeta: EditorMarkupMeta,
-	renderOptions: RenderOptions
+	renderOptions: RenderOptions,
 ) {
 	const markupEl = markupApi.getElement();
 
@@ -24,12 +26,12 @@ export function renderMarkup(
 		const { highlightLines, isWrapEnabled, hideLineNumbers } =
 			renderOptions;
 
-		const lineNumAttr = MARKUP_LINE_ATTRIBUTES.lineNumber;
-		const { error, number, value } = lineMeta;
+		const lineNumAttr = MarkupLineAttributeDomName.lineNumber;
+		const { error, number, tokens } = lineMeta;
 
 		const isHighlighted = highlightLines?.includes(number);
 
-		const tokensMarkup = value.map(generateTokenElementMarkup).join('');
+		const tokensMarkup = tokens.map(generateTokenElementMarkup).join('');
 
 		return `
 			<pre 
@@ -40,7 +42,7 @@ export function renderMarkup(
 					hideLineNumbers && 'pl-6',
 					isHighlighted && 'bg-ceMarkupLine-highlight',
 					error && 'bg-ceMarkupLine-error',
-					isWrapEnabled && 'whitespace-pre-wrap wrap-anywhere'
+					isWrapEnabled && 'whitespace-pre-wrap wrap-anywhere',
 				)}' 
 				${lineNumAttr}='${number}'
 			>${tokensMarkup}</pre>

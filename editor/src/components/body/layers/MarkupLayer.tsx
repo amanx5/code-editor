@@ -1,11 +1,9 @@
 import { cls, getEventHandlers } from '../../../utils';
-import { useEditor } from '../../../hooks';
-
-export type CodeLineNumber = number;
+import { useEditor, type LineNumber } from '../../../hooks';
 
 export type MarkupOptions = {
 	disabled?: boolean;
-	highlightLines?: CodeLineNumber[];
+	highlightLines?: LineNumber[];
 	hideLineNumbers?: boolean;
 };
 
@@ -30,7 +28,7 @@ export function MarkupLayer() {
 				'cursor-text',
 				'flex-1 inline-flex flex-col min-h-full h-max',
 				'focus:outline-none',
-				'selection:bg-blue-100',
+				'selection:bg-transparent',
 				'z-10'
 			)}
 			ref={markupApi.setElement} // callback ref
