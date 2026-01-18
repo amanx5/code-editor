@@ -9,6 +9,7 @@ import {
 	Toolbar,
 	ToolbarOptionsDefault,
 	MarkupOptionsDefault,
+	SelectionLayer,
 } from './components';
 import {
 	EditorApiContext,
@@ -62,6 +63,7 @@ export function CodeEditor({
 					<Toolbar options={toolbarOptions} states={toolbarStates} />
 
 					<Body>
+						<SelectionLayer />
 						<MarkupLayer />
 						<CursorLayer />
 					</Body>

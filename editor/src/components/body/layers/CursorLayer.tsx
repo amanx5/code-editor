@@ -9,15 +9,12 @@ export function CursorLayer() {
 	const { cursorApi } = useEditor();
 	
 	return (
-		<div aria-hidden className='absolute'>
+		<div aria-hidden className='absolute select-none pointer-events-none'>
 			<div
 				className={cls(
-					'absolute',
 					'ceContent',
 					'border-l-[1.2px] border-black',
 					'hidden',
-					'pointer-events-none',
-					'z-10'
 				)}
 				ref={cursorApi.setElement} // callback ref
 			></div>

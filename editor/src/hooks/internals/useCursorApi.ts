@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import type { CursorElement } from '../../components';
-import { type MarkupApi } from './useMarkupApi';
+import { type Coordinates, type MarkupApi } from './useMarkupApi';
 import {
 	isEqualObjects,
 	resolveSetterValue,
@@ -20,9 +20,9 @@ export type CursorPosition = {
 };
 
 export enum PositionComparison {
-	BEFORE = -1,
+	LESSER = -1,
 	EQUAL = 0,
-	AFTER = 1,
+	GREATER = 1,
 }
 
 export type CursorSelection = {
@@ -33,6 +33,8 @@ export type CursorSelection = {
 export type CursorSelectionListener = () => void;
 
 export type CursorApi = {
+	calculateCoordinates(cursorPosition: CursorPosition): Coordinates;
+
 	calculatePosition(e: React.PointerEvent): CursorPosition | null;
 
 	getElement(): CursorElement | null;
@@ -89,6 +91,43 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 	// dont use ?? even though it prevents overwriting, the assignment itself runs every render, which is a smell and can break in StrictMode or future refactors.
 	if (!apiRef.current) {
 		apiRef.current = {
+			calculateCoordinates(cursorPosition) {
+				const markupMetrics = markupApi.getMetrics();
+				if (!markupMetrics) throw new Error();
+
+				const cursorEl = this.getElement();
+				const markupEl = markupApi.getElement();
+				const lineEl = markupApi.getLineElement(
+					cursorPosition.lineNumber,
+				);
+				if (!cursorEl || !lineEl || !markupEl) throw new Error();
+
+				// TODO: Calculate metrics everytime based on lineContentTillCursor
+				// const lineContentTillCursor = lineEl.textContent.substring(
+				// 	0,
+				// 	cursorPosition.lineColumn
+				// );
+
+				const lineColumnWidthMultiplier = cursorPosition.lineColumn - 1;
+
+				const columnsWidth =
+					lineColumnWidthMultiplier * markupMetrics.column.width +
+					(lineColumnWidthMultiplier - 1) *
+						toNumber(markupMetrics.column.letterSpacing);
+
+				const lineElementCoordinates =
+					markupApi.getLineElementCoordinates(lineEl);
+					
+				const x: number =
+					lineElementCoordinates.x +
+					toNumber(markupMetrics.line.paddingLeft) +
+					columnsWidth;
+
+				const y = lineElementCoordinates.y;
+
+				return { x, y };
+			},
+
 			calculatePosition(e) {
 				const markupMetrics = markupApi.getMetrics();
 				if (!markupMetrics) return null;
@@ -278,30 +317,26 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 
 	function normalizePosition(position: CursorPosition): CursorPosition {
 		const cursorApi = apiRef.current;
-
-		let lineColumnNormalized, lineNumberNormalized;
-
-		if (cursorApi) {
-			lineNumberNormalized = Math.max(
-				MIN_LINE_NUMBER,
-				Math.min(position.lineNumber, cursorApi.getMaxLineNumber()),
-			);
-
-			lineColumnNormalized = Math.max(
-				MIN_LINE_COLUMN,
-				Math.min(
-					position.lineColumn,
-					cursorApi.getMaxLineColumn(lineNumberNormalized) + 1,
-				),
-			);
-		} else {
-			lineColumnNormalized = MIN_LINE_COLUMN;
-			lineNumberNormalized = MIN_LINE_NUMBER;
+		if (!cursorApi) {
+			throw new Error('Cursor API is not setup yet.');
 		}
 
+		const lineNumber = Math.max(
+			MIN_LINE_NUMBER,
+			Math.min(position.lineNumber, cursorApi.getMaxLineNumber()),
+		);
+
+		const lineColumn = Math.max(
+			MIN_LINE_COLUMN,
+			Math.min(
+				position.lineColumn,
+				cursorApi.getMaxLineColumn(lineNumber) + 1,
+			),
+		);
+
 		return {
-			lineColumn: lineColumnNormalized,
-			lineNumber: lineNumberNormalized,
+			lineColumn,
+			lineNumber,
 		};
 	}
 
@@ -315,38 +350,14 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 		const cursorApi = apiRef.current;
 		if (!cursorApi) return;
 
-		const cursorPosition = cursorApi.getSelection().end;
-		const markupMetrics = markupApi.getMetrics();
-		if (!markupMetrics) return;
-
 		const cursorEl = cursorApi.getElement();
-		const markupEl = markupApi.getElement();
-		const lineEl = markupApi.getLineElement(cursorPosition.lineNumber);
-		if (!cursorEl || !lineEl || !markupEl) return;
+		if (!cursorEl) return;
 
-		// TODO: Calculate metrics everytime based on lineContentTillCursor
-		// const lineContentTillCursor = lineEl.textContent.substring(
-		// 	0,
-		// 	cursorPosition.lineColumn
-		// );
+		const cursorPosition = cursorApi.getSelection().end;
 
-		const lineColumnWidthMultiplier = cursorPosition.lineColumn - 1;
+		const { x, y } = cursorApi.calculateCoordinates(cursorPosition);
 
-		const columnsWidth =
-			lineColumnWidthMultiplier * markupMetrics.column.width +
-			(lineColumnWidthMultiplier - 1) *
-				toNumber(markupMetrics.column.letterSpacing);
-
-		const newX: number =
-			lineEl.offsetLeft +
-			toNumber(markupMetrics.line.paddingLeft) +
-			columnsWidth;
-
-		const newY: number =
-			lineEl.getBoundingClientRect().top -
-			markupEl.getBoundingClientRect().top;
-
-		cursorEl.style.transform = `translate(${newX}px, ${newY}px)`;
+		cursorEl.style.transform = `translate(${x}px, ${y}px)`;
 
 		cursorApi.setVisible(true);
 	}
@@ -360,11 +371,15 @@ export function comparePositions(
 	const { lineNumber: ln2, lineColumn: lc2 } = b;
 
 	if (ln1 !== ln2) {
-		return ln1 > ln2 ? PositionComparison.AFTER : PositionComparison.BEFORE;
+		return ln1 > ln2
+			? PositionComparison.GREATER
+			: PositionComparison.LESSER;
 	}
 
 	if (lc1 !== lc2) {
-		return lc1 > lc2 ? PositionComparison.AFTER : PositionComparison.BEFORE;
+		return lc1 > lc2
+			? PositionComparison.GREATER
+			: PositionComparison.LESSER;
 	}
 
 	return PositionComparison.EQUAL;

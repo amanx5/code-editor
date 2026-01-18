@@ -1,3 +1,7 @@
+/**
+ * Returns an array starting from `start` till `end`. 
+ * Negative range is also supported.
+ */
 export function range(start: number, end: number): number[] {
 	if (!Number.isInteger(start) || !Number.isInteger(end)) {
 		throw new Error('start and end must be integers');

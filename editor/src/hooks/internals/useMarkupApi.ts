@@ -26,6 +26,12 @@ import {
 } from './markup-api';
 import { type LineNumber } from './useCursorApi';
 
+export type Axis = 'x' | 'y';
+
+export type Coordinates = {
+	[key in Axis]: number;
+};
+
 export type RenderOptions = MarkupOptions & ToolbarStateValues;
 
 export type MarkupCommit = {
@@ -51,6 +57,11 @@ export type MarkupApi = {
 		lineElement: MarkupLineElement,
 		attribute: MarkupLineAttribute,
 	): string;
+	/** 
+	 * Returns coordinates of the given line element with respect to `MarkupElement`.
+	 * TODO: Written coordinates w.r.t `Body` element as all layers reside inside `Body`. It will be more robust solution.
+	 */
+	getLineElementCoordinates(lineElement: MarkupLineElement): Coordinates;
 
 	getMetrics(): MarkupMetrics | null;
 
@@ -136,6 +147,33 @@ export function useMarkupApi(
 				}
 
 				return attrValue;
+			},
+
+			getLineElementCoordinates(lineElement) {
+				const markupElement = this.getElement();
+
+				if (!markupElement) {
+					throw new Error(
+						'Markup element is not rendered yet. This method should not be used before render',
+					);
+				}
+
+				const lineElementRect = lineElement.getBoundingClientRect();
+				const parentElementRect = markupElement.getBoundingClientRect();
+
+				const x = lineElementRect.left - parentElementRect.left;
+				const y = lineElementRect.top - parentElementRect.top;
+
+				// Can use offsets but they might miscalculate when:
+				// - line element ancestors are transformed (NOT SURE)
+				// - page scrolled (NOT SURE)
+				// - lineElement.offsetParent != markupElement (FOR SURE, offsetParent is closest positioned parent, not just any parent)
+				// - borders (NOT SURE), RTL mode (NOT SURE)
+				// const { offsetLeft, offsetTop } = lineElement;
+				// const x = offsetLeft;
+				// const y = offsetTop;
+
+				return { x, y };
 			},
 
 			getMetrics() {

@@ -24,12 +24,11 @@ export function MarkupLayer() {
 		<div
 			aria-multiline
 			className={cls(
-				'bg-ceMarkupLayer',
+				'absolute',
 				'cursor-text',
 				'flex-1 inline-flex flex-col min-h-full h-max',
 				'focus:outline-none',
 				'selection:bg-transparent',
-				'z-10'
 			)}
 			ref={markupApi.setElement} // callback ref
 			role='textbox'

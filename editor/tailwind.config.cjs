@@ -43,7 +43,7 @@ const preset = {
 
 			backgroundColor: {
 				ceRoot: '#f8f8f8',
-				ceMarkupLayer: 'white',
+				ceBody: 'white',
 				ceMarkupLine: {
 					error: '#fee2e2',
 					highlight: '#fffbdd',
