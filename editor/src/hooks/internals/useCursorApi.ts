@@ -5,6 +5,7 @@ import {
 	isEqualObjects,
 	resolveSetterValue,
 	toNumber,
+	type Content,
 	type SetterValue,
 } from '../../utils';
 
@@ -35,6 +36,8 @@ export type CursorSelectionListener = () => void;
 export type CursorApi = {
 	calculateCoordinates(cursorPosition: CursorPosition): Coordinates;
 
+	calculateOffset(cursorPosition: CursorPosition): number;
+
 	calculatePosition(e: React.PointerEvent): CursorPosition | null;
 
 	getElement(): CursorElement | null;
@@ -44,6 +47,8 @@ export type CursorApi = {
 	getMaxLineNumber(): LineNumber;
 
 	getSelection(): CursorSelection;
+
+	getSelectedContent(): Content | null;
 
 	setElement(element: CursorElement): void;
 
@@ -117,7 +122,7 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 
 				const lineElementCoordinates =
 					markupApi.getLineElementCoordinates(lineEl);
-					
+
 				const x: number =
 					lineElementCoordinates.x +
 					toNumber(markupMetrics.line.paddingLeft) +
@@ -126,6 +131,29 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 				const y = lineElementCoordinates.y;
 
 				return { x, y };
+			},
+
+			calculateOffset(cursorPosition) {
+				const { lineNumber, lineColumn } = cursorPosition;
+				const currentCommit = markupApi.getCurrentCommit();
+
+				if (!currentCommit) {
+					throw new Error(
+						'Unable to calculate offset as no document is commited yet.',
+					);
+				}
+
+				const allContent = currentCommit.document.content;
+
+				const lines = allContent.split('\n');
+
+				let offset = lines
+					.slice(undefined, lineNumber - 1)
+					.reduce((prev, curr) => (prev += curr.length), 0);
+
+				offset += lineColumn - 1;
+
+				return offset;
 			},
 
 			calculatePosition(e) {
@@ -220,6 +248,22 @@ export function useCursorApi(markupApi: MarkupApi): CursorApi {
 
 			getSelection() {
 				return selectionRef.current;
+			},
+
+			getSelectedContent() {
+				const currentCommit = markupApi.getCurrentCommit();
+				if (!currentCommit) return null;
+
+				const { start, end } = this.getSelection();
+				if (comparePositions(start, end) === PositionComparison.EQUAL) {
+					return null;
+				}
+
+				const allContent = currentCommit.document.content;
+				const startOffset = this.calculateOffset(start);
+				const endOffset = this.calculateOffset(end);
+
+				return allContent.substring(startOffset, endOffset);
 			},
 
 			setElement(el) {

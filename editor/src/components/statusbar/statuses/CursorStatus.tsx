@@ -6,13 +6,17 @@ export function CursorStatus() {
 	const { cursorApi } = useEditor();
 	const { end } = useCursorSelection();
 
+	const selectedContent = cursorApi.getSelectedContent();
+	const selectionStatus = selectedContent ? `(${selectedContent.length} selected)`: ''
+	const status = `Ln ${end.lineNumber}, Col ${end.lineColumn} ${selectionStatus}`;
+
 	return (
 		<StatusButton
 			className='px-1'
 			onClick={onClick}
 			title='Cursor Position'
 		>
-			Ln {end.lineNumber}, Col {end.lineColumn}
+			{status}
 		</StatusButton>
 	);
 

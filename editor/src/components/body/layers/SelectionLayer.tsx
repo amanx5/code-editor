@@ -61,7 +61,10 @@ export function SelectionLayer() {
 		({ columnStart, columnEnd, lineNumber }) => {
 			const lineElement = markupApi.getLineElement(lineNumber);
 			if (!lineElement) {
-				throw new Error();
+				throw new Error(
+					'Invalid line number in cursor selection. No corresponding line element found for line number:  ' +
+						lineNumber,
+				);
 			}
 
 			const columnStartCoordinate = cursorApi.calculateCoordinates({
@@ -91,9 +94,8 @@ export function SelectionLayer() {
 					key={lineNumber}
 					className={cls(
 						'absolute',
-						'bg-blue-200',
+						'bg-blue-100',
 						'ceContent',
-						'z-0',
 					)}
 					style={{
 						width: width + 'px',

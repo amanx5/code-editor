@@ -29,6 +29,7 @@ export function MarkupLayer() {
 				'flex-1 inline-flex flex-col min-h-full h-max',
 				'focus:outline-none',
 				'selection:bg-transparent',
+				// 'selection:bg-red-800 selection:bg-opacity-40', // for testing
 			)}
 			ref={markupApi.setElement} // callback ref
 			role='textbox'
