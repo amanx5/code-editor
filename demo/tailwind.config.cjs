@@ -1,4 +1,5 @@
-const {preset} = require('code-editor/tailwind-config');
+const editorConfig = require('code-editor/tailwind-config');
+const workbenchConfig = require('code-workbench/tailwind-config');
 
 /**
  * Tailwind config for the demo app
@@ -6,12 +7,14 @@ const {preset} = require('code-editor/tailwind-config');
  */
 module.exports = {
 	presets: [
-		preset, // preset for code-editor
+		...editorConfig.presets,
+		...workbenchConfig.presets,
 	],
 	content: [
 		'./index.html',
 		'./src/**/*.{js,ts,jsx,tsx}',
-		'./node_modules/code-editor/**/*.{js,ts,jsx,tsx}', // files from code-editor
+		'./node_modules/code-editor/src/**/*.{js,ts,jsx,tsx}', // files from code-editor
+		'./node_modules/code-workbench/src/**/*.{js,ts,jsx,tsx}', // files from code-workbench
 	],
 	theme: {
 		extend: {
