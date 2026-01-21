@@ -3,7 +3,7 @@ import type { EditorEventHandler } from '../get-event-handlers';
 export const handleFocus: EditorEventHandler<'onFocus'> = (eventObject, editorApi) => {
     console.log('focus');
 
-    const {markupApi} = editorApi;
+    const {markup} = editorApi;
 
-    markupApi.setFocused(true);
+    markup.setFocused(true);
 };

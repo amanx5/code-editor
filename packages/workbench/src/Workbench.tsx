@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
 	type ToolbarOptions,
 	Layout,
@@ -20,15 +21,21 @@ export type WorkbenchProps = {
  * Note: CSS for this component is not included by default. Refer README for CSS installation.
  */
 export function Workbench({ editorOptions, toolbarOptions }: WorkbenchProps) {
+	const {listeners, ...restEditorOptions} = editorOptions;
 	toolbarOptions = mergeOverrides(ToolbarOptionsDefault, toolbarOptions);
 
 	const toolbarStates = useToolbarStates();
+	const [document, setDocument] = useState(editorOptions.document);
+
+	const mergedListeners = {
+		
+	}
 
 	return (
 		<Layout>
 			<Toolbar options={toolbarOptions} states={toolbarStates} />
 
-			<Editor {...editorOptions} />
+			<Editor listeners={{onChange: [...listeners?.onChange, setDocument]}}{...restEditorOptions}  />
 
 			<Statusbar />
 		</Layout>

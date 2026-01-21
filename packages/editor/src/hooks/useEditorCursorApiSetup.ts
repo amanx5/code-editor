@@ -6,9 +6,14 @@ import {
 	type LineColumn,
 	type LineNumber,
 	type MarkupApi,
-} from './useSetupMarkupApi';
-import { isEqualObjects, toNumber, type Content } from '../../utils';
-import { comparePositions, PositionComparison } from '../../utils/cursor';
+} from './useEditorMarkupApiSetup';
+import {
+	type Content,
+	isEqualObjects,
+	toNumber,
+	comparePositions,
+	PositionComparison,
+} from '../utils';
 
 export type CursorOffset = number;
 
@@ -43,15 +48,13 @@ export type CursorApi = {
 };
 
 /**
- *
- * CursorAPI hook
+ * CursorAPI setup hook
  *
  * NOTE: This is a single use hook per editor instance.
  *
- * To prevent unnecessary re-creations of the CursorAPI object on rerenders, the returned CursorAPI object is memoized internally by keeping it in a ref.
+ * FIXME: Cursor renders blurry and wider on alternate columns. But looks fine on high zoom levels.
  */
-// FIXME: Cursor renders blurry and wider on alternate columns. But looks fine on high zoom levels.
-export function useSetupCursorApi(markupApi: MarkupApi): CursorApi {
+export function useEditorCursorApiSetup(markupApi: MarkupApi): CursorApi {
 	const [selection, setSelection] = useState<CursorSelection | null>(null);
 
 	const cursorApi: CursorApi = {
@@ -66,8 +69,8 @@ export function useSetupCursorApi(markupApi: MarkupApi): CursorApi {
 			}
 
 			const allContent = currentCommit.document.content;
-			const startOffset = this.positionToOffset(start);
-			const endOffset = this.positionToOffset(end);
+			const startOffset = cursorApi.positionToOffset(start);
+			const endOffset = cursorApi.positionToOffset(end);
 
 			return allContent.substring(startOffset, endOffset);
 		},
@@ -235,11 +238,10 @@ export function useSetupCursorApi(markupApi: MarkupApi): CursorApi {
 			}
 
 			nextSelection = {
-				start: this.positionNormalize(nextSelection.start),
-				end: this.positionNormalize(nextSelection.end),
+				start: cursorApi.positionNormalize(nextSelection.start),
+				end: cursorApi.positionNormalize(nextSelection.end),
 			};
 
-			console.log(nextSelection.end.lineColumn);
 			const isSelectionChanged =
 				!isEqualObjects(selection?.start, nextSelection.start) ||
 				!isEqualObjects(selection?.end, nextSelection.end);

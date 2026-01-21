@@ -1,6 +1,6 @@
-import { type MarkupApi} from '../../';
-import { type EditorOptions} from '../../../';
-import { type TokenMeta, cls } from '../../../utils';
+import { type MarkupApi } from '../';
+import { type EditorOptions } from '../..';
+import { type TokenMeta, cls } from '../../utils';
 import type { EditorMarkupMeta, LineMeta } from './generate-markup-meta';
 
 export type MarkupLineAttribute = keyof typeof MarkupLineAttributeDomName;
@@ -24,8 +24,7 @@ export function renderMarkup(
 	markupEl.innerHTML = linesMarkup;
 
 	function generateLineElementMarkup(lineMeta: LineMeta): string {
-		const { highlightLines, hideLineNumbers } =
-			editorOptions;
+		const { highlightLines, hideLineNumbers } = editorOptions;
 
 		const lineNumAttr = MarkupLineAttributeDomName.lineNumber;
 		const { error, number, tokens } = lineMeta;

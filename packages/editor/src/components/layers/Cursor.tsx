@@ -1,16 +1,15 @@
 import { cls } from '../../utils';
 import { useLayoutEffect, useRef } from 'react';
-import { useCursorApi, useMarkupApi } from '../../hooks';
+import { useEditorApi } from '../../hooks';
 
 export type CursorElement = HTMLDivElement;
 
 // TODO
 // - Add Blink effect (make sure to pause blink when typing)
 export function Cursor() {
-	const cursorApi = useCursorApi();
-	const markupApi = useMarkupApi();
-	const { focused } = markupApi;
-	const { positionToCoordinates, selection } = cursorApi;
+	const { cursor, markup } = useEditorApi();
+	const { focused } = markup;
+	const { positionToCoordinates, selection } = cursor;
 
 	const cursorElRef = useRef<CursorElement>(null);
 
@@ -30,7 +29,7 @@ export function Cursor() {
 			});
 		}
 	}, [selection]);
-            
+
 	return (
 		<div
 			className={cls(

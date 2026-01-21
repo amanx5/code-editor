@@ -1,11 +1,9 @@
 import {
 	MIN_LINE_COLUMN,
-	useCursorSelection,
-	useCursorApi,
-	useMarkupApi,
 	type Coordinates,
 	type LineColumn,
 	type LineNumber,
+	useEditorApi,
 } from '../../hooks';
 import { cls, range } from '../../utils';
 import { comparePositions, PositionComparison } from '../../utils/cursor';
@@ -23,9 +21,9 @@ export type LineSelectionMeta = {
 };
 
 export function SelectionLayer() {
-	const cursorApi = useCursorApi();
-	const markupApi = useMarkupApi();
-	const selection = useCursorSelection();
+	const { cursor, markup } = useEditorApi();
+	const { getLineElement, getMaxLineColumn } = markup;
+	const { positionToCoordinates, selection } = cursor;
 
 	if (!selection) return null;
 
@@ -51,7 +49,7 @@ export function SelectionLayer() {
 			const columnEnd =
 				lineNumber === greaterLineNumber.lineNumber
 					? greaterLineNumber.lineColumn
-					: markupApi.getMaxLineColumn(lineNumber) + 1;
+					: getMaxLineColumn(lineNumber) + 1;
 
 			lineSelectionRanges.push({
 				columnStart,
@@ -63,7 +61,7 @@ export function SelectionLayer() {
 
 	const lineSelMeta: Array<LineSelectionMeta> = lineSelectionRanges.map(
 		({ columnStart, columnEnd, lineNumber }) => {
-			const lineElement = markupApi.getLineElement(lineNumber);
+			const lineElement = getLineElement(lineNumber);
 			if (!lineElement) {
 				throw new Error(
 					'Invalid line number in cursor selection. No corresponding line element found for line number:  ' +
@@ -71,12 +69,12 @@ export function SelectionLayer() {
 				);
 			}
 
-			const columnStartCoordinate = cursorApi.positionToCoordinates({
+			const columnStartCoordinate = positionToCoordinates({
 				lineColumn: columnStart,
 				lineNumber,
 			});
 
-			const columnEndCoordinate = cursorApi.positionToCoordinates({
+			const columnEndCoordinate = positionToCoordinates({
 				lineColumn: columnEnd,
 				lineNumber,
 			});
@@ -96,11 +94,7 @@ export function SelectionLayer() {
 			{lineSelMeta.map(({ lineNumber, coordinates, width }) => (
 				<div
 					key={lineNumber}
-					className={cls(
-						'absolute',
-						'bg-blue-100',
-						'ceContent',
-					)}
+					className={cls('absolute', 'bg-blue-100', 'ceContent')}
 					style={{
 						width: width + 'px',
 						transform: `translate(${coordinates.x}px, ${coordinates.y}px)`,

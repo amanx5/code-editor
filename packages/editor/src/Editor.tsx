@@ -1,7 +1,7 @@
 import { Scroller } from './components';
 import { EditorApiContext } from './contexts';
 import { type Content, type EditorError, type Language } from './utils';
-import { useSetupEditorApi, type LineNumber } from './hooks';
+import { useEditorApiSetup, type EditorApi, type LineNumber } from './hooks';
 import {
 	Cursor,
 	CursorLayer,
@@ -16,8 +16,8 @@ export type EditorDocument = {
 };
 
 export type EditorListeners = {
-	onChange?: (content: Content) => void;
-	onError?: (error: EditorError) => void;
+	apiChange?: (editorApi: EditorApi) => void;
+	documentChange?: (document: EditorDocument, error: EditorError) => void;
 };
 
 export type EditorOptions = {
@@ -46,7 +46,7 @@ export type EditorProps = {
 export function Editor({ document, listeners, editorOptions }: EditorProps) {
 	editorOptions = mergeOverrides(EditorOptionsDefault, editorOptions);
 
-	const editorApi = useSetupEditorApi(document, editorOptions, listeners);
+	const editorApi = useEditorApiSetup(document, editorOptions, listeners);
 
 	return (
 		<EditorApiContext.Provider value={editorApi}>

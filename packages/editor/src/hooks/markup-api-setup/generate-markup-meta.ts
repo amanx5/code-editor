@@ -1,15 +1,15 @@
-import type { EditorDocument } from '../../../';
+import type { EditorDocument } from '../..';
 import {
 	tokeniseContent,
 	type Content,
 	type EditorError,
 	type TokenisedLine,
-} from '../../../utils';
-import type { LineNumber } from '../useSetupCursorApi';
+} from '../../utils';
+import type { LineNumber } from '../useEditorMarkupApiSetup';
 
 export type LineMeta = {
 	content: Content;
-	error: EditorError | null;
+	error: EditorError;
 	number: LineNumber;
 	tokens: TokenisedLine['tokens'];
 };

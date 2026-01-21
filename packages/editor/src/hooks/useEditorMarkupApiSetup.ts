@@ -7,9 +7,9 @@ import {
 	resolveSetterValue,
 	type SetterValue,
 	validateContent,
-} from '../../utils';
-import type { EditorDocument, EditorListeners, EditorOptions } from '../..';
-import type { MarkupElement } from '../../components';
+} from '../utils';
+import type { EditorDocument, EditorListeners, EditorOptions } from '..';
+import type { MarkupElement } from '../components';
 import {
 	updateMarkupMetrics,
 	type MarkupMetrics,
@@ -18,7 +18,7 @@ import {
 	renderMarkup,
 	type MarkupLineAttribute,
 	MarkupLineAttributeDomName,
-} from './markup-api';
+} from './markup-api-setup';
 
 export type Axis = 'x' | 'y';
 
@@ -75,11 +75,11 @@ export type MarkupApi = {
 };
 
 /**
- * Markup API hook
+ * MarkupAPI setup hook
  *
  * NOTE: This is a single use hook per editor instance.
  */
-export function useSetupMarkupApi(
+export function useEditorMarkupApiSetup(
 	document: EditorDocument,
 	editorOptions: EditorOptions,
 	listeners?: EditorListeners,
@@ -108,7 +108,7 @@ export function useSetupMarkupApi(
 			return elementRef.current ?? null;
 		},
 		getLineElement(position = 'first') {
-			const markupEl = this.getElement();
+			const markupEl = markupApi.getElement();
 			if (!markupEl) return null;
 
 			const lineNumAttr = MarkupLineAttributeDomName.lineNumber;
@@ -146,7 +146,7 @@ export function useSetupMarkupApi(
 			return attrValue;
 		},
 		getLineElementCoordinates(lineElement) {
-			const markupElement = this.getElement();
+			const markupElement = markupApi.getElement();
 
 			if (!markupElement) {
 				throw new Error(
@@ -231,12 +231,7 @@ export function useSetupMarkupApi(
 				};
 
 				const listeners = listenersRef.current;
-				// don't fire onChange on first render
-				if (!isFirstRender) {
-					listeners?.onChange?.(document.content);
-				}
-				// fire onError on each render
-				listeners?.onError?.(error);
+				listeners?.documentChange?.(document, error);
 
 				// TODO: Don't cache metrics, we need to re-calculate metrics everytime cursor changes.
 				// Assuming that content change doesn't have impact on metrics is wrong, since
@@ -259,7 +254,7 @@ export function useSetupMarkupApi(
 				content: newContent,
 			};
 
-			this.updateDocument(newDocument, commitRef.current.editorOptions);
+			markupApi.updateDocument(newDocument, commitRef.current.editorOptions);
 		},
 	};
 

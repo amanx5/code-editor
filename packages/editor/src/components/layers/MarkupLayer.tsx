@@ -1,12 +1,12 @@
 import { cls, getEventHandlers } from '../../utils';
-import { useCursorApi, useMarkupApi } from '../../hooks';
+import { useEditorApi } from '../../hooks';
 
 export type MarkupElement = HTMLDivElement;
 
 export function MarkupLayer() {
-	const cursorApi = useCursorApi();
-	const markupApi = useMarkupApi();
-	const eventHandlers = getEventHandlers({ cursorApi, markupApi });
+	const editorApi = useEditorApi();
+	const eventHandlers = getEventHandlers(editorApi);
+	const { markup } = editorApi;
 
 	return (
 		<div
@@ -19,7 +19,7 @@ export function MarkupLayer() {
 				'selection:bg-transparent',
 				// 'selection:bg-red-800 selection:bg-opacity-40', // for testing
 			)}
-			ref={markupApi.setElement} // callback ref
+			ref={markup.setElement} // callback ref
 			role='textbox'
 			spellCheck={false}
 			tabIndex={0}

@@ -12,15 +12,13 @@ export function ExampleOutput({
 	const [error, setError] = useState<EditorError>(null);
 
 	return (
-		<div className="flex flex-col gap-2">
+		<div className='flex flex-col gap-2'>
 			<div className='flex h-64 border'>
 				<Editor
 					{...exampleProps}
 					listeners={{
-						onChange: (content) => {
-							setContent(content);
-						},
-						onError: (error) => {
+						documentChange: (document, error) => {
+							setContent(document.content);
 							setError(error);
 						},
 					}}

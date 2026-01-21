@@ -8,12 +8,14 @@ export const handlePointerMove: EditorEventHandler<'onPointerMove'> = (
 	e,
 	editorApi,
 ) => {
-	const { cursorApi } = editorApi;
+	const { cursor } = editorApi;
+	const { positionFromEvent, updateSelection } = cursor;
+
 	if (e.buttons === 1) {
 		// primary button is pressed
 		console.log('pointer move with button 1');
 
-		const pointerPosition = cursorApi.positionFromEvent(e);
-		cursorApi.updateSelection({ moveEnd: pointerPosition });
+		const pointerPosition = positionFromEvent(e);
+		updateSelection({ moveEnd: pointerPosition });
 	}
 };

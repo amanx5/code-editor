@@ -5,10 +5,11 @@ export const handlePointerDown: EditorEventHandler<'onPointerDown'> = (
 	editorApi,
 ) => {
 	console.log('pointer down');
-	const { cursorApi } = editorApi;
-	
+	const { cursor } = editorApi;
+	const { positionFromEvent, updateSelection } = cursor;
+
 	if ((e.buttons = 1)) {
-		const pointerPosition = cursorApi.positionFromEvent(e);
-		cursorApi.updateSelection({ collapse: pointerPosition });
+		const pointerPosition = positionFromEvent(e);
+		updateSelection({ collapse: pointerPosition });
 	}
 };
