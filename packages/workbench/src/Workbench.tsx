@@ -8,10 +8,18 @@ import {
 } from './components';
 
 import { useToolbarStates } from './hooks';
-import { mergeOverrides, Editor, type EditorProps } from 'code-editor';
+import {
+	mergeOverrides,
+	Editor,
+	type EditorProps,
+	type EditorListeners,
+	type EditorDocument,
+} from 'code-editor';
+import { WorkbenchContext } from './contexts/WorkbenchContext';
+import type { EditorApi } from '../../editor/src/hooks';
 
 export type WorkbenchProps = {
-	editorOptions: EditorProps;
+	editorProps: EditorProps;
 	toolbarOptions?: ToolbarOptions;
 };
 
@@ -20,24 +28,36 @@ export type WorkbenchProps = {
  *
  * Note: CSS for this component is not included by default. Refer README for CSS installation.
  */
-export function Workbench({ editorOptions, toolbarOptions }: WorkbenchProps) {
-	const {listeners, ...restEditorOptions} = editorOptions;
+export function Workbench({ editorProps, toolbarOptions }: WorkbenchProps) {
 	toolbarOptions = mergeOverrides(ToolbarOptionsDefault, toolbarOptions);
 
 	const toolbarStates = useToolbarStates();
-	const [document, setDocument] = useState(editorOptions.document);
+	const [editorApi, setEditorApi] = useState<EditorApi | null>(null);
+	const [editorDocument, setEditorDocument] = useState<EditorDocument | null>(
+		null,
+	);
 
-	const mergedListeners = {
-		
-	}
+	const listeners: EditorListeners = {
+		...editorProps.listeners,
+		apiChange: (editorApi) => {
+			setEditorApi(editorApi);
+			editorProps.listeners?.apiChange?.(editorApi);
+		},
+		documentChange: (document, error) => {
+			setEditorDocument(document);
+			editorProps.listeners?.documentChange?.(document, error);
+		},
+	};
 
 	return (
-		<Layout>
-			<Toolbar options={toolbarOptions} states={toolbarStates} />
+		<WorkbenchContext.Provider value={{ editorApi, editorDocument }}>
+			<Layout>
+				<Toolbar options={toolbarOptions} states={toolbarStates} />
 
-			<Editor listeners={{onChange: [...listeners?.onChange, setDocument]}}{...restEditorOptions}  />
+				<Editor {...editorProps} listeners={listeners} />
 
-			<Statusbar />
-		</Layout>
+				<Statusbar />
+			</Layout>
+		</WorkbenchContext.Provider>
 	);
 }

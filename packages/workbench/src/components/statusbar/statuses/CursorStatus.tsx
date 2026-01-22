@@ -1,22 +1,21 @@
-import { useCursorSelection, useCursorApi } from 'code-editor/hooks';
 import { toNumber } from 'code-editor/utils';
 import { StatusButton } from './StatusButton';
+import { useEditorApi } from '../../../hooks/useEditorApi';
 
 export function CursorStatus() {
-	const cursorApi = useCursorApi();
+	const editorApi = useEditorApi();
 
-	if (!cursorApi) {
+	if (!editorApi) {
 		return null;
 	}
-	
-	const selection = useCursorSelection();
 
-	const selectedContent = cursorApi?.getSelectedContent();
+	const { cursor, markup } = editorApi;
+	const selectedContent = cursor.getSelectedContent();
 	const selectionStatus = selectedContent
 		? `(${selectedContent.length} selected)`
 		: '';
-	const status = selection
-		? `Ln ${selection.end.lineNumber}, Col ${selection.end.lineColumn} ${selectionStatus}`
+	const status = cursor.selection
+		? `Ln ${cursor.selection.end.lineNumber}, Col ${cursor.selection.end.lineColumn} ${selectionStatus}`
 		: 'Go to line';
 
 	return (
@@ -41,7 +40,8 @@ export function CursorStatus() {
 			const lineColumn = toNumber(column, 'int');
 			const lineNumber = toNumber(line, 'int');
 
-			updateSelection({
+			markup.setFocused(true);
+			cursor.updateSelection({
 				collapse: {
 					lineColumn,
 					lineNumber,

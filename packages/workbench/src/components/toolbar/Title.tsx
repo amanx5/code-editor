@@ -1,8 +1,8 @@
 import { cls, getLanguageName } from 'code-editor/utils';
-import { useDocument } from 'code-editor/hooks';
+import { useEditorDocument } from '../../hooks';
 
 export function Title() {
-	const document = useDocument();
+	const document = useEditorDocument();
 
 	if (!document) {
 		return null;

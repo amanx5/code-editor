@@ -8,38 +8,46 @@ export function TryWorkbench() {
 	const [error, setError] = useState<EditorError>(null);
 
 	return (
-		<div className='flex flex-col gap-2 mt-20'>
-			<h1 className='text-xl font-semibold'>States</h1>
-			<div className='flex flex-col gap-2 border rounded-lg p-3'>
+		<div className='flex flex-col gap-10 py-10'>
+			<div className='bg-slate-50 flex flex-col gap-5 border rounded-lg p-3'>
+				{/* header */}
+				<h1 className='text-xl font-semibold italic'>States</h1>
+
 				{/* content */}
 				<div className='flex gap-2'>
 					<span className='font-semibold'>Content:</span>
 					<textarea
-						className='flex-1 p-2 bg-slate-50'
+						className='flex-1 p-2 '
 						value={content}
 						onChange={(e) => setContent(e.target.value)}
 					/>
 				</div>
+
 				{/* error */}
 				<div className='flex gap-2'>
-					<span className='font-semibold'>Error:</span>
-					<pre className='max-h-10 overflow-auto bg-red-50 p-2 flex-1'>
+					<span className='font-semibold '>Error:</span>
+					<pre className='max-h-10 overflow-auto bg-white p-2 flex-1'>
 						{JSON.stringify(error)}
 					</pre>
 				</div>
 			</div>
 
-			<h1 className='text-xl font-semibold mt-20'>Editor</h1>
-			<div className='flex h-64 border'>
+			<div className='bg-yellow-50 flex flex-col gap-5 h-64 border p-3 rounded-lg'>
+				{/* header */}
+				<h1 className='text-xl font-semibold italic'>Workbench</h1>
+
+				{/* workbench */}
 				<Workbench
-					editorOptions={{
+					editorProps={{
 						document: {
 							content,
 							language,
 						},
 						listeners: {
-							onChange: setContent,
-							onError: setError,
+							documentChange: (document, error) => {
+								setContent(document.content);
+								setError(error);
+							},
 						},
 					}}
 				/>

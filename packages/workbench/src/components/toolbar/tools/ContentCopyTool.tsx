@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
 import { ClipboardSvg } from '../../svg/ClipboardSvg';
 import { ToolDefaultSvgProps, ToolButton } from './ToolButton';
+import { useEditorDocument } from '../../../hooks';
 
 export function ContentCopyTool() {
-	const document = useDocument();
+	const document = useEditorDocument();
 
 	if (!document) {
 		return null;
