@@ -1,23 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useContext, useState } from 'react';
 import { ClipboardSvg } from '../../svg/ClipboardSvg';
 import { ToolDefaultSvgProps, ToolButton } from './ToolButton';
-import { useEditorDocument } from '../../../hooks';
+import { EditorDocumentContext } from '../../../contexts';
 
 export function ContentCopyTool() {
-	const document = useEditorDocument();
-
-	if (!document) {
-		return null;
-	}
-
-	const { content } = document;
-
 	const [isCopied, setIsCopied] = useState(false);
-	const readerText = 'Copy code to clipboard';
-	const hoverText = isCopied ? 'Code copied' : 'Copy code';
+	const document = useContext(EditorDocumentContext);
 
-	const copyCode = useCallback(async () => {
-		await copyToClipboard(content);
+	const copyCode = async () => {
+		await copyToClipboard(document ? document.content : '');
 		setIsCopied(true);
 
 		const timeout = setTimeout(() => {
@@ -25,7 +16,10 @@ export function ContentCopyTool() {
 		}, 2000);
 
 		return () => clearTimeout(timeout);
-	}, [content, isCopied]);
+	};
+
+	const readerText = 'Copy code to clipboard';
+	const hoverText = isCopied ? 'Code copied' : 'Copy code';
 
 	return (
 		<>

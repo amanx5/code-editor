@@ -10,8 +10,6 @@ import {
 import type { EditorOptions } from '..';
 import { useEffect } from 'react';
 
-export type EditorApiName = keyof EditorApi;
-
 export type EditorApi = {
 	cursor: CursorApi;
 	markup: MarkupApi;

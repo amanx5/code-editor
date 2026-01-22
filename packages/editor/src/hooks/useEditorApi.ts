@@ -1,17 +1,15 @@
 import { useContext } from 'react';
 import { EditorApiContext } from '../contexts';
-import type { EditorApi, EditorApiName } from './useEditorApiSetup';
+import type { EditorApi } from './useEditorApiSetup';
 
-export function useEditorApi(): EditorApi;
-export function useEditorApi<N extends EditorApiName>(apiName: N): EditorApi[N];
-export function useEditorApi(apiName?: EditorApiName) {
+export function useEditorApi(): EditorApi {
 	const editorApi = useContext(EditorApiContext);
 
 	if (!editorApi) {
 		throw new Error(
-			'Invalid hook call. Call this hook inside AllApiContext.Provider',
+			'Invalid hook call. Call this hook inside "EditorApiContext.Provider" only.',
 		);
 	}
 
-	return apiName ? editorApi[apiName] : editorApi;
+	return editorApi;
 }

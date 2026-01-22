@@ -1,8 +1,9 @@
-import { cls, getLanguageName } from 'code-editor/utils';
-import { useEditorDocument } from '../../hooks';
+import { cls, getLanguageName } from 'code-editor';
+import { useContext } from 'react';
+import { EditorDocumentContext } from '../../contexts';
 
 export function Title() {
-	const document = useEditorDocument();
+	const document = useContext(EditorDocumentContext);
 
 	if (!document) {
 		return null;
@@ -16,7 +17,7 @@ export function Title() {
 			className={cls(
 				'flex items-center pl-2',
 				'text-ceToolbarItem-normal',
-				'text-sm'
+				'text-sm',
 			)}
 		>
 			{title}

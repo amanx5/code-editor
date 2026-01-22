@@ -1,4 +1,4 @@
-import { cls } from 'code-editor/utils';
+import { cls } from 'code-editor';
 
 export function Layout({ children }: { children: React.ReactNode }) {
 	return (
@@ -7,7 +7,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				'bg-ceLayout',
 				'border border-cePanel',
 				'flex-1 flex flex-col',
-				'overflow-hidden'
+				'overflow-hidden',
 			)}
 		>
 			{children}

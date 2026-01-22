@@ -1,9 +1,9 @@
 import { EditorApiContext, toNumber } from 'code-editor';
 import { StatusButton } from './StatusButton';
-import { useEditorApi } from '../../../hooks/useEditorApi';
+import { useContext } from 'react';
 
 export function CursorStatus() {
-	const editorApi = useEditorApi();
+	const editorApi = useContext(EditorApiContext);
 
 	if (!editorApi) {
 		return null;
