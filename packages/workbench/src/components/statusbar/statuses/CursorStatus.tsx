@@ -1,4 +1,4 @@
-import { toNumber } from 'code-editor/utils';
+import { EditorApiContext, toNumber } from 'code-editor';
 import { StatusButton } from './StatusButton';
 import { useEditorApi } from '../../../hooks/useEditorApi';
 

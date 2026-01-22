@@ -1,6 +1,5 @@
 import type { ExampleProps } from '../utils/example-props';
-import { Editor } from 'code-editor';
-import type { EditorError } from 'code-editor/utils';
+import { Editor, type EditorError } from 'code-editor';
 import { useState } from 'react';
 
 export function ExampleOutput({

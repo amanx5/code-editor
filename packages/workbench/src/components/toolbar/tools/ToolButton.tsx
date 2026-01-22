@@ -1,4 +1,4 @@
-import { cls } from 'code-editor/utils';
+import { cls } from 'code-editor';
 
 export function ToolButton(props: React.ComponentProps<'button'>) {
 	return (
@@ -8,7 +8,7 @@ export function ToolButton(props: React.ComponentProps<'button'>) {
 				'px-2',
 				'text-ceToolbarItem-normal',
 				'hover:text-ceToolbarItem-hover hover:bg-ceToolbarItem-hover',
-				props.className
+				props.className,
 			)}
 			{...props}
 		/>

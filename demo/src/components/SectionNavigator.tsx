@@ -1,4 +1,4 @@
-import { cls } from 'code-editor/utils';
+import { cls } from 'code-editor';
 import { pxToNum, TW_CONFIG } from '../utils/styling';
 
 type SectionNavigatorProps = {

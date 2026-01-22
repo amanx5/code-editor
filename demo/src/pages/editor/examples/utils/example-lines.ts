@@ -1,9 +1,9 @@
-import { range, shuffle } from "code-editor/utils";
+import { range, shuffle } from 'code-editor';
 
 export function getExampleLines(
 	count: number,
 	minWordCount: number = 0,
-	maxWordCount: number = 10
+	maxWordCount: number = 10,
 ) {
 	const line =
 		'Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia accusamus, reprehenderit, nobis itaque dolorem fugit ipsa vel minima natus enim quis nesciunt. Fugiat, sed? Iure ex quam suscipit est temporibus?';
@@ -17,13 +17,12 @@ export function getExampleLines(
 					0,
 					Math.min(
 						Math.floor(
-							Math.random() * (maxWordCount - minWordCount + 1)
+							Math.random() * (maxWordCount - minWordCount + 1),
 						) + minWordCount,
-						words.length
-					)
+						words.length,
+					),
 				)
-				.join(' ')
+				.join(' '),
 		)
 		.join('\n');
 }
-

@@ -1,5 +1,4 @@
-import { cls } from 'code-editor/utils';
-import { isPlainObject } from 'code-editor/utils';
+import { cls, isPlainObject} from 'code-editor';
 import { formatPropValue, type ExampleProps } from '../utils/example-props';
 
 export function ExampleData({ exampleProps }: { exampleProps: ExampleProps }) {
@@ -8,7 +7,7 @@ export function ExampleData({ exampleProps }: { exampleProps: ExampleProps }) {
 			<div
 				className={cls(
 					'bg-surface-muted border border-outline-subtle rounded-md',
-					'flex flex-col gap-1 p-4'
+					'flex flex-col gap-1 p-4',
 				)}
 			>
 				{Object.entries(exampleProps).map(([key, value], index) =>
@@ -19,9 +18,9 @@ export function ExampleData({ exampleProps }: { exampleProps: ExampleProps }) {
 										index,
 										key: key + '.' + keyInner,
 										value,
-									})
-						  )
-						: KeyValue({ index, key, value })
+									}),
+							)
+						: KeyValue({ index, key, value }),
 				)}
 			</div>
 		</>

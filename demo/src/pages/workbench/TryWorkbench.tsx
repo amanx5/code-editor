@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Workbench } from 'code-workbench';
-import type { EditorError } from 'code-editor/utils';
+import { type EditorError } from 'code-editor';
 
 export function TryWorkbench() {
 	const [content, setContent] = useState('hello world\nhow are you doing');

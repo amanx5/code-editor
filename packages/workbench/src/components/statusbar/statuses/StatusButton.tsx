@@ -1,4 +1,4 @@
-import { cls } from 'code-editor/utils';
+import { cls } from 'code-editor';
 
 export function StatusButton(props: React.ComponentProps<'button'>) {
 	return (
@@ -8,7 +8,7 @@ export function StatusButton(props: React.ComponentProps<'button'>) {
 				'px-2',
 				'text-xs text-ceStatusBarItem-normal',
 				'hover:bg-ceStatusBarItem-hover hover:text-ceStatusBarItem-hover',
-				props.className
+				props.className,
 			)}
 			type='button'
 		/>

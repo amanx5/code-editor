@@ -10,8 +10,7 @@
 			"types": "./src/index.ts"
 		},
 		"./css": "./dist/index.css",
-		"./tailwind-config": "./tailwind.config.cjs",
-		"./utils": "./src/utils/index.ts"
+		"./tailwind-config": "./tailwind.config.cjs"
 	},
 	"scripts": {
 		"tw:build": "tailwindcss -i ./src/index.css -o ./dist/index.css",

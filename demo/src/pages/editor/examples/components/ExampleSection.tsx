@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { cls } from 'code-editor/utils';
+import { cls } from 'code-editor';
 import { Section } from '../../../../components/Section';
 import type { ExampleProps } from '../utils/example-props';
 import { ExampleData } from './ExampleData';
@@ -45,7 +45,7 @@ export function ExampleSection({
 								'border transition-colors',
 								enabled
 									? 'bg-blue-600 text-white border-blue-600'
-									: 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'
+									: 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100',
 							)}
 						>
 							{label}

@@ -1,4 +1,4 @@
-import { beautifyJson } from "code-editor/utils";
+import { beautifyJson } from 'code-editor';
 
 export const exampleJson = beautifyJson({
 	id: 'P-1001',
@@ -14,5 +14,5 @@ export const exampleJson = beautifyJson({
 		isSeasonal: false,
 		createdOn: '2024-09-19',
 		archivedAt: null,
-	}
+	},
 });

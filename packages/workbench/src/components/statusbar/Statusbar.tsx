@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { cls } from 'code-editor/utils';
+import { cls } from 'code-editor';
 import { CursorStatus } from './statuses';
 
 export const Statusbar = memo(function Statusbar() {
@@ -11,7 +11,7 @@ export const Statusbar = memo(function Statusbar() {
 				'h-6 max-h-6',
 			)}
 		>
-            <CursorStatus />
+			<CursorStatus />
 		</div>
 	);
 });

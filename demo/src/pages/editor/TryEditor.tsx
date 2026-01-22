@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Editor } from 'code-editor';
-import type { EditorError } from 'code-editor/utils';
+import { Editor, type EditorError } from 'code-editor';
 
 export function TryEditor() {
 	const [content, setContent] = useState('hello world\nhow are you doing');
@@ -36,7 +35,7 @@ export function TryEditor() {
 				{/* header */}
 				<h1 className='text-xl font-semibold italic'>Editor</h1>
 
-				{/* workbench */}
+				{/* editor */}
 				<Editor
 					document={{
 						content,
