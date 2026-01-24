@@ -3,7 +3,6 @@ import { contentValidatorJson } from './content-validator-json';
 import { contentTokeniserJson } from './content-tokeniser-json';
 
 export const LANGUAGE_UTIL_JSON: LanguageUtil = {
-	languageName: 'JSON',
 	contentValidator: contentValidatorJson,
 	contentTokeniser: contentTokeniserJson,
 };

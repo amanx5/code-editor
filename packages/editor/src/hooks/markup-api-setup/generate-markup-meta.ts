@@ -8,7 +8,7 @@ import {
 import type { LineNumber } from '../useEditorMarkupApiSetup';
 
 export type LineMeta = {
-	content: Content;
+	value: Content;
 	error: EditorError;
 	number: LineNumber;
 	tokens: TokenisedLine['tokens'];
@@ -22,12 +22,12 @@ export function generateMarkupMeta(
 ): EditorMarkupMeta {
 	const tokenisedLines = tokeniseContent(document);
 
-	const markup = tokenisedLines.map(({ content, tokens }, index) => {
+	const markup = tokenisedLines.map(({ value, tokens }, index) => {
 		const lineNumber = index + 1;
 
 		const lineMeta = {
 			// TODO: Make editor error as key value pair of line numbers and corresponding errors
-			content,
+			value,
 			error: error?.line === lineNumber ? error : null,
 			number: lineNumber,
 			tokens,

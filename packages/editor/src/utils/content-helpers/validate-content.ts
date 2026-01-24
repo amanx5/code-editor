@@ -1,5 +1,5 @@
 import type { EditorDocument } from '../../';
-import { LANGUAGE_UTIL, type Content } from './language-util';
+import { LANGUAGE_UTILS, type Content } from './language-utils';
 
 export type EditorError = {
 	message: string;
@@ -14,16 +14,12 @@ export type ContentValidator = (content: Content) => EditorError;
 export function validateContent(document: EditorDocument): EditorError {
 	const { content, language } = document;
 
-	let contentValidator: ContentValidator;
-	if (LANGUAGE_UTIL[language].contentValidator) {
-		contentValidator = LANGUAGE_UTIL[language].contentValidator;
-	} else {
+	if (!LANGUAGE_UTILS[language].contentValidator) {
 		console.warn(
-			`No 'contentValidator' found for language '${language}'. Content will be validated as plain-text.`
+			`No 'contentValidator' found for language '${language}'. Content will not be validated.`,
 		);
-
-		contentValidator = LANGUAGE_UTIL.txt.contentValidator!;
+		return null;
 	}
 
-	return contentValidator(content);
+	return LANGUAGE_UTILS[language].contentValidator(content);
 }

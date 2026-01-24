@@ -1,4 +1,4 @@
-import { cls, getLanguageName } from 'code-editor';
+import { cls, LANGUAGE_NAMES } from 'code-editor';
 import { useContext } from 'react';
 import { EditorDocumentContext } from '../../contexts';
 
@@ -8,9 +8,8 @@ export function Title() {
 	if (!document) {
 		return null;
 	}
-
 	const { name, language } = document;
-	const title = name ? name + '.' + language : getLanguageName(language);
+	const title = name ? name + '.' + language : LANGUAGE_NAMES[language];
 
 	return (
 		<div

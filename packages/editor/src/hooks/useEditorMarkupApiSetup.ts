@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import {
 	type Content,
 	type EditorError,
@@ -8,16 +8,13 @@ import {
 	type SetterValue,
 	validateContent,
 } from '../utils';
-import type { EditorDocument, EditorListeners, EditorOptions } from '..';
+import { MarkupLineAttributeDomName, type EditorDocument, type EditorListeners, type EditorOptions, type MarkupLineAttribute } from '..';
 import type { MarkupElement } from '../components';
 import {
 	updateMarkupMetrics,
 	type MarkupMetrics,
 	type EditorMarkupMeta,
 	generateMarkupMeta,
-	renderMarkup,
-	type MarkupLineAttribute,
-	MarkupLineAttributeDomName,
 } from './markup-api-setup';
 
 export type Axis = 'x' | 'y';
@@ -43,9 +40,9 @@ export type EditorFocused = boolean;
 export type MarkupLineElement = HTMLPreElement;
 
 export type MarkupApi = {
+	commit: MarkupCommit | null;
 	focused: EditorFocused;
 
-	getCurrentCommit(): MarkupCommit | null;
 	getElement(): MarkupElement | null;
 	getLineElement(
 		position?: LineNumber | 'first' | 'last' | { near: HTMLElement },
@@ -85,25 +82,18 @@ export function useEditorMarkupApiSetup(
 	listeners?: EditorListeners,
 ): MarkupApi {
 	const elementRef = useRef<MarkupElement>(null);
-	const commitRef = useRef<MarkupCommit>(null);
+	const [commit, setCommit] = useState<MarkupCommit | null>(null);
 	const metricsRef = useRef<MarkupMetrics>(null);
-	const listenersRef = useRef(listeners);
 	const [focused, setFocused] = useState<EditorFocused>(false);
-
-	useEffect(() => {
-		listenersRef.current = listeners;
-	}, [listeners]);
 
 	useLayoutEffect(() => {
 		markupApi.updateDocument(document, editorOptions);
 	}, [document, editorOptions]);
 
 	const markupApi: MarkupApi = {
+		commit,
 		focused,
 
-		getCurrentCommit() {
-			return commitRef.current ?? null;
-		},
 		getElement() {
 			return elementRef.current ?? null;
 		},
@@ -172,10 +162,9 @@ export function useEditorMarkupApiSetup(
 			return { x, y };
 		},
 		getMaxLineColumn(lineNumber) {
-			const currentCommit = markupApi.getCurrentCommit();
-			if (!currentCommit) return MIN_LINE_COLUMN;
+			if (!commit) return MIN_LINE_COLUMN;
 
-			const lineMeta = currentCommit.markupMeta.find(
+			const lineMeta = commit.markupMeta.find(
 				(lineMeta) => lineMeta.number === lineNumber,
 			);
 
@@ -185,13 +174,12 @@ export function useEditorMarkupApiSetup(
 				);
 			}
 
-			return lineMeta.content.length;
+			return lineMeta.value.length;
 		},
 		getMaxLineNumber() {
-			const currentCommit = markupApi.getCurrentCommit();
-			if (!currentCommit) return MIN_LINE_NUMBER;
+			if (!commit) return MIN_LINE_NUMBER;
 
-			return currentCommit.markupMeta.length;
+			return commit.markupMeta.length;
 		},
 		getMetrics() {
 			return metricsRef.current ?? null;
@@ -206,31 +194,26 @@ export function useEditorMarkupApiSetup(
 		},
 
 		updateDocument(document, editorOptions) {
-			const latestCommit = commitRef.current;
-			const isFirstRender = latestCommit === null;
 			const isDocumentChanged = !isEqualObjects(
 				document,
-				latestCommit?.document,
+				commit?.document,
 			);
 			const isOptionsChanged = !isEqualObjects(
 				editorOptions,
-				latestCommit?.editorOptions,
+				commit?.editorOptions,
 			);
 
-			if (isFirstRender || isDocumentChanged || isOptionsChanged) {
+			if (isDocumentChanged || isOptionsChanged) {
 				const error = validateContent(document);
 				const markupMeta = generateMarkupMeta(document, error);
 
-				renderMarkup(markupApi, markupMeta, editorOptions);
-
-				commitRef.current = {
+				setCommit({
 					document: document,
 					error: error,
 					markupMeta: markupMeta,
 					editorOptions: editorOptions,
-				};
+				});
 
-				const listeners = listenersRef.current;
 				listeners?.documentChange?.(document, error);
 
 				// TODO: Don't cache metrics, we need to re-calculate metrics everytime cursor changes.
@@ -242,19 +225,19 @@ export function useEditorMarkupApiSetup(
 			}
 		},
 		updateDocumentContent(value) {
-			if (!commitRef.current) return;
+			if (!commit) return;
 
 			const newContent = resolveSetterValue(
 				value,
-				commitRef.current.document.content,
+				commit.document.content,
 			);
 
 			const newDocument = {
-				...commitRef.current.document,
+				...commit.document,
 				content: newContent,
 			};
 
-			markupApi.updateDocument(newDocument, commitRef.current.editorOptions);
+			markupApi.updateDocument(newDocument, commit.editorOptions);
 		},
 	};
 

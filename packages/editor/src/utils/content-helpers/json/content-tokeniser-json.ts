@@ -1,7 +1,7 @@
-import type { ContentTokeniser, TokenisedLine } from '../tokenise-content';
+import type { ContentTokeniser } from '../tokenise-content';
 
 const JSON_TOKEN_REGEX =
-	/(\s+|"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|\btrue\b|\bfalse\b|\bnull\b|[{}\[\]:,])/g;
+	/(\s+|"(?:\\.|[^"\\])*"|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|\btrue\b|\bfalse\b|\bnull\b|[{}\[\]:,]|[^\s{}\[\]:,"]+)/g;
 
 const TOKEN_CLS_MAP = {
 	string: 'text-ceMarkupToken-string',
@@ -14,30 +14,24 @@ const TOKEN_CLS_MAP = {
 } as const;
 
 export const contentTokeniserJson: ContentTokeniser = (content) => {
-	const contentLines = content.split('\n');
-	let result = [];
+	const lines = content.split('\n');
+	const tokenisedLines = [];
 
-	for (const line of contentLines) {
-		const tokenisedLine: TokenisedLine = {
-			content: line,
-			tokens: [],
-		};
+	for (const line of lines) {
+		const matches = line.match(JSON_TOKEN_REGEX) ?? [line];
 
-		const matches = line.match(JSON_TOKEN_REGEX) ?? [];
+		const tokens = matches.map((token) => ({
+			cls: TOKEN_CLS_MAP[getTokenType(token)],
+			value: token,
+		}));
 
-		for (const token of matches) {
-			const type = getTokenType(token);
-
-			tokenisedLine.tokens.push({
-				cls: TOKEN_CLS_MAP[type],
-				value: token,
-			});
-		}
-
-		result.push(tokenisedLine);
+		tokenisedLines.push({
+			value: line,
+			tokens,
+		});
 	}
 
-	return result;
+	return tokenisedLines;
 };
 
 function getTokenType(value: string): keyof typeof TOKEN_CLS_MAP {

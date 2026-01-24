@@ -1,12 +1,14 @@
 import { cls, getEventHandlers } from '../../utils';
 import { useEditorApi } from '../../hooks';
+import { memo } from 'react';
 
 export type MarkupElement = HTMLDivElement;
 
-export function MarkupLayer() {
+export const MarkupLayer = memo(MarkupLayerComp);
+
+function MarkupLayerComp({ children }: { children?: React.ReactNode }) {
 	const editorApi = useEditorApi();
 	const eventHandlers = getEventHandlers(editorApi);
-	const { markup } = editorApi;
 
 	return (
 		<div
@@ -19,11 +21,13 @@ export function MarkupLayer() {
 				'selection:bg-transparent',
 				// 'selection:bg-red-800 selection:bg-opacity-40', // for testing
 			)}
-			ref={markup.setElement} // callback ref
+			ref={editorApi.markup.setElement} // callback ref
 			role='textbox'
 			spellCheck={false}
 			tabIndex={0}
 			{...eventHandlers}
-		/>
+		>
+			{children}
+		</div>
 	);
 }

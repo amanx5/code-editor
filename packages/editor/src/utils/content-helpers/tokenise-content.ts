@@ -1,14 +1,14 @@
 import type { EditorDocument } from '../../';
-import { LANGUAGE_UTIL, type Content } from './language-util';
+import { LANGUAGE_UTILS, type Content } from './language-utils';
 
 export type TokenMeta = {
 	cls: string;
-	value: string;
+	value: Content;
 };
 
 export type TokenisedLine = {
-	content: Content;
 	tokens: TokenMeta[];
+	value: Content;
 };
 
 export type ContentTokeniser = (content: Content) => TokenisedLine[];
@@ -16,16 +16,19 @@ export type ContentTokeniser = (content: Content) => TokenisedLine[];
 export function tokeniseContent(document: EditorDocument): TokenisedLine[] {
 	const { content, language } = document;
 
-	let contentTokeniser: ContentTokeniser;
-
-	if (LANGUAGE_UTIL[language].contentTokeniser) {
-		contentTokeniser = LANGUAGE_UTIL[language].contentTokeniser;
-	} else {
+	const contentTokeniser = LANGUAGE_UTILS[language].contentTokeniser;
+	if (!contentTokeniser) {
 		console.warn(
-			`No 'contentTokeniser' found for language '${language}'. Content will be displayed as plain-text.`,
+			`No 'contentTokeniser' found for language '${language}'. Using 'txt' content-tokeniser instead.`,
 		);
 
-		contentTokeniser = LANGUAGE_UTIL.txt.contentTokeniser!;
+		const txtContentTokeniser = LANGUAGE_UTILS.txt.contentTokeniser;
+
+		if (!txtContentTokeniser) {
+			throw new Error(`No 'contentTokeniser' found for language 'txt'.`);
+		}
+
+		return txtContentTokeniser(content);
 	}
 
 	return contentTokeniser(content);

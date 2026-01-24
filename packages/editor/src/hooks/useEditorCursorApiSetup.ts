@@ -60,15 +60,15 @@ export function useEditorCursorApiSetup(markupApi: MarkupApi): CursorApi {
 	const cursorApi: CursorApi = {
 		selection,
 		getSelectedContent() {
-			const currentCommit = markupApi.getCurrentCommit();
-			if (!currentCommit || !selection) return null;
+			const commit = markupApi.commit;
+			if (!commit || !selection) return null;
 
 			const { start, end } = selection;
 			if (comparePositions(start, end) === PositionComparison.EQUAL) {
 				return null;
 			}
 
-			const allContent = currentCommit.document.content;
+			const allContent = commit.document.content;
 			const startOffset = cursorApi.positionToOffset(start);
 			const endOffset = cursorApi.positionToOffset(end);
 
@@ -184,15 +184,15 @@ export function useEditorCursorApiSetup(markupApi: MarkupApi): CursorApi {
 		},
 		positionToOffset(cursorPosition) {
 			const { lineNumber, lineColumn } = cursorPosition;
-			const currentCommit = markupApi.getCurrentCommit();
+			const commit = markupApi.commit;
 
-			if (!currentCommit) {
+			if (!commit) {
 				throw new Error(
 					'Unable to calculate offset as no document is commited yet.',
 				);
 			}
 
-			const allContent = currentCommit.document.content;
+			const allContent = commit.document.content;
 
 			const lines = allContent.split('\n');
 

@@ -8,6 +8,8 @@ import {
 	MarkupLayer,
 	SelectionLayer,
 } from './components/layers';
+import { MarkupLine } from './components/layers/markup-layer/MarkupLine';
+import { MarkupToken } from './components/layers/markup-layer/MarkupToken';
 
 export type EditorDocument = {
 	content: Content;
@@ -47,13 +49,31 @@ export function Editor({ document, listeners, editorOptions }: EditorProps) {
 	editorOptions = mergeOverrides(EditorOptionsDefault, editorOptions);
 
 	const editorApi = useEditorApiSetup(document, editorOptions, listeners);
+	const { markup } = editorApi;
+	const { commit } = markup;
+	const lineMetaArray = commit?.markupMeta ?? [];
 
 	return (
 		<EditorApiContext.Provider value={editorApi}>
 			<Scroller>
 				<SelectionLayer />
 
-				<MarkupLayer />
+				<MarkupLayer>
+					{lineMetaArray.map((lineMeta, index) => (
+						<MarkupLine
+							key={index}
+							lineMeta={lineMeta}
+							editorOptions={editorOptions}
+						>
+							{lineMeta.tokens.map((tokenMeta, index) => (
+								<MarkupToken
+									key={index}
+									tokenMeta={tokenMeta}
+								/>
+							))}
+						</MarkupLine>
+					))}
+				</MarkupLayer>
 
 				<CursorLayer>
 					<Cursor />
