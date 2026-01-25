@@ -1,4 +1,4 @@
-import { cls } from 'code-editor';
+import { cls, applyDefaults } from 'code-editor';
 import { ContentCopyTool, ContentFormatTool, ContentWrapTool } from './tools';
 import { memo } from 'react';
 import { Title } from './Title';
@@ -37,7 +37,7 @@ export const ToolbarStatesDefault: ToolbarStates = {
 };
 
 export type ToolbarProps = {
-	options: ToolbarOptions;
+	options?: ToolbarOptions;
 	states: ToolbarStates;
 };
 
@@ -45,6 +45,7 @@ export const Toolbar = memo(function Toolbar({
 	options,
 	states,
 }: ToolbarProps) {
+	options = applyDefaults(options, ToolbarOptionsDefault);
 	const {
 		isWrapEnabled,
 		isFormatEnabled,

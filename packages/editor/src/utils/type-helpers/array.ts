@@ -1,5 +1,7 @@
+import { isEqualObjects, isPlainObject } from '../..';
+
 /**
- * Returns an array starting from `start` till `end`. 
+ * Returns an array starting from `start` till `end`.
  * Negative range is also supported.
  */
 export function range(start: number, end: number): number[] {
@@ -15,4 +17,24 @@ export function range(start: number, end: number): number[] {
 
 export function shuffle<T>(arr: T[]) {
 	return [...arr].sort(() => Math.random() - 0.5);
+}
+/**
+ * Returns true if elements of both arrays are equal.
+ * 
+ * Note: If elements are objects, they are shallow compared using `isEqualObjects`.
+ */
+export function isEqualArrays(a: unknown, b: unknown) {
+	if (!Array.isArray(a) || !Array.isArray(b)) return false;
+	
+	if (a.length !== b.length) return false;
+
+	for (let i = 0; i < a.length; i++) {
+		if (isPlainObject(a[i])) {
+			if (!isEqualObjects(a[i], b[i])) return false;
+		} else {
+			if (!Object.is(a[i], b[i])) return false;
+		}
+	}
+
+	return true;
 }

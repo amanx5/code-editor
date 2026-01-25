@@ -12,23 +12,22 @@ export function Cursor() {
 	const { positionToCoordinates, selection } = cursor;
 
 	const cursorElRef = useRef<CursorElement>(null);
+	const cursorEl = cursorElRef.current;
 
 	useLayoutEffect(() => {
-		const cursorEl = cursorElRef.current;
-
-		if (!cursorEl) return;
-
-		if (selection) {
+		if (cursorEl && selection) {
 			const coordinates = positionToCoordinates(selection.end);
 			cursorEl.style.transform = `translate(${coordinates.x}px, ${coordinates.y}px)`;
 
-			cursorEl.scrollIntoView({
-				behavior: 'instant',
-				block: 'nearest',
-				inline: 'nearest',
-			});
+			ensureInView(cursorEl);
 		}
 	}, [selection]);
+
+	useLayoutEffect(() => {
+		if (cursorEl && focused) {
+			ensureInView(cursorEl);
+		}
+	}, [focused]);
 
 	return (
 		<div
@@ -40,4 +39,12 @@ export function Cursor() {
 			ref={cursorElRef}
 		/>
 	);
+
+	function ensureInView(cursorEl: CursorElement) {
+		cursorEl.scrollIntoView({
+			behavior: 'instant',
+			block: 'nearest',
+			inline: 'nearest',
+		});
+	}
 }

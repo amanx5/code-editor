@@ -1,15 +1,14 @@
-import { Scroller } from './components';
-import { EditorApiContext } from './contexts';
-import { type Content, type EditorError, type Language } from './utils';
-import { useEditorApiSetup, type EditorApi, type LineNumber } from './hooks';
 import {
 	Cursor,
 	CursorLayer,
 	MarkupLayer,
+	MarkupLineMemo,
+	Scroller,
 	SelectionLayer,
-} from './components/layers';
-import { MarkupLine } from './components/layers/markup-layer/MarkupLine';
-import { MarkupToken } from './components/layers/markup-layer/MarkupToken';
+} from './components';
+import { EditorApiContext } from './contexts';
+import { type Content, type EditorError, type Language } from './utils';
+import { useEditorApiSetup, type EditorApi, type LineNumber } from './hooks';
 
 export type EditorDocument = {
 	content: Content;
@@ -46,8 +45,6 @@ export type EditorProps = {
  * Note: CSS for this component is not included by default. Refer README for CSS installation.
  */
 export function Editor({ document, listeners, editorOptions }: EditorProps) {
-	editorOptions = mergeOverrides(EditorOptionsDefault, editorOptions);
-
 	const editorApi = useEditorApiSetup(document, editorOptions, listeners);
 	const { markup } = editorApi;
 	const { commit } = markup;
@@ -55,23 +52,20 @@ export function Editor({ document, listeners, editorOptions }: EditorProps) {
 
 	return (
 		<EditorApiContext.Provider value={editorApi}>
+			{/* TODO: Render the components within a renderer, this will allow consumers to wrap the editor
+			in a container of their choice (will also give access to EditorApiContext) */}
 			<Scroller>
 				<SelectionLayer />
 
 				<MarkupLayer>
-					{lineMetaArray.map((lineMeta, index) => (
-						<MarkupLine
-							key={index}
-							lineMeta={lineMeta}
+					{lineMetaArray.map(({ error, number, tokens }) => (
+						<MarkupLineMemo
+							key={number}
+							number={number}
+							error={error}
+							tokens={tokens}
 							editorOptions={editorOptions}
-						>
-							{lineMeta.tokens.map((tokenMeta, index) => (
-								<MarkupToken
-									key={index}
-									tokenMeta={tokenMeta}
-								/>
-							))}
-						</MarkupLine>
+						/>
 					))}
 				</MarkupLayer>
 
@@ -81,14 +75,4 @@ export function Editor({ document, listeners, editorOptions }: EditorProps) {
 			</Scroller>
 		</EditorApiContext.Provider>
 	);
-}
-
-export function mergeOverrides<T>(
-	defaults: T,
-	overrides: Partial<T> | undefined,
-): T {
-	return {
-		...defaults,
-		...overrides,
-	};
 }

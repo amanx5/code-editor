@@ -1,6 +1,10 @@
 import { memo } from 'react';
 import {
+	arePropValuesEqual,
 	cls,
+	EditorOptionsDefault,
+	MarkupTokenMemo,
+	applyDefaults,
 	type EditorOptions,
 	type LineMeta,
 } from '../../..';
@@ -11,21 +15,23 @@ export enum MarkupLineAttributeDomName {
 	lineNumber = 'data-line-num',
 }
 
-export const MarkupLine = memo(MarkupLineComp);
+export const MarkupLineMemo = memo(MarkupLine, arePropValuesEqual);
 
-function MarkupLineComp({
-	children,
+function MarkupLine({
 	editorOptions,
-	lineMeta,
+	error,
+	number,
+	tokens,
 }: {
-	children?: React.ReactNode;
-	editorOptions: EditorOptions;
-	lineMeta: LineMeta;
+	editorOptions?: EditorOptions;
+	error?: LineMeta['error'];
+	number: LineMeta['number'];
+	tokens: LineMeta['tokens'];
 }) {
+	editorOptions = applyDefaults(editorOptions, EditorOptionsDefault);
+
 	const { highlightLines, hideLineNumbers } = editorOptions;
 	const lineNumAttr = MarkupLineAttributeDomName.lineNumber;
-	const { error, number } = lineMeta;
-
 	const isHighlighted = highlightLines?.includes(number);
 
 	return (
@@ -41,7 +47,9 @@ function MarkupLineComp({
 			)}
 			{...{ [lineNumAttr]: number }}
 		>
-			{children}
+			{tokens.map(({ cls, value }, index) => (
+				<MarkupTokenMemo key={index} cls={cls} value={value} />
+			))}
 		</pre>
 	);
 }

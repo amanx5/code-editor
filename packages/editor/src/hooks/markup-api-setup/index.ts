@@ -1,2 +1,2 @@
-export * from './update-markup-metrics';
+export * from './calculate-markup-metrics';
 export * from './generate-markup-meta';

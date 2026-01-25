@@ -1,12 +1,9 @@
 import { cls, getEventHandlers } from '../../utils';
 import { useEditorApi } from '../../hooks';
-import { memo } from 'react';
 
 export type MarkupElement = HTMLDivElement;
 
-export const MarkupLayer = memo(MarkupLayerComp);
-
-function MarkupLayerComp({ children }: { children?: React.ReactNode }) {
+export function MarkupLayer({ children }: { children?: React.ReactNode }) {
 	const editorApi = useEditorApi();
 	const eventHandlers = getEventHandlers(editorApi);
 

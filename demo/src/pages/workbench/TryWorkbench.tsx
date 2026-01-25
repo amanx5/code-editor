@@ -2,15 +2,21 @@ import { useState } from 'react';
 import { Workbench } from 'code-workbench';
 import {
 	LANGUAGE_NAMES,
+	Editor,
 	type EditorDocument,
 	type EditorError,
+	type EditorProps,
 	type Language,
 	type LanguageName,
 } from 'code-editor';
 
-export function TryWorkbench() {
+export function TryWorkbench({
+	disableWorkbench,
+}: {
+	disableWorkbench?: boolean;
+}) {
 	const [document, setDocument] = useState<EditorDocument>({
-		content: 'hello world\nhow are you doing',
+		content: 'hello world\nhow are you doing\nare you well\nare you well\nwhat is the plan for today\nthanks and bye',
 		language: 'txt',
 	});
 
@@ -18,6 +24,16 @@ export function TryWorkbench() {
 	const languages = Object.entries(LANGUAGE_NAMES) as Array<
 		[Language, LanguageName]
 	>;
+
+	const editorProps: EditorProps = {
+		document,
+		listeners: {
+			documentChange: (document, error) => {
+				setDocument(document);
+				setError(error);
+			},
+		},
+	};
 
 	return (
 		<div className='flex flex-col gap-10 py-10'>
@@ -75,21 +91,17 @@ export function TryWorkbench() {
 			</div>
 
 			<div className='bg-yellow-50 flex flex-col gap-5 h-64 border p-3 rounded-lg'>
-				{/* header */}
-				<h1 className='text-xl font-semibold italic'>Workbench</h1>
+				{/* heading */}
+				<h1 className='text-xl font-semibold italic'>
+					{disableWorkbench ? 'Editor' : 'Workbench'}
+				</h1>
 
-				{/* workbench */}
-				<Workbench
-					editorProps={{
-						document,
-						listeners: {
-							documentChange: (document, error) => {
-								setDocument(document);
-								setError(error);
-							},
-						},
-					}}
-				/>
+				{/* output */}
+				{disableWorkbench ? (
+					<Editor {...editorProps} />
+				) : (
+					<Workbench editorProps={editorProps} />
+				)}
 			</div>
 		</div>
 	);

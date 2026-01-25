@@ -1,3 +1,5 @@
+import { isEqualArrays } from '../..';
+
 export type PlainObject = Record<PropertyKey, unknown>;
 export function isPlainObject(arg: unknown): arg is PlainObject {
 	if (
@@ -14,18 +16,21 @@ export function isPlainObject(arg: unknown): arg is PlainObject {
 /**
  * Returns shallow comparison of 2 objects by their property values.
  */
-export function isEqualObjects(object1: unknown, object2: unknown) {
-	if (!isPlainObject(object1) || !isPlainObject(object2)) {
+export function isEqualObjects(a: unknown, b: unknown) {
+	if (!isPlainObject(a) || !isPlainObject(b)) return false;
+
+	const keys1 = Object.keys(a);
+	const keys2 = Object.keys(b);
+
+	if (keys1.length !== keys2.length) {
 		return false;
 	}
 
-	if (Object.keys(object1).length !== Object.keys(object2).length) {
-		return false;
-	}
-
-	for (const key of Object.keys(object1)) {
-		if (object1[key] !== object2[key]) {
-			return false;
+	for (const key of keys1) {
+		if (Array.isArray(a[key])) {
+			if (!isEqualArrays(a[key], b[key])) return false;
+		} else {
+			if (!Object.is(a[key], b[key])) return false;
 		}
 	}
 

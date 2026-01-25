@@ -4,12 +4,10 @@ import {
 	Layout,
 	Statusbar,
 	Toolbar,
-	ToolbarOptionsDefault,
 } from './components';
 
 import { useToolbarStates } from './hooks';
 import {
-	mergeOverrides,
 	Editor,
 	type EditorProps,
 	type EditorListeners,
@@ -38,8 +36,6 @@ export type WorkbenchProps = {
  * Note: CSS for this component is not included by default. Refer README for CSS installation.
  */
 export function Workbench({ editorProps, toolbarOptions }: WorkbenchProps) {
-	toolbarOptions = mergeOverrides(ToolbarOptionsDefault, toolbarOptions);
-
 	const toolbarStates = useToolbarStates();
 	const [editorApi, setEditorApi] = useState<EditorApi | null>(null);
 	const [editorDocument, setEditorDocument] = useState<EditorDocument | null>(

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, useMemo } from 'react';
 import {
 	type Content,
 	type EditorError,
@@ -8,14 +8,24 @@ import {
 	type SetterValue,
 	validateContent,
 } from '../utils';
-import { MarkupLineAttributeDomName, type EditorDocument, type EditorListeners, type EditorOptions, type MarkupLineAttribute } from '..';
+import {
+	calculateMarkupMetrics,
+	EditorOptionsDefault,
+	MarkupLineAttributeDomName,
+	applyDefaults,
+	type EditorDocument,
+	type EditorListeners,
+	type EditorOptions,
+	type MarkupLineAttribute,
+} from '..';
 import type { MarkupElement } from '../components';
 import {
-	updateMarkupMetrics,
 	type MarkupMetrics,
 	type EditorMarkupMeta,
 	generateMarkupMeta,
 } from './markup-api-setup';
+
+// let lastCheckedFont: CSSStyleDeclaration['font'] | null = null;
 
 export type Axis = 'x' | 'y';
 
@@ -32,8 +42,8 @@ export const MIN_LINE_NUMBER: LineNumber = 1;
 export type MarkupCommit = {
 	document: EditorDocument;
 	error: EditorError;
-	markupMeta: EditorMarkupMeta;
 	editorOptions: EditorOptions;
+	markupMeta: EditorMarkupMeta;
 };
 
 export type EditorFocused = boolean;
@@ -53,7 +63,7 @@ export type MarkupApi = {
 	): string;
 	/**
 	 * Returns coordinates of the given line element with respect to `MarkupElement`.
-	 * TODO: Return coordinates w.r.t `Body` element as all layers reside inside `Body`. It will be more robust solution.
+	 * TODO: Return coordinates w.r.t `Scroller` component as all layers reside inside `Scroller`. It will be more robust solution.
 	 */
 	getLineElementCoordinates(lineElement: MarkupLineElement): Coordinates;
 	getMaxLineColumn(lineNumber: LineNumber): LineColumn;
@@ -62,11 +72,10 @@ export type MarkupApi = {
 
 	setElement(element: MarkupElement): void;
 	setFocused: React.Dispatch<React.SetStateAction<EditorFocused>>;
-	setMetrics(metrics: MarkupMetrics): void;
 
 	updateDocument(
 		document: EditorDocument,
-		editorOptions: EditorOptions,
+		editorOptions?: EditorOptions,
 	): void;
 	updateDocumentContent(arg: SetterValue<Content>): void;
 };
@@ -78,168 +87,191 @@ export type MarkupApi = {
  */
 export function useEditorMarkupApiSetup(
 	document: EditorDocument,
-	editorOptions: EditorOptions,
+	editorOptions?: EditorOptions,
 	listeners?: EditorListeners,
 ): MarkupApi {
 	const elementRef = useRef<MarkupElement>(null);
 	const [commit, setCommit] = useState<MarkupCommit | null>(null);
-	const metricsRef = useRef<MarkupMetrics>(null);
 	const [focused, setFocused] = useState<EditorFocused>(false);
+	// const [loading, setLoading] = useState<boolean>(false);
 
 	useLayoutEffect(() => {
-		markupApi.updateDocument(document, editorOptions);
+		markupApiMemoized.updateDocument(document, editorOptions);
+
+		// TODO: Either Block access to Editor until the font is loaded
+		// Or write a mechanism to update selection layer, cursor layer, etc. when font is loaded/updated.
+		// const lineEl = markupApiMemoized.getLineElement();
+		// if (!lineEl) return;
+
+		// const lineStyle = getComputedStyle(lineEl);
+
+		// if (lastCheckedFont === lineStyle.font) return;
+		// lastCheckedFont = lineStyle.font;
+
+		// setLoading(true);
+		// window.document.fonts.load(lineStyle.font).then(() => {
+		// 	setLoading(false);
+		// });
 	}, [document, editorOptions]);
 
-	const markupApi: MarkupApi = {
-		commit,
-		focused,
+	const markupApiMemoized = useMemo<MarkupApi>(() => {
+		const markupApi: MarkupApi = {
+			commit,
+			focused,
 
-		getElement() {
-			return elementRef.current ?? null;
-		},
-		getLineElement(position = 'first') {
-			const markupEl = markupApi.getElement();
-			if (!markupEl) return null;
+			getElement() {
+				return elementRef.current ?? null;
+			},
+			getLineElement(position = 'first') {
+				const markupEl = markupApi.getElement();
+				if (!markupEl) return null;
 
-			const lineNumAttr = MarkupLineAttributeDomName.lineNumber;
-			let lineEl;
+				const lineNumAttr = MarkupLineAttributeDomName.lineNumber;
+				let lineEl;
 
-			if (isPlainObject(position) && 'near' in position) {
-				lineEl = position.near.closest(`[${lineNumAttr}]`);
-			} else {
-				const selector =
-					position === 'first'
-						? `[${lineNumAttr}='1']`
-						: position === 'last'
-							? `[${lineNumAttr}]:last-child`
-							: `[${lineNumAttr}='${position}']`;
+				if (isPlainObject(position) && 'near' in position) {
+					lineEl = position.near.closest(`[${lineNumAttr}]`);
+				} else {
+					const selector =
+						position === 'first'
+							? `[${lineNumAttr}='1']`
+							: position === 'last'
+								? `[${lineNumAttr}]:last-child`
+								: `[${lineNumAttr}='${position}']`;
 
-				lineEl = markupEl.querySelector(selector);
-			}
-
-			if (lineEl) {
-				return lineEl as MarkupLineElement;
-			}
-
-			return null;
-		},
-		getLineElementAttribute(lineElement, attribute) {
-			const attrDomName = MarkupLineAttributeDomName[attribute];
-			const attrValue = lineElement.getAttribute(attrDomName);
-
-			if (attrValue == null) {
-				throw new Error(
-					`No value is assigned to this line element for attribute "${attribute}". Searched using dom name "${attrDomName}" `,
-				);
-			}
-
-			return attrValue;
-		},
-		getLineElementCoordinates(lineElement) {
-			const markupElement = markupApi.getElement();
-
-			if (!markupElement) {
-				throw new Error(
-					'Markup element is not rendered yet. This method should not be used before render',
-				);
-			}
-
-			const lineElementRect = lineElement.getBoundingClientRect();
-			const parentElementRect = markupElement.getBoundingClientRect();
-
-			const x = lineElementRect.left - parentElementRect.left;
-			const y = lineElementRect.top - parentElementRect.top;
-
-			// Can use offsets but they might miscalculate when:
-			// - line element ancestors are transformed (NOT SURE)
-			// - page scrolled (NOT SURE)
-			// - lineElement.offsetParent != markupElement (FOR SURE, offsetParent is closest positioned parent, not just any parent)
-			// - borders (NOT SURE), RTL mode (NOT SURE)
-			// const { offsetLeft, offsetTop } = lineElement;
-			// const x = offsetLeft;
-			// const y = offsetTop;
-
-			return { x, y };
-		},
-		getMaxLineColumn(lineNumber) {
-			if (!commit) return MIN_LINE_COLUMN;
-
-			const lineMeta = commit.markupMeta.find(
-				(lineMeta) => lineMeta.number === lineNumber,
-			);
-
-			if (!lineMeta) {
-				throw new Error(
-					`Line meta doesn't exist for line number: ${lineNumber}`,
-				);
-			}
-
-			return lineMeta.value.length;
-		},
-		getMaxLineNumber() {
-			if (!commit) return MIN_LINE_NUMBER;
-
-			return commit.markupMeta.length;
-		},
-		getMetrics() {
-			return metricsRef.current ?? null;
-		},
-
-		setElement(el) {
-			elementRef.current = el;
-		},
-		setFocused,
-		setMetrics(metrics) {
-			return (metricsRef.current = metrics);
-		},
-
-		updateDocument(document, editorOptions) {
-			const isDocumentChanged = !isEqualObjects(
-				document,
-				commit?.document,
-			);
-			const isOptionsChanged = !isEqualObjects(
-				editorOptions,
-				commit?.editorOptions,
-			);
-
-			if (isDocumentChanged || isOptionsChanged) {
-				const error = validateContent(document);
-				const markupMeta = generateMarkupMeta(document, error);
-
-				setCommit({
-					document: document,
-					error: error,
-					markupMeta: markupMeta,
-					editorOptions: editorOptions,
-				});
-
-				listeners?.documentChange?.(document, error);
-
-				// TODO: Don't cache metrics, we need to re-calculate metrics everytime cursor changes.
-				// Assuming that content change doesn't have impact on metrics is wrong, since
-				// not all glyphs acquire same column width
-				if (isOptionsChanged) {
-					updateMarkupMetrics(markupApi);
+					lineEl = markupEl.querySelector(selector);
 				}
-			}
-		},
-		updateDocumentContent(value) {
-			if (!commit) return;
 
-			const newContent = resolveSetterValue(
-				value,
-				commit.document.content,
-			);
+				if (lineEl) {
+					return lineEl as MarkupLineElement;
+				}
 
-			const newDocument = {
-				...commit.document,
-				content: newContent,
-			};
+				return null;
+			},
+			getLineElementAttribute(lineElement, attribute) {
+				const attrDomName = MarkupLineAttributeDomName[attribute];
+				const attrValue = lineElement.getAttribute(attrDomName);
 
-			markupApi.updateDocument(newDocument, commit.editorOptions);
-		},
-	};
+				if (attrValue == null) {
+					throw new Error(
+						`No value is assigned to this line element for attribute "${attribute}". Searched using dom name "${attrDomName}" `,
+					);
+				}
 
-	return markupApi;
+				return attrValue;
+			},
+			getLineElementCoordinates(lineElement) {
+				const markupElement = markupApi.getElement();
+
+				if (!markupElement) {
+					throw new Error(
+						'Markup element is not rendered yet. This method should not be used before render',
+					);
+				}
+
+				const lineElementRect = lineElement.getBoundingClientRect();
+				const parentElementRect = markupElement.getBoundingClientRect();
+
+				const x = lineElementRect.left - parentElementRect.left;
+				const y = lineElementRect.top - parentElementRect.top;
+
+				// Can use offsets but they might miscalculate when:
+				// - line element ancestors are transformed (NOT SURE)
+				// - page scrolled (NOT SURE)
+				// - lineElement.offsetParent != markupElement (FOR SURE, offsetParent is closest positioned parent, not just any parent)
+				// - borders (NOT SURE), RTL mode (NOT SURE)
+				// const { offsetLeft, offsetTop } = lineElement;
+				// const x = offsetLeft;
+				// const y = offsetTop;
+
+				return { x, y };
+			},
+			getMaxLineColumn(lineNumber) {
+				if (!commit) return MIN_LINE_COLUMN;
+
+				const lineMeta = commit.markupMeta.find(
+					(lineMeta) => lineMeta.number === lineNumber,
+				);
+
+				if (!lineMeta) {
+					throw new Error(
+						`Line meta doesn't exist for line number: ${lineNumber}`,
+					);
+				}
+
+				return lineMeta.value.length;
+			},
+			getMaxLineNumber() {
+				if (!commit) return MIN_LINE_NUMBER;
+
+				return commit.markupMeta.length;
+			},
+			getMetrics() {
+				const lineEl = markupApi.getLineElement();
+				if (!lineEl) {
+					throw new Error(
+						'Call `getMetrics` method only after render',
+					);
+				}
+
+				const lineStyle = getComputedStyle(lineEl);
+
+				return calculateMarkupMetrics(lineStyle);
+			},
+
+			setElement(el) {
+				elementRef.current = el;
+			},
+			setFocused,
+
+			updateDocument(document, editorOptions) {
+				editorOptions = applyDefaults(
+					editorOptions,
+					EditorOptionsDefault,
+				);
+
+				const isDocumentChanged = !isEqualObjects(
+					document,
+					commit?.document,
+				);
+				const isOptionsChanged = !isEqualObjects(
+					editorOptions,
+					commit?.editorOptions,
+				);
+
+				if (isDocumentChanged || isOptionsChanged) {
+					const error = validateContent(document);
+					const markupMeta = generateMarkupMeta(document, error);
+
+					setCommit({
+						document: document,
+						error: error,
+						markupMeta: markupMeta,
+						editorOptions: editorOptions,
+					});
+
+					listeners?.documentChange?.(document, error);
+				}
+			},
+			updateDocumentContent(value) {
+				if (!commit) return;
+
+				const newContent = resolveSetterValue(
+					value,
+					commit.document.content,
+				);
+
+				const newDocument = {
+					...commit.document,
+					content: newContent,
+				};
+
+				markupApi.updateDocument(newDocument, commit.editorOptions);
+			},
+		};
+
+		return markupApi;
+	}, [commit, focused, listeners]);
+
+	return markupApiMemoized;
 }

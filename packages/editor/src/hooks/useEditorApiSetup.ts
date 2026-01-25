@@ -1,4 +1,4 @@
-import type { EditorDocument, EditorListeners } from '..';
+import { type EditorDocument, type EditorListeners } from '..';
 import {
 	useEditorMarkupApiSetup,
 	type MarkupApi,
@@ -8,7 +8,7 @@ import {
 	type CursorApi,
 } from './useEditorCursorApiSetup';
 import type { EditorOptions } from '..';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 export type EditorApi = {
 	cursor: CursorApi;
@@ -20,20 +20,26 @@ export type EditorApi = {
  *
  * NOTE: This is a single use hook per editor instance.
  *
- * For accessing an already setup API, use the `useAllApi` hook..
+ * For accessing an already setup API, use the `useEditorApi` hook..
  */
 export function useEditorApiSetup(
 	document: EditorDocument,
-	editorOptions: EditorOptions,
+	editorOptions?: EditorOptions,
 	listeners?: EditorListeners,
 ): EditorApi {
 	const markup = useEditorMarkupApiSetup(document, editorOptions, listeners);
 	const cursor = useEditorCursorApiSetup(markup);
 
-	const editorApi: EditorApi = {
+	// editorApi is memoized as when the Editor component re-renders for some reason
+	// then if this hook returns a new editorApi object, the EditorApiContext.Provider
+	// will pass a new value to its children every time and all the context consumers
+	// will re-render for no reason.
+	// Also, the effect below that calls apiChange listeners will be called on each render of Editor.
+	// For same reason, markup and cursor are also memoized in their respective hooks.
+	const editorApi = useMemo<EditorApi>(() => ({
 		markup,
 		cursor,
-	};
+	}), [markup, cursor]);
 
 	useEffect(() => {
 		listeners?.apiChange?.(editorApi);
