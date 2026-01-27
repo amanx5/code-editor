@@ -1,4 +1,5 @@
-export * from './Layout';
-export * from './statusbar/'
+export * from './statusbar/';
 export * from './svg/';
 export * from './toolbar/';
+export * from './WorkbenchRoot';
+export * from './Wrapper';

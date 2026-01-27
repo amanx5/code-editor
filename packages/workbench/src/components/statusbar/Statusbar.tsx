@@ -6,7 +6,7 @@ export const Statusbar = memo(function Statusbar() {
 	return (
 		<div
 			className={cls(
-				'border-t border-t-cePanel',
+				'border-t border-t-cwPanel',
 				'flex items-stretch justify-end',
 				'h-6 max-h-6',
 			)}

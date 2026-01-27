@@ -1,11 +1,11 @@
 import { cls } from 'code-editor';
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function WorkbenchRoot({ children }: { children: React.ReactNode }) {
 	return (
 		<div
 			className={cls(
-				'bg-ceLayout',
-				'border border-cePanel',
+				'bg-cwRoot',
+				'border border-cwPanel',
 				'flex-1 flex flex-col',
 				'overflow-hidden',
 			)}

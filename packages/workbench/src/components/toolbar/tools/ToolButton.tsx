@@ -6,8 +6,8 @@ export function ToolButton(props: React.ComponentProps<'button'>) {
 			className={cls(
 				'flex items-center justify-center',
 				'px-2',
-				'text-ceToolbarItem-normal',
-				'hover:text-ceToolbarItem-hover hover:bg-ceToolbarItem-hover',
+				'text-cwToolbarItem-normal',
+				'hover:text-cwToolbarItem-hover hover:bg-cwToolbarItem-hover',
 				props.className,
 			)}
 			{...props}

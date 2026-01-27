@@ -1,14 +1,20 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { ClipboardSvg } from '../../svg/ClipboardSvg';
 import { ToolDefaultSvgProps, ToolButton } from './ToolButton';
-import { EditorDocumentContext } from '../../../contexts';
+import { useEditorApi } from 'code-editor';
 
 export function ContentCopyTool() {
 	const [isCopied, setIsCopied] = useState(false);
-	const document = useContext(EditorDocumentContext);
+	const { markup } = useEditorApi();
+	
+	if (!markup.commit) {
+		return null;
+	}
+
+	const { document } = markup.commit;
 
 	const copyCode = async () => {
-		await copyToClipboard(document ? document.content : '');
+		await copyToClipboard(document.content);
 		setIsCopied(true);
 
 		const timeout = setTimeout(() => {

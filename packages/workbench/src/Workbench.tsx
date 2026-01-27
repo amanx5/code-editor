@@ -1,22 +1,13 @@
-import { useState } from 'react';
-import {
-	type ToolbarOptions,
-	Layout,
-	Statusbar,
-	Toolbar,
-} from './components';
-
-import { useToolbarStates } from './hooks';
 import {
 	Editor,
 	type EditorProps,
-	type EditorListeners,
 	type EditorDocument,
-	EditorApiContext,
+	type EditorApi,
+	type EditorError,
 } from 'code-editor';
-import type { EditorApi } from '../../editor/src/hooks';
-import type { EditorError } from 'code-editor';
-import { EditorDocumentContext, EditorErrorContext } from './contexts';
+import { type ToolbarOptions, Wrapper } from './components';
+import { useToolbarStates } from './hooks';
+import { WorkbenchContext } from './contexts';
 
 export type EditorDataKey = keyof EditorDataClone;
 export type EditorDataClone = {
@@ -37,41 +28,10 @@ export type WorkbenchProps = {
  */
 export function Workbench({ editorProps, toolbarOptions }: WorkbenchProps) {
 	const toolbarStates = useToolbarStates();
-	const [editorApi, setEditorApi] = useState<EditorApi | null>(null);
-	const [editorDocument, setEditorDocument] = useState<EditorDocument | null>(
-		null,
-	);
-	const [editorError, setEditorError] = useState<EditorError | null>(null);
-
-	const listeners: EditorListeners = {
-		...editorProps.listeners,
-		apiChange: (api) => {
-			setEditorApi(api);
-			editorProps.listeners?.apiChange?.(api);
-		},
-		documentChange: (document, error) => {
-			setEditorDocument(document);
-			setEditorError(error);
-			editorProps.listeners?.documentChange?.(document, error);
-		},
-	};
 
 	return (
-		<EditorApiContext.Provider value={editorApi}>
-			<EditorDocumentContext.Provider value={editorDocument}>
-				<EditorErrorContext.Provider value={editorError}>
-					<Layout>
-						<Toolbar
-							options={toolbarOptions}
-							states={toolbarStates}
-						/>
-
-						<Editor {...editorProps} listeners={listeners} />
-
-						<Statusbar />
-					</Layout>
-				</EditorErrorContext.Provider>
-			</EditorDocumentContext.Provider>
-		</EditorApiContext.Provider>
+		<WorkbenchContext.Provider value={{ toolbarOptions, toolbarStates }}>
+			<Editor {...editorProps} RootWrapper={Wrapper} />
+		</WorkbenchContext.Provider>
 	);
 }

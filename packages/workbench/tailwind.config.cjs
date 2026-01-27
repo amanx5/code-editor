@@ -8,28 +8,28 @@ const preset = {
 	theme: {
 		extend: {
 			textColor: {
-				ceStatusBarItem: {
+				cwStatusBarItem: {
 					normal: '#3b3b3b',
 					hover: '#000000',
 				},
-				ceToolbarItem: {
+				cwToolbarItem: {
 					normal: '#3b3b3b',
 					hover: '#000000',
 				},
 			},
 
 			backgroundColor: {
-				ceLayout: '#f8f8f8',
-				ceStatusBarItem: {
+				cwRoot: '#f8f8f8',
+				cwStatusBarItem: {
 					hover: '#1f1f1f12',
 				},
-				ceToolbarItem: {
+				cwToolbarItem: {
 					hover: '#1f1f1f12',
 				},
 			},
 
 			borderColor: {
-				cePanel: '#e5e5e5',
+				cwPanel: '#e5e5e5',
 			},
 		},
 	},

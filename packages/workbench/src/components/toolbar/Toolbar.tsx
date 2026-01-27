@@ -59,7 +59,7 @@ export const Toolbar = memo(function Toolbar({
 	return (
 		<div
 			className={cls(
-				'border-b border-b-cePanel',
+				'border-b border-b-cwPanel',
 				'flex items-stretch justify-between',
 				'h-9 max-h-9',
 			)}
