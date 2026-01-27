@@ -3,12 +3,13 @@ import {
 	CursorLayer,
 	MarkupLayer,
 	MarkupLineMemo,
-	Scroller,
+	EditorRoot,
 	SelectionLayer,
 } from './components';
 import { EditorApiContext } from './contexts';
 import { type Content, type EditorError, type Language } from './utils';
 import { useEditorApiSetup, type EditorApi, type LineNumber } from './hooks';
+import { Fragment, type ReactElement } from 'react';
 
 export type EditorDocument = {
 	content: Content;
@@ -33,10 +34,19 @@ export const EditorOptionsDefault: EditorOptions = {
 	hideLineNumbers: false,
 };
 
+export type EditorRootWrapper = React.ComponentType<{
+	children: ReactElement<typeof EditorRoot>;
+}>;
+
 export type EditorProps = {
 	document: EditorDocument;
 	listeners?: EditorListeners;
 	editorOptions?: EditorOptions;
+	/**
+	 * Custom wrapper component to wrap the `EditorRoot` component.
+	 * @default React.Fragment
+	 */
+	RootWrapper?: EditorRootWrapper;
 };
 
 /**
@@ -44,7 +54,12 @@ export type EditorProps = {
  *
  * Note: CSS for this component is not included by default. Refer README for CSS installation.
  */
-export function Editor({ document, listeners, editorOptions }: EditorProps) {
+export function Editor({
+	document,
+	listeners,
+	editorOptions,
+	RootWrapper = Fragment,
+}: EditorProps) {
 	const editorApi = useEditorApiSetup(document, editorOptions, listeners);
 	const { markup } = editorApi;
 	const { commit } = markup;
@@ -52,27 +67,27 @@ export function Editor({ document, listeners, editorOptions }: EditorProps) {
 
 	return (
 		<EditorApiContext.Provider value={editorApi}>
-			{/* TODO: Render the components within a renderer, this will allow consumers to wrap the editor
-			in a container of their choice (will also give access to EditorApiContext) */}
-			<Scroller>
-				<SelectionLayer />
+			<RootWrapper>
+				<EditorRoot>
+					<SelectionLayer />
 
-				<MarkupLayer>
-					{lineMetaArray.map(({ error, number, tokens }) => (
-						<MarkupLineMemo
-							key={number}
-							number={number}
-							error={error}
-							tokens={tokens}
-							editorOptions={editorOptions}
-						/>
-					))}
-				</MarkupLayer>
+					<MarkupLayer>
+						{lineMetaArray.map(({ error, number, tokens }) => (
+							<MarkupLineMemo
+								key={number}
+								number={number}
+								error={error}
+								tokens={tokens}
+								editorOptions={editorOptions}
+							/>
+						))}
+					</MarkupLayer>
 
-				<CursorLayer>
-					<Cursor />
-				</CursorLayer>
-			</Scroller>
+					<CursorLayer>
+						<Cursor />
+					</CursorLayer>
+				</EditorRoot>
+			</RootWrapper>
 		</EditorApiContext.Provider>
 	);
 }

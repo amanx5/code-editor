@@ -63,7 +63,7 @@ export type MarkupApi = {
 	): string;
 	/**
 	 * Returns coordinates of the given line element with respect to `MarkupElement`.
-	 * TODO: Return coordinates w.r.t `Scroller` component as all layers reside inside `Scroller`. It will be more robust solution.
+	 * TODO: Return coordinates w.r.t `EditorRoot` component as all layers reside inside `EditorRoot`. It will be more robust solution.
 	 */
 	getLineElementCoordinates(lineElement: MarkupLineElement): Coordinates;
 	getMaxLineColumn(lineNumber: LineNumber): LineColumn;
