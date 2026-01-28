@@ -4,10 +4,10 @@ import {
 	LANGUAGE_NAMES,
 	Editor,
 	type EditorDocument,
-	type EditorError,
 	type EditorProps,
 	type Language,
 	type LanguageName,
+	type DocumentIssues,
 } from 'code-editor';
 
 export function TryWorkbench({
@@ -20,7 +20,7 @@ export function TryWorkbench({
 		language: 'txt',
 	});
 
-	const [error, setError] = useState<EditorError>(null);
+	const [issues, setIssues] = useState<DocumentIssues>({});
 	const languages = Object.entries(LANGUAGE_NAMES) as Array<
 		[Language, LanguageName]
 	>;
@@ -28,9 +28,9 @@ export function TryWorkbench({
 	const editorProps: EditorProps = {
 		document,
 		listeners: {
-			documentChange: (document, error) => {
+			documentChange: (document, documentIssues) => {
 				setDocument(document);
-				setError(error);
+				setIssues(documentIssues);
 			},
 		},
 	};
@@ -80,11 +80,11 @@ export function TryWorkbench({
 							))}
 						</select>
 					</div>
-					{/* error */}
+					{/* Issues */}
 					<div className='flex gap-2'>
-						<span className='font-semibold '>Error:</span>
+						<span className='font-semibold '>Issues:</span>
 						<pre className='max-h-10 overflow-auto bg-white p-2 flex-1'>
-							{JSON.stringify(error)}
+							{JSON.stringify(issues)}
 						</pre>
 					</div>
 				</div>

@@ -7,7 +7,7 @@ import {
 	SelectionLayer,
 } from './components';
 import { EditorApiContext } from './contexts';
-import { type Content, type EditorError, type Language } from './utils';
+import { type Content, type DocumentIssues, type Language } from './utils';
 import { useEditorApiSetup, type EditorApi, type LineNumber } from './hooks';
 import { Fragment, type ReactElement } from 'react';
 
@@ -19,7 +19,7 @@ export type EditorDocument = {
 
 export type EditorListeners = {
 	apiChange?: (editorApi: EditorApi) => void;
-	documentChange?: (document: EditorDocument, error: EditorError) => void;
+	documentChange?: (document: EditorDocument, documentIssues: DocumentIssues) => void;
 };
 
 export type EditorOptions = {
@@ -72,11 +72,11 @@ export function Editor({
 					<SelectionLayer />
 
 					<MarkupLayer>
-						{lineMetaArray.map(({ error, number, tokens }) => (
+						{lineMetaArray.map(({ issue, number, tokens }) => (
 							<MarkupLineMemo
 								key={number}
 								number={number}
-								error={error}
+								issue={issue}
 								tokens={tokens}
 								editorOptions={editorOptions}
 							/>

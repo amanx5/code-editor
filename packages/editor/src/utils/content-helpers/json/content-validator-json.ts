@@ -2,7 +2,7 @@ import type { ContentValidator } from "../validate-content";
 import { decode } from "./decode-json";
 
 export const contentValidatorJson: ContentValidator = (json) => {
-	const { error } = decode(json);
+	const { issues } = decode(json);
 
-	return error || null;
+	return issues ?? {};
 }

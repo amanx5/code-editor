@@ -13,7 +13,7 @@ export function CursorStatus() {
 	const selectionStatus = selectedContent
 		? `(${selectedContent.length} selected)`
 		: '';
-	const status = cursor.selection
+	const overallStatus = cursor.selection
 		? `Ln ${cursor.selection.end.lineNumber}, Col ${cursor.selection.end.lineColumn} ${selectionStatus}`
 		: 'Go to line';
 
@@ -23,7 +23,7 @@ export function CursorStatus() {
 			onClick={onClick}
 			title='Cursor Position'
 		>
-			{status}
+			{overallStatus}
 		</StatusButton>
 	);
 

@@ -1,5 +1,5 @@
 import type { ExampleProps } from '../utils/example-props';
-import { Editor, type EditorError } from 'code-editor';
+import { Editor, type DocumentIssues } from 'code-editor';
 import { useState } from 'react';
 
 export function ExampleOutput({
@@ -8,7 +8,7 @@ export function ExampleOutput({
 	exampleProps: ExampleProps;
 }) {
 	const [content, setContent] = useState(exampleProps.document.content);
-	const [error, setError] = useState<EditorError>(null);
+	const [issues, setIssues] = useState<DocumentIssues>({});
 
 	return (
 		<div className='flex flex-col gap-2'>
@@ -16,9 +16,9 @@ export function ExampleOutput({
 				<Editor
 					{...exampleProps}
 					listeners={{
-						documentChange: (document, error) => {
+						documentChange: (document, documentIssues) => {
 							setContent(document.content);
-							setError(error);
+							setIssues(documentIssues);
 						},
 					}}
 				/>
@@ -29,9 +29,9 @@ export function ExampleOutput({
 					<pre className='max-h-20 overflow-auto'>{content}</pre>
 				</div>
 				<div className='flex gap-2'>
-					<span className='font-semibold'>Error:</span>
+					<span className='font-semibold'>Issues:</span>
 					<pre className='max-h-10 overflow-auto'>
-						{JSON.stringify(error)}
+						{JSON.stringify(issues)}
 					</pre>
 				</div>
 			</div>

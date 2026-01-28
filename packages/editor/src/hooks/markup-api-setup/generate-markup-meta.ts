@@ -1,36 +1,34 @@
-import type { EditorDocument } from '../..';
+import type { DocumentIssues, EditorDocument, LineIssue } from '../..';
 import {
 	tokeniseContent,
 	type Content,
-	type EditorError,
 	type TokenisedLine,
 } from '../../utils';
 import type { LineNumber } from '../useEditorMarkupApiSetup';
 
 export type LineMeta = {
-	value: Content;
-	error: EditorError;
+	issue?: LineIssue;
 	number: LineNumber;
 	tokens: TokenisedLine['tokens'];
+	value: Content;
 };
 
 export type EditorMarkupMeta = Array<LineMeta>;
 
 export function generateMarkupMeta(
 	document: EditorDocument,
-	error: EditorError,
+	documentIssues: DocumentIssues,
 ): EditorMarkupMeta {
 	const tokenisedLines = tokeniseContent(document);
 
 	const markup = tokenisedLines.map(({ value, tokens }, index) => {
 		const lineNumber = index + 1;
 
-		const lineMeta = {
-			// TODO: Make editor error as key value pair of line numbers and corresponding errors
-			value,
-			error: error?.line === lineNumber ? error : null,
+		const lineMeta: LineMeta = {
+			issue: documentIssues[lineNumber],
 			number: lineNumber,
 			tokens,
+			value,
 		};
 
 		return lineMeta;

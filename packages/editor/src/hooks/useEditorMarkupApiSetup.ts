@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef, useState, useMemo } from 'react';
 import {
 	type Content,
-	type EditorError,
 	isEqualObjects,
 	isPlainObject,
 	resolveSetterValue,
@@ -17,6 +16,7 @@ import {
 	type EditorListeners,
 	type EditorOptions,
 	type MarkupLineAttribute,
+	type DocumentIssues,
 } from '..';
 import type { MarkupElement } from '../components';
 import {
@@ -41,7 +41,7 @@ export const MIN_LINE_NUMBER: LineNumber = 1;
 
 export type MarkupCommit = {
 	document: EditorDocument;
-	error: EditorError;
+	documentIssues: DocumentIssues;
 	editorOptions: EditorOptions;
 	markupMeta: EditorMarkupMeta;
 };
@@ -240,17 +240,17 @@ export function useEditorMarkupApiSetup(
 				);
 
 				if (isDocumentChanged || isOptionsChanged) {
-					const error = validateContent(document);
-					const markupMeta = generateMarkupMeta(document, error);
+					const documentIssues = validateContent(document);
+					const markupMeta = generateMarkupMeta(document, documentIssues);
 
 					setCommit({
 						document: document,
-						error: error,
+						documentIssues: documentIssues,
 						markupMeta: markupMeta,
 						editorOptions: editorOptions,
 					});
 
-					listeners?.documentChange?.(document, error);
+					listeners?.documentChange?.(document, documentIssues);
 				}
 			},
 			updateDocumentContent(value) {

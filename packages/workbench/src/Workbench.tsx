@@ -1,20 +1,7 @@
-import {
-	Editor,
-	type EditorProps,
-	type EditorDocument,
-	type EditorApi,
-	type EditorError,
-} from 'code-editor';
+import { Editor, type EditorProps } from 'code-editor';
 import { type ToolbarOptions, Wrapper } from './components';
 import { useToolbarStates } from './hooks';
 import { WorkbenchContext } from './contexts';
-
-export type EditorDataKey = keyof EditorDataClone;
-export type EditorDataClone = {
-	api: EditorApi | null;
-	error: EditorError | null;
-	document: EditorDocument | null;
-};
 
 export type WorkbenchProps = {
 	editorProps: EditorProps;
