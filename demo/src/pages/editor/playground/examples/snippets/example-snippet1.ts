@@ -1,0 +1,28 @@
+export const EXAMPLE_SNIPPET1 = `export default function App () {
+	const json = \`{
+		"id": "P-1001",
+		"name": "AirFlex Running Shoes",
+		"createdDate": "2024-07-30",
+		"lastUpdated": "2023-03-27T02:39:01",
+		"isAvailable": false,
+		"discountPercentage": 8.1,
+		"tags": ["denim", "summer", "eco", "cotton"],
+		"category": {
+			"main": "Clothing",
+			"sub": "Men",
+			"isSeasonal": false,
+			"createdOn": "2024-09-19",
+			"archivedAt": null
+		}
+	}\`;
+
+
+	return (
+		<Editor
+			document={{
+				content: json,
+				language: 'json',
+			}}
+		/>
+	);
+}`;

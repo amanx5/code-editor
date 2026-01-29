@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { HomePage, TryEditor, TryWorkbench } from './pages/';
+import { EditorRouter, Home, TryWorkbench } from './pages/';
 
 export default function App() {
 	return (
 		<BrowserRouter>
 			<AppWrapper>
 				<Routes>
-					<Route path='/' element={<HomePage />} />
-					<Route path='/editor' element={<TryEditor />} />
+					<Route path='/' element={<Home />} />
+					<Route path='/editor/*' element={<EditorRouter />} />
 					<Route path='/workbench' element={<TryWorkbench />} />
 				</Routes>
 			</AppWrapper>
@@ -41,6 +41,3 @@ function AppWrapper({ children }: { children: React.ReactNode }) {
 		</div>
 	);
 }
-
-
-

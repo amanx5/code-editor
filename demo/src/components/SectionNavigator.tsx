@@ -29,7 +29,7 @@ export function SectionNavigator({ sections }: SectionNavigatorProps) {
 									onClick={() => scrollToId(id)}
 									className={cls(
 										'block py-1',
-										'text-xs text-text-muted hover:text-text-primary',
+										'text-left text-xs text-text-muted hover:text-text-primary',
 										'transition-colors rounded hover:bg-surface-hover',
 										'whitespace-nowrap lg:whitespace-normal'
 									)}

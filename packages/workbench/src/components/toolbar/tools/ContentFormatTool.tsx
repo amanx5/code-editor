@@ -1,7 +1,7 @@
 // TODO
 export function ContentFormatTool({
-	isFormatEnabled,
-	setIsFormatEnabled,
+	// isFormatEnabled,
+	// setIsFormatEnabled,
 }: {
 	isFormatEnabled: boolean;
 	setIsFormatEnabled: React.Dispatch<React.SetStateAction<boolean>>;

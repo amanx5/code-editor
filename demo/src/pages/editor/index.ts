@@ -1,2 +1,2 @@
-export * from './examples/';
-export * from './TryEditor';
+export * from './EditorRouter';
+export * from './playground/';
