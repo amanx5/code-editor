@@ -17,7 +17,7 @@ export function Workbench({ editorProps, toolbarOptions }: WorkbenchProps) {
 	const toolbarStates = useToolbarStates();
 
 	return (
-		<WorkbenchContext.Provider value={{ toolbarOptions, toolbarStates }}>
+		<WorkbenchContext.Provider value={{ editorProps, toolbarOptions, toolbarStates }}>
 			<Editor {...editorProps} RootWrapper={Wrapper} />
 		</WorkbenchContext.Provider>
 	);
