@@ -35,9 +35,10 @@ const preset = {
 			},
 
 			backgroundColor: {
-				ceMarkupLine: {
+				ceDecoration: {
+					error: '#fee2e2',
 					highlight: '#fffbdd',
-					issue: '#fee2e2',
+					warning: '#fff2cc',
 				},
 				ceScroller: 'white',
 			},

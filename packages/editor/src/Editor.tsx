@@ -1,9 +1,8 @@
 import {
-	Cursor,
 	CursorLayer,
-	MarkupLayer,
-	MarkupLineMemo,
+	DecorationLayer,
 	EditorRoot,
+	MarkupLayer,
 	SelectionLayer,
 } from './components';
 import { EditorApiContext } from './contexts';
@@ -28,7 +27,7 @@ export type EditorOptions = {
 	hideLineNumbers?: boolean;
 };
 
-export const EditorOptionsDefault: EditorOptions = {
+export const EditorOptionsDefault: Required<EditorOptions> = {
 	disabled: false,
 	highlightLines: [],
 	hideLineNumbers: false,
@@ -61,31 +60,18 @@ export function Editor({
 	RootWrapper = Fragment,
 }: EditorProps) {
 	const editorApi = useEditorApiSetup(document, editorOptions, listeners);
-	const { markup } = editorApi;
-	const { commit } = markup;
-	const lineMetaArray = commit?.markupMeta ?? [];
 
 	return (
 		<EditorApiContext.Provider value={editorApi}>
 			<RootWrapper>
 				<EditorRoot>
+					<DecorationLayer editorOptions={editorOptions} />
+
 					<SelectionLayer />
 
-					<MarkupLayer>
-						{lineMetaArray.map(({ issue, number, tokens }) => (
-							<MarkupLineMemo
-								key={number}
-								number={number}
-								issue={issue}
-								tokens={tokens}
-								editorOptions={editorOptions}
-							/>
-						))}
-					</MarkupLayer>
+					<MarkupLayer />
 
-					<CursorLayer>
-						<Cursor />
-					</CursorLayer>
+					<CursorLayer />
 				</EditorRoot>
 			</RootWrapper>
 		</EditorApiContext.Provider>

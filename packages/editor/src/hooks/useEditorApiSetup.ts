@@ -27,6 +27,7 @@ export function useEditorApiSetup(
 	editorOptions?: EditorOptions,
 	listeners?: EditorListeners,
 ): EditorApi {
+	// TODO: Separate reactive and non-reactive properties in different objects and return them in separate contexts
 	const markup = useEditorMarkupApiSetup(document, editorOptions, listeners);
 	const cursor = useEditorCursorApiSetup(markup);
 

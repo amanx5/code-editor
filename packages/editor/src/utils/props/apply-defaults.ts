@@ -6,11 +6,10 @@
  */
 export function applyDefaults<T>(
 	prop: Partial<T> | undefined,
-	defaultProp: T,
-): T {
+	defaultProp: Required<T>,
+): Required<T> {
 	return {
 		...defaultProp,
 		...prop,
 	};
 }
-

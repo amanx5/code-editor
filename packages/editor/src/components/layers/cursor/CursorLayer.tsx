@@ -1,7 +1,9 @@
-export function CursorLayer({ children }: { children: React.ReactNode }) {
+import { Cursor } from './Cursor';
+
+export function CursorLayer() {
 	return (
 		<div aria-hidden className='absolute select-none pointer-events-none'>
-			{children}
+			<Cursor />
 		</div>
 	);
 }

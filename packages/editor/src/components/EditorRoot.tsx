@@ -5,7 +5,9 @@ export function EditorRoot({ children }: { children: React.ReactNode }) {
 		<div
 			className={cls(
 				'bg-ceScroller',
-				'flex flex-1 overflow-auto relative',
+				'flex-1 h-full', // for stretching to fill parent container
+				'overflow-auto', // for scrolling
+				'relative', // for positioning of absolute layers
 			)}
 		>
 			{children}

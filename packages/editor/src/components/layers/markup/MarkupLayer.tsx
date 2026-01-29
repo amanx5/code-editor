@@ -1,11 +1,14 @@
-import { cls, getEventHandlers } from '../../utils';
-import { useEditorApi } from '../../hooks';
+import { cls, getEventHandlers } from '../../../utils';
+import { useEditorApi } from '../../../hooks';
+import { MarkupLineMemo } from '../../..';
 
 export type MarkupElement = HTMLDivElement;
 
-export function MarkupLayer({ children }: { children?: React.ReactNode }) {
+export function MarkupLayer() {
 	const editorApi = useEditorApi();
 	const eventHandlers = getEventHandlers(editorApi);
+	const { markup } = editorApi;
+	const lineMetas = markup.commit?.markupMeta ?? [];
 
 	return (
 		<div
@@ -24,7 +27,9 @@ export function MarkupLayer({ children }: { children?: React.ReactNode }) {
 			tabIndex={0}
 			{...eventHandlers}
 		>
-			{children}
+			{lineMetas.map((lineMeta) => (
+				<MarkupLineMemo key={lineMeta.number} {...lineMeta} />
+			))}
 		</div>
 	);
 }

@@ -1,6 +1,6 @@
-import { cls } from '../../utils';
+import { cls } from '../../../utils';
 import { useLayoutEffect, useRef } from 'react';
-import { useEditorApi } from '../../hooks';
+import { useEditorApi } from '../../../hooks';
 
 export type CursorElement = HTMLDivElement;
 

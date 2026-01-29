@@ -1,7 +1,7 @@
 import { memo } from 'react';
-import { arePropValuesEqual, type TokenMeta } from '../../..';
+import { comparePropsByValue, type TokenMeta } from '../../..';
 
-export const MarkupTokenMemo = memo(MarkupToken, arePropValuesEqual);
+export const MarkupTokenMemo = memo(MarkupToken, comparePropsByValue);
 
 export function MarkupToken({
 	cls,

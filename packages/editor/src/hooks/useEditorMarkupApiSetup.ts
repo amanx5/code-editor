@@ -10,7 +10,7 @@ import {
 import {
 	calculateMarkupMetrics,
 	EditorOptionsDefault,
-	MarkupLineAttributeDomName,
+	MarkupLineDomAttribute,
 	applyDefaults,
 	type EditorDocument,
 	type EditorListeners,
@@ -126,7 +126,7 @@ export function useEditorMarkupApiSetup(
 				const markupEl = markupApi.getElement();
 				if (!markupEl) return null;
 
-				const lineNumAttr = MarkupLineAttributeDomName.lineNumber;
+				const lineNumAttr = MarkupLineDomAttribute.lineNumber;
 				let lineEl;
 
 				if (isPlainObject(position) && 'near' in position) {
@@ -149,7 +149,7 @@ export function useEditorMarkupApiSetup(
 				return null;
 			},
 			getLineElementAttribute(lineElement, attribute) {
-				const attrDomName = MarkupLineAttributeDomName[attribute];
+				const attrDomName = MarkupLineDomAttribute[attribute];
 				const attrValue = lineElement.getAttribute(attrDomName);
 
 				if (attrValue == null) {

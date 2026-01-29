@@ -29,7 +29,7 @@ export type ToolbarStateSetters = {
 
 export type ToolbarStates = ToolbarStateValues & ToolbarStateSetters;
 
-export const ToolbarStatesDefault: ToolbarStates = {
+export const ToolbarStatesDefault: Required<ToolbarStates> = {
 	isWrapEnabled: false,
 	isFormatEnabled: false,
 	setIsWrapEnabled: () => {},

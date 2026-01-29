@@ -52,7 +52,7 @@ export type CursorApi = {
  *
  * NOTE: This is a single use hook per editor instance.
  *
- * FIXME: Cursor renders blurry and wider on alternate columns. But looks fine on high zoom levels.
+ * TODO: Cursor renders blurry and wider on alternate columns. But looks fine on high zoom levels.
  */
 export function useEditorCursorApiSetup(markupApi: MarkupApi): CursorApi {
 	const [selection, setSelection] = useState<CursorSelection | null>(null);
